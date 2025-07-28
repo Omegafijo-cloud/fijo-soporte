@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from './ui/button';
 import { Copy, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 // Tipos para los datos del formulario y checkboxes
 type GenericFormData = {
@@ -61,9 +62,9 @@ const PlantillasGenericasTab = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        const pruebas = Object.keys(checkboxes)
-            .filter(key => checkboxes[key])
-            .map(key => `- ${key}`)
+        const pruebas = Object.entries(checkboxes)
+            .filter(([, checked]) => checked)
+            .map(([label]) => `- ${label}`)
             .join('\n');
         setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
     }, [checkboxes]);
@@ -78,7 +79,7 @@ const PlantillasGenericasTab = () => {
             'tipo-servicio': 'tipoServicio',
             'pruebas-realizadas': 'pruebasRealizadas'
         };
-        const formKey = keyMapping[id];
+        const formKey = keyMapping[id as keyof typeof keyMapping];
         if (formKey) {
             setFormData(prev => ({ ...prev, [formKey]: value }));
         }
@@ -128,15 +129,15 @@ ${formData.pruebasRealizadas}
         });
     };
     
-    const renderCheckboxes = (category: keyof typeof checkboxOptions) => {
-        return Object.keys(checkboxOptions[category]).map(label => (
+    const renderCheckboxes = (options: {[key: string]: boolean}) => {
+        return Object.keys(options).map(label => (
             <div className="flex items-center space-x-2" key={label}>
                 <Checkbox
-                    id={label}
+                    id={`genericas-${label}`}
                     checked={checkboxes[label]}
                     onCheckedChange={() => handleCheckboxChange(label)}
                 />
-                <Label htmlFor={label} className="font-normal">{label}</Label>
+                <Label htmlFor={`genericas-${label}`} className="font-normal">{label}</Label>
             </div>
         ));
     };
@@ -188,25 +189,25 @@ ${formData.pruebasRealizadas}
                 <div className="p-4 border rounded-lg">
                     <h4 className="font-semibold mb-2">Nivel Cero</h4>
                     <div className="space-y-2">
-                       {renderCheckboxes('nivelCero')}
+                       {renderCheckboxes(checkboxOptions.nivelCero)}
                     </div>
                 </div>
                 <div className="p-4 border rounded-lg">
                     <h4 className="font-semibold mb-2">GPON - ADSL - HFC</h4>
                     <div className="space-y-2">
-                        {renderCheckboxes('gponAdslHfc')}
+                        {renderCheckboxes(checkboxOptions.gponAdslHfc)}
                     </div>
                 </div>
                 <div className="p-4 border rounded-lg">
                     <h4 className="font-semibold mb-2">TV HFC - DTH - IPTV</h4>
                     <div className="space-y-2">
-                        {renderCheckboxes('tvHfcDthIptv')}
+                        {renderCheckboxes(checkboxOptions.tvHfcDthIptv)}
                     </div>
                 </div>
                 <div className="p-4 border rounded-lg">
                     <h4 className="font-semibold mb-2">Otros</h4>
                     <div className="space-y-2">
-                        {renderCheckboxes('otros')}
+                        {renderCheckboxes(checkboxOptions.otros)}
                     </div>
                 </div>
             </div>
@@ -214,7 +215,175 @@ ${formData.pruebasRealizadas}
     );
 };
 
-const PlantillasQuejasTab = () => <div>Contenido de Plantillas de Quejas</div>;
+// --- PLANTILLAS DE QUEJAS ---
+const memoQuejasTemplates = {
+    'INTERNET DSL': [
+        { id: 'luz-portadora', label: 'Luz Portadora:', type: 'text' },
+        { id: 'snr', label: 'SNR:', type: 'text' },
+        { id: 'atenuacion', label: 'Atenuación:', type: 'text' },
+        { id: 'problema-reportado', label: 'Problema Reportado:', type: 'textarea' },
+    ],
+    'TV DTH': [
+        { id: 'modelo-deco', label: 'Modelo DECO:', type: 'text' },
+        { id: 'version-sw', label: 'Versión SW:', type: 'text' },
+        { id: 'id-smart-card', label: 'ID Smart Card:', type: 'text' },
+        { id: 'problema-reportado-tv', label: 'Problema Reportado:', type: 'textarea' },
+    ],
+};
+
+const quejasCheckboxOptions = {
+    nivelCero: { 'Se solicita realizar descartes con cable de red y persiste el inconveniente (Memo).': false },
+    gponAdslHfc: { 'Se realizan pruebas de velocidad y los parámetros son correctos (Memo).': false },
+    tvHfcDthIptv: { 'Se realizan pruebas en el DECO y persiste el inconveniente (Memo).': false },
+    otros: { 'Se reinicia el equipo de forma remota (Memo).': false },
+};
+
+const PlantillasQuejasTab = () => {
+    const [selectedMemo, setSelectedMemo] = useState<string>('');
+    const [formData, setFormData] = useState<{ [key: string]: any }>({});
+    const [checkboxes, setCheckboxes] = useState<CheckboxState>({
+        ...quejasCheckboxOptions.nivelCero,
+        ...quejasCheckboxOptions.gponAdslHfc,
+        ...quejasCheckboxOptions.tvHfcDthIptv,
+        ...quejasCheckboxOptions.otros,
+    });
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const pruebas = Object.entries(checkboxes)
+            .filter(([, checked]) => checked)
+            .map(([label]) => `- ${label}`)
+            .join('\n');
+        setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
+    }, [checkboxes]);
+
+    const handleMemoChange = (value: string) => {
+        setSelectedMemo(value);
+        setFormData({ pruebasRealizadas: formData.pruebasRealizadas || '' }); // Reset form but keep pruebas
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        setCheckboxes(prev => ({ ...prev, [id]: checked }));
+    };
+    
+    const handleClear = () => {
+        setSelectedMemo('');
+        setFormData({});
+        const resetCheckboxes: CheckboxState = {};
+        Object.keys(checkboxes).forEach(key => {
+            resetCheckboxes[key] = false;
+        });
+        setCheckboxes(resetCheckboxes);
+        toast({ title: "Formulario de Queja Limpio" });
+    };
+
+    const handleCopy = () => {
+        let memoContent = `MEMO DE QUEJA: ${selectedMemo}\n\n`;
+        memoQuejasTemplates[selectedMemo as keyof typeof memoQuejasTemplates]?.forEach(field => {
+            memoContent += `${field.label} ${formData[field.id] || ''}\n`;
+        });
+        memoContent += `\nPRUEBAS REALIZADAS:\n${formData.pruebasRealizadas || ''}`;
+
+        navigator.clipboard.writeText(memoContent.trim()).then(() => {
+            toast({ title: "Memo de Queja Copiado" });
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+            toast({ title: "Error al Copiar", variant: "destructive" });
+        });
+    };
+
+    const renderDynamicFields = () => {
+        if (!selectedMemo) return <p className="text-muted-foreground text-center col-span-2">Seleccione un tipo de memo para ver el formulario.</p>;
+        
+        const fields = memoQuejasTemplates[selectedMemo as keyof typeof memoQuejasTemplates];
+
+        return fields.map(field => (
+            <div className="space-y-2" key={field.id}>
+                <Label htmlFor={field.id}>{field.label}</Label>
+                {field.type === 'textarea' ? (
+                    <Textarea id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} />
+                ) : (
+                    <Input id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} />
+                )}
+            </div>
+        ));
+    };
+
+    const renderCheckboxes = (options: { [key: string]: boolean }) => {
+        return Object.keys(options).map(label => (
+            <div className="flex items-center space-x-2" key={label}>
+                <Checkbox
+                    id={`quejas-${label}`}
+                    checked={!!checkboxes[label]}
+                    onCheckedChange={(checked) => handleCheckboxChange(label, !!checked)}
+                />
+                <Label htmlFor={`quejas-${label}`} className="font-normal">{label}</Label>
+            </div>
+        ));
+    };
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            <div className="md:col-span-2 space-y-4">
+                <div className="space-y-2">
+                    <Label>Tipo de Memo de Queja:</Label>
+                    <Select onValueChange={handleMemoChange} value={selectedMemo}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un tipo de memo..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="INTERNET DSL">INTERNET DSL</SelectItem>
+                            <SelectItem value="TV DTH">TV DTH</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {renderDynamicFields()}
+                </div>
+
+                {selectedMemo && (
+                    <>
+                        <div className="space-y-2">
+                            <Label htmlFor="pruebas-realizadas-quejas">PRUEBAS REALIZADAS:</Label>
+                            <Textarea id="pruebas-realizadas-quejas" rows={8} value={formData.pruebasRealizadas || ''} readOnly />
+                        </div>
+                        <div className="flex gap-4 mt-4">
+                            <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4" />Copiar Memo</Button>
+                            <Button variant="destructive" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4" />Limpiar Memo</Button>
+                        </div>
+                    </>
+                )}
+            </div>
+            
+            <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Nivel Cero (Memos)</h4>
+                    <div className="space-y-2">{renderCheckboxes(quejasCheckboxOptions.nivelCero)}</div>
+                </div>
+                <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">GPON - ADSL - HFC (Memos)</h4>
+                    <div className="space-y-2">{renderCheckboxes(quejasCheckboxOptions.gponAdslHfc)}</div>
+                </div>
+                <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">TV HFC - DTH - IPTV (Memos)</h4>
+                    <div className="space-y-2">{renderCheckboxes(quejasCheckboxOptions.tvHfcDthIptv)}</div>
+                </div>
+                <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Otros (Memos)</h4>
+                    <div className="space-y-2">{renderCheckboxes(quejasCheckboxOptions.otros)}</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 const MemosWFTab = () => <div>Contenido de Memos de WF</div>;
 const MemosOrdenTab = () => <div>Contenido de Memos de Orden</div>;
 
