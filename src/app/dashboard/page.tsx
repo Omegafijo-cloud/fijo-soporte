@@ -689,48 +689,50 @@ export default function DashboardPage() {
                 const docRef = doc(db, 'users', user.uid, 'state', 'appState');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists() && !docSnap.data()?.tutorialCompleted) {
-                    const intro = introJs();
-                    intro.setOptions({
-                        steps: [
-                            {
-                                element: '#main-tabs',
-                                title: 'Pestañas Principales',
-                                intro: 'Aquí puedes navegar entre las diferentes secciones de la aplicación como Plantillas, Herramientas, Archivos y más.',
-                                position: 'bottom'
-                            },
-                            {
-                                element: '#sub-tabs',
-                                title: 'Sub-Pestañas de Plantillas',
-                                intro: 'Dentro de Plantillas, puedes elegir entre diferentes tipos como Genéricas, de Quejas, y Memos.',
-                                position: 'bottom'
-                            },
-                            {
-                                element: '#timer-widget',
-                                title: 'Temporizador',
-                                intro: 'Usa este temporizador para llevar un control de tus llamadas o tareas. Puedes configurarlo haciendo clic en él.',
-                                position: 'left'
-                            },
-                            {
-                                element: '#floating-widgets-container',
-                                title: 'Widgets Flotantes',
-                                intro: 'Estos botones te dan acceso rápido a notas, listas de usuarios, personalización del tema y el Copilot de OMEGA. ¡Pruébalos!',
-                                position: 'left'
-                            },
-                        ],
-                        showBullets: false,
-                        showStepNumbers: true,
-                        exitOnOverlayClick: false,
-                        doneLabel: 'Entendido, ¡no mostrar más!',
-                    });
+                    setTimeout(() => {
+                        const intro = introJs();
+                        intro.setOptions({
+                            steps: [
+                                {
+                                    element: '#main-tabs',
+                                    title: 'Pestañas Principales',
+                                    intro: 'Aquí puedes navegar entre las diferentes secciones de la aplicación como Plantillas, Herramientas, Archivos y más.',
+                                    position: 'bottom'
+                                },
+                                {
+                                    element: '#sub-tabs',
+                                    title: 'Sub-Pestañas de Plantillas',
+                                    intro: 'Dentro de Plantillas, puedes elegir entre diferentes tipos como Genéricas, de Quejas, y Memos.',
+                                    position: 'bottom'
+                                },
+                                {
+                                    element: '#timer-widget',
+                                    title: 'Temporizador',
+                                    intro: 'Usa este temporizador para llevar un control de tus llamadas o tareas. Puedes configurarlo haciendo clic en él.',
+                                    position: 'left'
+                                },
+                                {
+                                    element: '#floating-widgets-container',
+                                    title: 'Widgets Flotantes',
+                                    intro: 'Estos botones te dan acceso rápido a notas, listas de usuarios, personalización del tema y el Copilot de OMEGA. ¡Pruébalos!',
+                                    position: 'left'
+                                },
+                            ],
+                            showBullets: false,
+                            showStepNumbers: true,
+                            exitOnOverlayClick: false,
+                            doneLabel: 'Entendido, ¡no mostrar más!',
+                        });
 
-                    intro.oncomplete(async () => {
-                        await updateDoc(docRef, { tutorialCompleted: true });
-                    });
-                     intro.onexit(async () => {
-                        await updateDoc(docRef, { tutorialCompleted: true });
-                    });
+                        intro.oncomplete(async () => {
+                            await updateDoc(docRef, { tutorialCompleted: true });
+                        });
+                        intro.onexit(async () => {
+                            await updateDoc(docRef, { tutorialCompleted: true });
+                        });
 
-                    intro.start();
+                        intro.start();
+                    }, 500); // Pequeño retraso para asegurar que los elementos estén renderizados
                 }
             }
         };
@@ -1028,7 +1030,7 @@ export default function DashboardPage() {
                 newService={transferenciasNewService}
                 setNewService={setTransferenciasNewService}
                 newValue={transferenciasNewValue}
-                setNewValue={setTransferenciasNewValue}
+                setNewValue={setNewValue}
                 />
             </TabsContent>
             
