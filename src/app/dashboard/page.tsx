@@ -12,6 +12,7 @@ import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
 import MemosWfTab from '@/components/tabs/MemosWfTab';
 import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 import HerramientasTab from '@/components/tabs/HerramientasTab';
+import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -102,15 +103,7 @@ export default function DashboardPage() {
           </TabsContent>
           
           <TabsContent value="transferencias" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Transferencias</CardTitle>
-                <CardDescription>Gestión de destinos de transferencia.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Aquí irá la lista de transferencias predefinidas y personalizadas.</p>
-              </CardContent>
-            </Card>
+            <TransferenciasTab />
           </TabsContent>
 
           <TabsContent value="avisos" className="mt-4">
