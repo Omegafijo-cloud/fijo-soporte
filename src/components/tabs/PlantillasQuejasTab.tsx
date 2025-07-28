@@ -10,137 +10,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-// Define la estructura de las plantillas de memos
-const memoTemplates = {
-  'INTERNET DSL': {
-    fields: [
-      { id: 'snr', label: 'SNR', type: 'textarea' },
-      { id: 'velocidadCurrent', label: 'Velocidad Current igual a Pisa', type: 'text' },
-      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
-      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
-      { id: 'telContacto', label: 'Tel Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    },
-    radioGroups: {
-      'Luz Portadora': ['Fija', 'Apagada', 'Intermitente'],
-      'Luz Internet': ['Fija', 'Apagada', 'Intermitente'],
-      'Estado del Puerto': ['UP', 'DOWN', 'DORMANT'],
-      'Estatus de niveles': ['Correctos', 'Erroneos'],
-      'Canal dañado': ['Datos', 'Voz', 'Todos'],
-    }
-  },
-  'TV DTH': {
-    fields: [
-      { id: 'numero', label: 'Número', type: 'text' },
-      { id: 'noTvsAfectados', label: 'No. Tvs Afectados', type: 'text' },
-      { id: 'serieStb', label: 'Serie STB', type: 'text' },
-      { id: 'smartCard', label: 'Smart Card', type: 'text' },
-      { id: 'modeloStb', label: 'Modelo STB', type: 'text' },
-      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
-      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
-      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-     checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    }
-  },
-   'TV HFC': {
-    fields: [
-      { id: 'numero', label: 'Número', type: 'text' },
-      { id: 'noTvsAfectados', label: 'No. Tvs Afectados', type: 'text' },
-      { id: 'noSerieStb', label: 'No. Serie Stb', type: 'text' },
-      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
-      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
-      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    },
-  },
-  'INTERNET HFC/LINEA': {
-    fields: [
-      { id: 'nivelesSenal', label: 'Niveles De Señal', type: 'text' },
-      { id: 'nivelesRuido', label: 'Niveles De Ruido', type: 'text' },
-      { id: 'macAddress', label: 'Mac Address', type: 'text' },
-      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
-      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
-      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    },
-    radioGroups: {
-      'Estado del Puerto': ['UP', 'DOWN', 'DORMANT'],
-      'Luz portadora': ['fija', 'intermitente', 'apagada'],
-      'Luz online': ['fija', 'intermitente', 'apagada'],
-      'Estatus de niveles': ['Correctos', 'Erroneos'],
-    },
-  },
-  'LINEA FIJA': {
-    fields: [
-      { id: 'alLevantarAuricular', label: 'Al Levantar El Auricular', type: 'text' },
-      { id: 'cuandoLeLlaman', label: 'Cuando Le Llaman', type: 'text' },
-      { id: 'contacto', label: 'Contacto', type: 'text' },
-      { id: 'telReferencia', label: 'Tel Referencia', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-      'Diagnóstico': ['Sin tono', 'Tono ocupado', 'Ruido en la línea', 'No saca llamadas', 'No entran llamadas', 'Llamadas se cortan'],
-    },
-  },
-  'GPON/LINEA': {
-    fields: [
-      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
-      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
-      { id: 'telContacto', label: 'Tel De Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    },
-    radioGroups: {
-      'Estatus de niveles:': ['Correctos', 'Erroneos'],
-      'Canal Dañado': ['Datos', 'Voz', 'Todos'],
-      'PON': ['fija', 'apagada', 'intermitente'],
-      'LOS': ['fija', 'apagada', 'roja'],
-    },
-  },
-  'IPTV': {
-    fields: [
-      { id: 'numeroSerie', label: 'Número de Serie', type: 'text' },
-      { id: 'numero', label: 'Número', type: 'text' },
-      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
-      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
-      { id: 'nombreCliente', label: 'Nombre Cliente', type: 'text' },
-      { id: 'numeroContacto', label: 'Número De Contacto', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-      { id: 'queja', label: 'Queja', type: 'text' },
-      { id: 'id', label: 'ID', type: 'text' },
-    ],
-    checkboxes: {
-      'Quien genera queja': ['Telefónico', 'Corporativo'],
-    },
-  },
+type TemplateField = {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea';
+  defaultValue?: string;
 };
+
+type TemplateCheckboxGroup = {
+  [group: string]: string[];
+};
+
+type TemplateRadioGroup = {
+  [group: string]: string[];
+};
+
+type BaseTemplate = {
+  fields: TemplateField[];
+  checkboxes?: TemplateCheckboxGroup;
+  radioGroups?: TemplateRadioGroup;
+};
+
+type MemoTemplate = {
+  [key: string]: BaseTemplate;
+}
 
 type CheckboxState = {
   [group: string]: {
@@ -153,6 +46,7 @@ type RadioGroupState = {
 }
 
 interface PlantillasQuejasTabProps {
+    templates: MemoTemplate;
     selectedTemplate: string;
     setSelectedTemplate: (value: string) => void;
     formData: { [key: string]: any };
@@ -168,6 +62,7 @@ interface PlantillasQuejasTabProps {
 }
 
 export default function PlantillasQuejasTab({
+    templates,
     selectedTemplate,
     setSelectedTemplate,
     formData,
@@ -185,9 +80,16 @@ export default function PlantillasQuejasTab({
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    // Let parent handle clearing state
-    onClear(); 
+    onClear();
     setRadioValues({});
+    const template = templates[templateKey];
+    const initialData: { [key: string]: any } = {};
+    if (template) {
+        template.fields.forEach(field => {
+            initialData[field.id] = field.defaultValue || '';
+        });
+    }
+    setFormData(initialData);
   };
   
   const handleInputChange = (id: string, value: string) => {
@@ -233,7 +135,7 @@ export default function PlantillasQuejasTab({
     }
     template += '\n';
 
-    const templateDefinition = memoTemplates[selectedTemplate as keyof typeof memoTemplates];
+    const templateDefinition = templates[selectedTemplate as keyof typeof templates];
     templateDefinition.fields.forEach(field => {
       template += `${field.label}: ${formData[field.id] || ''}\n`;
     });
@@ -247,7 +149,7 @@ export default function PlantillasQuejasTab({
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
-    const template = memoTemplates[selectedTemplate as keyof typeof memoTemplates];
+    const template = templates[selectedTemplate as keyof typeof templates];
     if (!template) return null;
 
     return (
@@ -341,7 +243,7 @@ export default function PlantillasQuejasTab({
                   <SelectValue placeholder="Seleccione una plantilla..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(memoTemplates).map(key => (
+                  {Object.keys(templates).map(key => (
                     <SelectItem key={key} value={key}>{key}</SelectItem>
                   ))}
                 </SelectContent>

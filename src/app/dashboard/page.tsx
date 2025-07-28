@@ -43,11 +43,29 @@ type TransferItem = {
   isCustom?: boolean;
 };
 
+type TemplateField = {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea';
+  defaultValue?: string;
+};
+
+type TemplateCheckboxGroup = {
+  [group: string]: string[];
+};
+
+type TemplateRadioGroup = {
+  [group: string]: string[];
+};
+
+type BaseTemplate = {
+  fields: TemplateField[];
+  checkboxes?: TemplateCheckboxGroup;
+  radioGroups?: TemplateRadioGroup;
+};
+
 type MemoTemplate = {
-  [key: string]: {
-    fields: any[];
-    checkboxes?: any;
-  }
+  [key: string]: BaseTemplate;
 }
 
 // Tipos para el estado global de la aplicación
@@ -69,6 +87,7 @@ type AppState = {
   plantillasGenericas_pruebasRealizadas?: string;
   plantillasGenericas_orderedPruebas?: string[];
 
+  plantillasQuejas_templates?: MemoTemplate;
   plantillasQuejas_selectedTemplate?: string;
   plantillasQuejas_formData?: any;
   plantillasQuejas_checkboxValues?: CheckboxState;
@@ -127,6 +146,137 @@ const initialPlantillasQuejasCheckboxes: CheckboxState = {
   'GPON - ADSL - HFC': { 'Se verifica estado de las luces del router': false, 'Envio reset en UMP': false, 'Se Desconecta y Conecta Corriente': false, 'Se Desconecta y Conecta en otro tomacorriente': false, 'Se verifica Splitter': false, 'Cambio de baterías': false, 'Se verifica Coaxial bien apretado': false, 'Se verifica cortes o daños en la fibra': false, 'Se manda a realizar test de velocidad (00 Megas)': false, 'Se realiza Ping (0% perdido)': false, 'Estado de la ONT activo': false, 'Niveles SNR en Rojo': false, 'Luz LOS en ROJO': false, 'Se envia reboot en Axiros': false },
   'TV HFC - DTH - IPTV': { 'Se verifica Conexiones HDMI': false, 'Se Verifica Conexiones RCA': false, 'Se verifica cable Coaxial': false, 'XX Stb afectados': false, 'Se valida Serial No. XXXX': false, 'Mensaje que muestra Tv: XXX': false, 'Se Envia Comando XXXX': false, 'Se Envia Reset Fisico': false, 'Se verifica en la GUI, AMCO en verde': false },
   'Otros': { 'Se valida DPI ok, nombre completo ok, sin restricciones': false, 'Cliente no esta en Sitio': false, 'Cliente esta en Agencia': false, 'Cliente no quiere hacer pruebas': false, 'Se realiza cambio de contraseña con exito': false, 'Servicio funcionando de manera correcta': false, 'Se Genera Averia': false, 'Se envía reproceso': false },
+};
+
+const initialPlantillasQuejasTemplates: MemoTemplate = {
+  'INTERNET DSL': {
+    fields: [
+      { id: 'snr', label: 'SNR', type: 'textarea' },
+      { id: 'velocidadCurrent', label: 'Velocidad Current igual a Pisa', type: 'text' },
+      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
+      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
+      { id: 'telContacto', label: 'Tel Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    },
+    radioGroups: {
+      'Luz Portadora': ['Fija', 'Apagada', 'Intermitente'],
+      'Luz Internet': ['Fija', 'Apagada', 'Intermitente'],
+      'Estado del Puerto': ['UP', 'DOWN', 'DORMANT'],
+      'Estatus de niveles': ['Correctos', 'Erroneos'],
+      'Canal dañado': ['Datos', 'Voz', 'Todos'],
+    }
+  },
+  'TV DTH': {
+    fields: [
+      { id: 'numero', label: 'Número', type: 'text' },
+      { id: 'noTvsAfectados', label: 'No. Tvs Afectados', type: 'text' },
+      { id: 'serieStb', label: 'Serie STB', type: 'text' },
+      { id: 'smartCard', label: 'Smart Card', type: 'text' },
+      { id: 'modeloStb', label: 'Modelo STB', type: 'text' },
+      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
+      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
+      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+     checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    }
+  },
+   'TV HFC': {
+    fields: [
+      { id: 'numero', label: 'Número', type: 'text' },
+      { id: 'noTvsAfectados', label: 'No. Tvs Afectados', type: 'text' },
+      { id: 'noSerieStb', label: 'No. Serie Stb', type: 'text' },
+      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
+      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
+      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    },
+  },
+  'INTERNET HFC/LINEA': {
+    fields: [
+      { id: 'nivelesSenal', label: 'Niveles De Señal', type: 'text' },
+      { id: 'nivelesRuido', label: 'Niveles De Ruido', type: 'text' },
+      { id: 'macAddress', label: 'Mac Address', type: 'text' },
+      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
+      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
+      { id: 'telContacto', label: 'Tel. Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    },
+    radioGroups: {
+      'Estado del Puerto': ['UP', 'DOWN', 'DORMANT'],
+      'Luz portadora': ['fija', 'intermitente', 'apagada'],
+      'Luz online': ['fija', 'intermitente', 'apagada'],
+      'Estatus de niveles': ['Correctos', 'Erroneos'],
+    },
+  },
+  'LINEA FIJA': {
+    fields: [
+      { id: 'alLevantarAuricular', label: 'Al Levantar El Auricular', type: 'text' },
+      { id: 'cuandoLeLlaman', label: 'Cuando Le Llaman', type: 'text' },
+      { id: 'contacto', label: 'Contacto', type: 'text' },
+      { id: 'telReferencia', label: 'Tel Referencia', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+      'Diagnóstico': ['Sin tono', 'Tono ocupado', 'Ruido en la línea', 'No saca llamadas', 'No entran llamadas', 'Llamadas se cortan'],
+    },
+  },
+  'GPON/LINEA': {
+    fields: [
+      { id: 'problemaReportado', label: 'Problema Reportado', type: 'textarea' },
+      { id: 'contactoEnSitio', label: 'Contacto En Sitio', type: 'text' },
+      { id: 'telContacto', label: 'Tel De Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    },
+    radioGroups: {
+      'Estatus de niveles:': ['Correctos', 'Erroneos'],
+      'Canal Dañado': ['Datos', 'Voz', 'Todos'],
+      'PON': ['fija', 'apagada', 'intermitente'],
+      'LOS': ['fija', 'apagada', 'roja'],
+    },
+  },
+  'IPTV': {
+    fields: [
+      { id: 'numeroSerie', label: 'Número de Serie', type: 'text' },
+      { id: 'numero', label: 'Número', type: 'text' },
+      { id: 'mensajeMuestraTv', label: 'Mensaje Que Muestra Tv', type: 'text' },
+      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
+      { id: 'nombreCliente', label: 'Nombre Cliente', type: 'text' },
+      { id: 'numeroContacto', label: 'Número De Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'queja', label: 'Queja', type: 'text' },
+      { id: 'id', label: 'ID', type: 'text' },
+    ],
+    checkboxes: {
+      'Quien genera queja': ['Telefónico', 'Corporativo'],
+    },
+  },
 };
 
 const initialTransferItems: TransferItem[] = [
@@ -401,6 +551,7 @@ export default function DashboardPage() {
 
 
   // Estado para Plantillas de Quejas
+  const [plantillasQuejasTemplates, setPlantillasQuejasTemplates] = useState<MemoTemplate>(initialPlantillasQuejasTemplates);
   const [plantillasQuejasSelectedTemplate, setPlantillasQuejasSelectedTemplate] = useState('');
   const [plantillasQuejasFormData, setPlantillasQuejasFormData] = useState({});
   const [plantillasQuejasCheckboxValues, setPlantillasQuejasCheckboxValues] = useState<CheckboxState>({});
@@ -437,6 +588,7 @@ export default function DashboardPage() {
       plantillasGenericas_checkboxes: plantillasGenericasCheckboxes,
       plantillasGenericas_orderedPruebas: plantillasGenericasOrderedPruebas,
       plantillasGenericas_pruebasRealizadas: plantillasGenericasPruebasRealizadas,
+      plantillasQuejas_templates: plantillasQuejasTemplates,
       plantillasQuejas_selectedTemplate: plantillasQuejasSelectedTemplate,
       plantillasQuejas_formData: plantillasQuejasFormData,
       plantillasQuejas_checkboxValues: plantillasQuejasCheckboxValues,
@@ -457,7 +609,7 @@ export default function DashboardPage() {
   }, [
       activeTab, activeSubTab, backupText, notesText, usersText, notices,
       plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasOrderedPruebas, plantillasGenericasPruebasRealizadas,
-      plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
+      plantillasQuejasTemplates, plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
       plantillasQuejasPruebasCheckboxes, plantillasQuejasOrderedPruebas, plantillasQuejasPruebasRealizadas,
       memosWfTemplates, memosWfSelectedTemplate, memosWfFormData, 
       memosOrdenTemplates, memosOrdenSelectedTemplate, memosOrdenFormData,
@@ -508,6 +660,7 @@ export default function DashboardPage() {
           if (data.plantillasGenericas_orderedPruebas) setPlantillasGenericasOrderedPruebas(data.plantillasGenericas_orderedPruebas);
           if (data.plantillasGenericas_pruebasRealizadas) setPlantillasGenericasPruebasRealizadas(data.plantillasGenericas_pruebasRealizadas);
 
+          if(data.plantillasQuejas_templates) setPlantillasQuejasTemplates(data.plantillasQuejas_templates);
           if(data.plantillasQuejas_selectedTemplate) setPlantillasQuejasSelectedTemplate(data.plantillasQuejas_selectedTemplate);
           if(data.plantillasQuejas_formData) setPlantillasQuejasFormData(data.plantillasQuejas_formData);
           if(data.plantillasQuejas_checkboxValues) setPlantillasQuejasCheckboxValues(data.plantillasQuejas_checkboxValues);
@@ -631,65 +784,42 @@ export default function DashboardPage() {
   };
   
   const handleGenericasCheckboxChange = (group: string, label: string, checked: boolean) => {
-    setPlantillasGenericasCheckboxes(prev => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [label]: checked,
-      },
-    }));
-    
-    setPlantillasGenericasOrderedPruebas(prevOrdered => {
-        const newOrderedPruebas = checked
-          ? [...prevOrdered, label]
-          : prevOrdered.filter(item => item !== label);
-        
-        setPlantillasGenericasPruebasRealizadas(prev => {
-            const currentManualText = prev.split(', ').filter(p => !Object.values(initialPlantillasGenericasCheckboxes).some(group => group.hasOwnProperty(p.trim())));
-            const newText = [...newOrderedPruebas, ...currentManualText].join(', ');
-            return newText;
-        });
+    const newCheckboxes = {
+        ...plantillasGenericasCheckboxes,
+        [group]: { ...plantillasGenericasCheckboxes[group], [label]: checked }
+    };
+    setPlantillasGenericasCheckboxes(newCheckboxes);
 
-        return newOrderedPruebas;
-    });
+    const newOrderedPruebas = checked
+        ? [...plantillasGenericasOrderedPruebas, label]
+        : plantillasGenericasOrderedPruebas.filter(item => item !== label);
+    
+    setPlantillasGenericasOrderedPruebas(newOrderedPruebas);
+    setPlantillasGenericasPruebasRealizadas(newOrderedPruebas.join(', '));
   };
 
 
   const handleClearQuejas = () => {
-    const selected = plantillasQuejasSelectedTemplate;
-    setPlantillasQuejasSelectedTemplate('');
     setPlantillasQuejasFormData({});
     setPlantillasQuejasCheckboxValues({});
     setPlantillasQuejasPruebasCheckboxes(initialPlantillasQuejasCheckboxes);
     setPlantillasQuejasOrderedPruebas([]);
     setPlantillasQuejasPruebasRealizadas('');
-    if (selected) {
-        setTimeout(() => setPlantillasQuejasSelectedTemplate(selected), 0);
-    }
   };
 
   const handleQuejasCheckboxChange = (group: string, label: string, checked: boolean) => {
-    setPlantillasQuejasPruebasCheckboxes(prev => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [label]: checked,
-      },
-    }));
+    const newCheckboxes = {
+        ...plantillasQuejasPruebasCheckboxes,
+        [group]: { ...plantillasQuejasPruebasCheckboxes[group], [label]: checked }
+    };
+    setPlantillasQuejasPruebasCheckboxes(newCheckboxes);
 
-     setPlantillasQuejasOrderedPruebas(prevOrdered => {
-        const newOrderedPruebas = checked
-          ? [...prevOrdered, label]
-          : prevOrdered.filter(item => item !== label);
-        
-        setPlantillasQuejasPruebasRealizadas(prev => {
-            const currentManualText = prev.split(', ').filter(p => !Object.values(initialPlantillasQuejasCheckboxes).some(group => group.hasOwnProperty(p.trim())));
-            const newText = [...newOrderedPruebas, ...currentManualText].join(', ');
-            return newText;
-        });
+    const newOrderedPruebas = checked
+        ? [...plantillasQuejasOrderedPruebas, label]
+        : plantillasQuejasOrderedPruebas.filter(item => item !== label);
 
-        return newOrderedPruebas;
-    });
+    setPlantillasQuejasOrderedPruebas(newOrderedPruebas);
+    setPlantillasQuejasPruebasRealizadas(newOrderedPruebas.join(', '));
   };
 
   const handleClearMemosWf = () => {
@@ -802,6 +932,7 @@ export default function DashboardPage() {
                     </TabsContent>
                     <TabsContent value="quejas" className="p-6">
                         <PlantillasQuejasTab 
+                            templates={plantillasQuejasTemplates}
                             selectedTemplate={plantillasQuejasSelectedTemplate}
                             setSelectedTemplate={setPlantillasQuejasSelectedTemplate}
                             formData={plantillasQuejasFormData}
