@@ -11,8 +11,9 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
 import { Separator } from './ui/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-type ActiveWidget = 'notes' | 'users' | 'chat' | 'theme' | null;
+type ActiveWidget = 'notes' | 'users' | 'theme' | null;
 
 interface FloatingWidgetsProps {
     notesText: string;
@@ -22,9 +23,9 @@ interface FloatingWidgetsProps {
 }
 
 const defaultTheme = {
-  primary: '26 35% 42%',
-  background: '0 0% 98%',
-  accent: '236 65% 33%',
+  primary: '237 73% 31%',
+  background: '0 0% 100%',
+  accent: '282 69% 54%',
 };
 
 const defaultThemeHex = {
@@ -166,21 +167,6 @@ export default function FloatingWidgets({
                 </CardContent>
             </Card>
         );
-      case 'chat':
-        return (
-            <Card className="h-full flex flex-col">
-                <CardHeader>
-                    <CardTitle>OMEGA Copilot</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 p-0">
-                    <iframe 
-                      src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
-                      className="w-full h-full border-0"
-                      title="OMEGA Copilot"
-                    ></iframe>
-                </CardContent>
-            </Card>
-        );
       case 'theme':
         return (
             <Card className="h-full overflow-y-auto">
@@ -226,7 +212,7 @@ export default function FloatingWidgets({
     }
   };
 
-  const getButtonIcon = (widget: ActiveWidget) => {
+  const getButtonIcon = (widget: ActiveWidget | 'chat') => {
     if (activeWidget === widget) {
       return <X className="h-6 w-6" />;
     }
@@ -248,7 +234,7 @@ export default function FloatingWidgets({
     <>
       {/* Botones Flotantes */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
-        {(['notes', 'users', 'chat', 'theme'] as ActiveWidget[]).map(widget => (
+        {(['notes', 'users', 'theme'] as ActiveWidget[]).map(widget => (
           <Button
             key={widget}
             size="icon"
@@ -259,6 +245,24 @@ export default function FloatingWidgets({
             {getButtonIcon(widget)}
           </Button>
         ))}
+         <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    size="icon"
+                    className="rounded-full h-14 w-14 shadow-lg"
+                    aria-label="Abrir widget de OMEGA Copilot"
+                >
+                    <MessageSquare className="h-6 w-6" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 h-[60vh] p-0 mr-4 border-primary shadow-2xl">
+                 <iframe 
+                      src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
+                      className="w-full h-full border-0"
+                      title="OMEGA Copilot"
+                    ></iframe>
+            </PopoverContent>
+        </Popover>
       </div>
 
       {/* Panel de Widget Activo */}
@@ -276,3 +280,5 @@ export default function FloatingWidgets({
     </>
   );
 }
+
+    
