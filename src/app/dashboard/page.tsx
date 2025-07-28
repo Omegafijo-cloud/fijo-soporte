@@ -21,6 +21,7 @@ import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import { Progress } from '@/components/ui/progress';
+import Timer from '@/components/Timer';
 
 // Tipos para el estado
 type AppState = {
@@ -45,15 +46,6 @@ export default function DashboardPage() {
   const [usersText, setUsersText] = useState('');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState('00:00:00');
-
-  // ----- Lógica del Reloj -----
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString('es-ES'));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // ----- Lógica de persistencia de datos -----
 
@@ -191,7 +183,7 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-sm font-medium">{currentTime}</div>
+          <Timer />
           <Button onClick={handleLogout} variant="destructive" size="sm">
             Salir
           </Button>
