@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
+import { HerramientasTab } from '@/components/herramientas-tab';
 
 // Placeholder components for each tab content
-const HerramientasTab = () => <div id="herramientas" className="tab-content">Contenido de Herramientas</div>;
 const TransferenciasTab = () => <div id="transferencias" className="tab-content">Contenido de Transferencias</div>;
 const AvisosTab = () => <div id="avisos" className="tab-content">Contenido de Avisos</div>;
 const CopiaRespaldoTab = () => <div id="copia-respaldo" className="tab-content">Contenido de Copia de Respaldo</div>;
