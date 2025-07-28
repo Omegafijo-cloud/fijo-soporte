@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
+import MemosWfTab from '@/components/tabs/MemosWfTab';
+import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -84,10 +86,10 @@ export default function DashboardPage() {
                     <PlantillasQuejasTab />
                   </TabsContent>
                   <TabsContent value="wf" className="p-6">
-                    <p>Contenido de Memos de WF irá aquí.</p>
+                    <MemosWfTab />
                   </TabsContent>
                   <TabsContent value="orden" className="p-6">
-                    <p>Contenido de Memos de Orden irá aquí.</p>
+                    <MemosOrdenTab />
                   </TabsContent>
                 </Tabs>
               </CardContent>
