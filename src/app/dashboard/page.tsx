@@ -17,6 +17,7 @@ import MemosWfTab from '@/components/tabs/MemosWfTab';
 import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
+import FloatingWidgets from '@/components/FloatingWidgets';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -178,6 +179,8 @@ export default function DashboardPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <FloatingWidgets />
 
       {/* Placeholder para la firma del desarrollador */}
       <footer className="p-4 text-center text-xs text-muted-foreground">
