@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
 import { Separator } from './ui/separator';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 type ActiveWidget = 'notes' | 'users' | 'theme' | null;
 
@@ -55,6 +54,7 @@ export default function FloatingWidgets({
   const [primaryColor, setPrimaryColor] = useState(defaultThemeHex.primary);
   const [backgroundColor, setBackgroundColor] = useState(defaultThemeHex.background);
   const [accentColor, setAccentColor] = useState(defaultThemeHex.accent);
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
 
   const applyTheme = (theme: {primary: string, background: string, accent: string}) => {
     const root = document.documentElement;
@@ -222,7 +222,7 @@ export default function FloatingWidgets({
   };
 
   const getButtonIcon = (widget: ActiveWidget | 'chat') => {
-    if (activeWidget === widget) {
+    if (activeWidget === widget || (widget === 'chat' && isCopilotOpen)) {
       return <X className="h-6 w-6" />;
     }
     switch (widget) {
@@ -238,6 +238,10 @@ export default function FloatingWidgets({
         return null;
     }
   };
+  
+  const toggleCopilot = () => {
+    setIsCopilotOpen(prev => !prev);
+  }
 
   return (
     <>
@@ -254,25 +258,28 @@ export default function FloatingWidgets({
             {getButtonIcon(widget)}
           </Button>
         ))}
-         <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                    size="icon"
-                    className="rounded-full h-14 w-14 shadow-lg bg-accent text-accent-foreground hover:bg-accent/90"
-                    aria-label="Abrir widget de OMEGA Copilot"
-                >
-                    <MessageSquare className="h-6 w-6" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-96 h-[60vh] p-0 mr-4 border-primary shadow-2xl">
-                 <iframe 
-                      src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
-                      className="w-full h-full border-0"
-                      title="OMEGA Copilot"
-                    ></iframe>
-            </PopoverContent>
-        </Popover>
+         <Button
+            size="icon"
+            className="rounded-full h-14 w-14 shadow-lg bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={toggleCopilot}
+            aria-label="Abrir widget de OMEGA Copilot"
+        >
+            {getButtonIcon('chat')}
+        </Button>
       </div>
+      
+       {/* Panel de Copilot */}
+      <div className={cn(
+          "fixed bottom-24 right-4 z-40 transition-transform duration-300 ease-in-out w-96 h-[60vh] rounded-lg border-primary shadow-2xl overflow-hidden",
+          isCopilotOpen ? 'translate-x-0' : 'translate-x-[150%]'
+      )}>
+            <iframe 
+                src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
+                className="w-full h-full border-0"
+                title="OMEGA Copilot"
+            ></iframe>
+      </div>
+
 
       {/* Panel de Widget Activo */}
       <div
