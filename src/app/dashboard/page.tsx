@@ -631,7 +631,6 @@ export default function DashboardPage() {
   };
   
   const handleGenericasCheckboxChange = (group: string, label: string, checked: boolean) => {
-    // Update the visual state of the checkbox
     setPlantillasGenericasCheckboxes(prev => ({
       ...prev,
       [group]: {
@@ -645,7 +644,12 @@ export default function DashboardPage() {
           ? [...prevOrdered, label]
           : prevOrdered.filter(item => item !== label);
         
-        setPlantillasGenericasPruebasRealizadas(newOrderedPruebas.join(', '));
+        setPlantillasGenericasPruebasRealizadas(prev => {
+            const currentManualText = prev.split(', ').filter(p => !Object.values(initialPlantillasGenericasCheckboxes).some(group => group.hasOwnProperty(p.trim())));
+            const newText = [...newOrderedPruebas, ...currentManualText].join(', ');
+            return newText;
+        });
+
         return newOrderedPruebas;
     });
   };
@@ -659,7 +663,6 @@ export default function DashboardPage() {
     setPlantillasQuejasPruebasCheckboxes(initialPlantillasQuejasCheckboxes);
     setPlantillasQuejasOrderedPruebas([]);
     setPlantillasQuejasPruebasRealizadas('');
-    // Restore the selection if it existed, to not interrupt the user flow
     if (selected) {
         setTimeout(() => setPlantillasQuejasSelectedTemplate(selected), 0);
     }
@@ -679,7 +682,12 @@ export default function DashboardPage() {
           ? [...prevOrdered, label]
           : prevOrdered.filter(item => item !== label);
         
-        setPlantillasQuejasPruebasRealizadas(newOrderedPruebas.join(', '));
+        setPlantillasQuejasPruebasRealizadas(prev => {
+            const currentManualText = prev.split(', ').filter(p => !Object.values(initialPlantillasQuejasCheckboxes).some(group => group.hasOwnProperty(p.trim())));
+            const newText = [...newOrderedPruebas, ...currentManualText].join(', ');
+            return newText;
+        });
+
         return newOrderedPruebas;
     });
   };
