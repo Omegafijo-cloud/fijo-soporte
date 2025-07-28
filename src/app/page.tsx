@@ -68,7 +68,7 @@ export default function LoginPage() {
         </div>
         <Card className="w-full max-w-md shadow-2xl bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">Iniciar Sesión</CardTitle>
+            <CardTitle className="text-3xl font-bold text-center">Omega iniciar sesión</CardTitle>
             <CardDescription className="text-center text-lg">
               Accede a tu cuenta para continuar
             </CardDescription>
