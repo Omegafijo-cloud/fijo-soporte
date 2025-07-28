@@ -18,7 +18,8 @@ interface PlantillasGenericasTabProps {
     formData: any;
     setFormData: (data: any) => void;
     checkboxes: CheckboxState;
-    orderedPruebas: string[];
+    pruebasRealizadasText: string;
+    setPruebasRealizadasText: (text: string) => void;
     onCheckboxChange: (group: string, label: string, checked: boolean) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
@@ -28,13 +29,12 @@ export default function PlantillasGenericasTab({
     formData,
     setFormData,
     checkboxes,
-    orderedPruebas,
+    pruebasRealizadasText,
+    setPruebasRealizadasText,
     onCheckboxChange,
     onCopy,
     onClear
 }: PlantillasGenericasTabProps) {
-
-  const pruebasRealizadasText = useMemo(() => orderedPruebas.join(', '), [orderedPruebas]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -114,7 +114,7 @@ PRUEBAS REALIZADAS: ${pruebasRealizadasText}`;
               <Textarea 
                 id="pruebasRealizadas" 
                 value={pruebasRealizadasText}
-                readOnly
+                onChange={(e) => setPruebasRealizadasText(e.target.value)}
                 rows={4} 
               />
             </div>

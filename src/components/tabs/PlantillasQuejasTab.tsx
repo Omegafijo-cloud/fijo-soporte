@@ -160,7 +160,8 @@ interface PlantillasQuejasTabProps {
     checkboxValues: CheckboxState;
     setCheckboxValues: (value: CheckboxState) => void;
     pruebasCheckboxes: CheckboxState;
-    orderedPruebas: string[];
+    pruebasRealizadasText: string;
+    setPruebasRealizadasText: (text: string) => void;
     onPruebasCheckboxChange: (group: string, label: string, checked: boolean) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
@@ -174,14 +175,13 @@ export default function PlantillasQuejasTab({
     checkboxValues,
     setCheckboxValues,
     pruebasCheckboxes,
-    orderedPruebas,
+    pruebasRealizadasText,
+    setPruebasRealizadasText,
     onPruebasCheckboxChange,
     onCopy,
     onClear,
 }: PlantillasQuejasTabProps) {
   const [radioValues, setRadioValues] = useState<RadioGroupState>({});
-
-  const pruebasRealizadasText = useMemo(() => orderedPruebas.join(', '), [orderedPruebas]);
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
@@ -356,7 +356,7 @@ export default function PlantillasQuejasTab({
                         <Textarea 
                             id="pruebasRealizadasMemo" 
                             value={pruebasRealizadasText}
-                            readOnly
+                            onChange={(e) => setPruebasRealizadasText(e.target.value)}
                             rows={4}
                         />
                     </div>
