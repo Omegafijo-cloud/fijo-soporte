@@ -5,19 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare, Palette, RotateCcw, Play, Square, RotateCw } from 'lucide-react';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, X, Users, MessageSquare, Palette, Play, Square, RotateCw } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
 import { AvisosTab } from '@/components/avisos-tab';
 import { CopiaRespaldoTab } from '@/components/copia-respaldo-tab';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { NotesWidget } from '@/components/widgets/notes-widget';
+import { UsersWidget } from '@/components/widgets/users-widget';
+import { CopilotWidget } from '@/components/widgets/copilot-widget';
+import { ThemeWidget } from '@/components/widgets/theme-widget';
+
 
 // -- Funciones para convertir HSL a Hex y viceversa --
 const hslStringToObj = (hslStr: string) => {
@@ -27,18 +30,6 @@ const hslStringToObj = (hslStr: string) => {
 
 const hslObjToCssVar = (hslObj: { h: number, s: number, l: number }) => {
     return `${hslObj.h} ${hslObj.s}% ${hslObj.l}%`;
-};
-
-const hslToHex = (h: number, s: number, l: number) => {
-    s /= 100;
-    l /= 100;
-    const k = (n: number) => (n + h / 30) % 12;
-    const a = s * Math.min(l, 1 - l);
-    const f = (n: number) =>
-        l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
-    return `#${[8, 4, 0].map(n =>
-        Math.round(f(n) * 255).toString(16).padStart(2, '0')
-    ).join('')}`;
 };
 
 const hexToHsl = (hex: string) => {
@@ -332,64 +323,31 @@ export default function OmegaPage() {
 
             <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
                 {activeWidget === 'notas' && (
-                    <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
-                        <CardContent className="p-4 space-y-3">
-                            <h4 className="font-semibold text-center">Notas Rápidas</h4>
-                            <Textarea placeholder="Escribe tus notas aquí..." rows={8} value={quickNotes} onChange={(e) => setQuickNotes(e.target.value)} />
-                            <div className="flex justify-between gap-2">
-                                <Button size="sm" onClick={() => handleCopyFromWidget(quickNotes, 'Notas Rápidas')} className="flex-1"><Copy className="mr-2 h-4 w-4" /> Copiar</Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleClearWidget(setQuickNotes, 'Notas Rápidas')} className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> Limpiar</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <NotesWidget
+                        quickNotes={quickNotes}
+                        setQuickNotes={setQuickNotes}
+                        onCopy={handleCopyFromWidget}
+                        onClear={handleClearWidget}
+                    />
                 )}
                 
                 {activeWidget === 'usuarios' && (
-                    <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
-                        <CardContent className="p-4 space-y-3">
-                            <h4 className="font-semibold text-center">Lista de Usuarios</h4>
-                            <Textarea placeholder="Mantén tu lista de usuarios aquí..." rows={8} value={userList} onChange={(e) => setUserList(e.target.value)} />
-                            <div className="flex justify-between gap-2">
-                                <Button size="sm" onClick={() => handleCopyFromWidget(userList, 'Lista de Usuarios')} className="flex-1"><Copy className="mr-2 h-4 w-4" /> Copiar</Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleClearWidget(setUserList, 'Lista de Usuarios')} className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> Limpiar</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+                     <UsersWidget
+                        userList={userList}
+                        setUserList={setUserList}
+                        onCopy={handleCopyFromWidget}
+                        onClear={handleClearWidget}
+                    />
                 )}
 
-                {activeWidget === 'copilot' && (
-                    <Card className="w-96 h-[60vh] shadow-lg animate-in slide-in-from-bottom-10 flex flex-col">
-                        <CardContent className="p-2 flex-1">
-                            <iframe src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2" className="w-full h-full border-0" title="Copilot Chat"></iframe>
-                        </CardContent>
-                    </Card>
-                )}
+                {activeWidget === 'copilot' && <CopilotWidget />}
 
                 {activeWidget === 'theme' && (
-                    <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
-                        <CardContent className="p-4 space-y-4">
-                            <h4 className="font-semibold text-center">Personalizar Tema</h4>
-                            <div className="space-y-3">
-                                <div className="space-y-1">
-                                    <Label>Fondo</Label>
-                                    <Input type="color" value={hslToHex(themeColors.background.h, themeColors.background.s, themeColors.background.l)} onChange={(e) => handleThemeColorChange('background', e.target.value)} className="p-1 h-10" />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label>Texto</Label>
-                                    <Input type="color" value={hslToHex(themeColors.foreground.h, themeColors.foreground.s, themeColors.foreground.l)} onChange={(e) => handleThemeColorChange('foreground', e.target.value)} className="p-1 h-10" />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label>Primario</Label>
-                                    <Input type="color" value={hslToHex(themeColors.primary.h, themeColors.primary.s, themeColors.primary.l)} onChange={(e) => handleThemeColorChange('primary', e.target.value)} className="p-1 h-10" />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label>Acento</Label>
-                                    <Input type="color" value={hslToHex(themeColors.accent.h, themeColors.accent.s, themeColors.accent.l)} onChange={(e) => handleThemeColorChange('accent', e.target.value)} className="p-1 h-10" />
-                                </div>
-                            </div>
-                            <Button onClick={resetTheme} variant="outline" className="w-full"><RotateCcw className="mr-2 h-4 w-4" /> Restaurar</Button>
-                        </CardContent>
-                    </Card>
+                    <ThemeWidget
+                        themeColors={themeColors}
+                        onColorChange={handleThemeColorChange}
+                        onReset={resetTheme}
+                    />
                 )}
 
                 <div className="flex justify-end gap-3">
