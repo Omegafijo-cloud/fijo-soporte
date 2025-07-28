@@ -45,7 +45,7 @@ export default function LoginPage() {
   if (loading || user) {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-            <p>Cargando...</p>
+            <p>Verificando sesión...</p>
         </div>
     );
   }

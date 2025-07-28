@@ -20,6 +20,7 @@ import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
+import { Progress } from '@/components/ui/progress';
 
 // Tipos para el estado
 type AppState = {
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const [notesText, setNotesText] = useState('');
   const [usersText, setUsersText] = useState('');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // ----- Lógica de persistencia de datos -----
 
@@ -87,7 +89,6 @@ export default function DashboardPage() {
       const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (docSnap) => {
         if (docSnap.exists() && isInitialLoad.current) {
           const data = docSnap.data() as AppState;
-          console.log("Datos cargados de Firebase:", data);
           if (data.backupText) setBackupText(data.backupText);
           if (data.activeTab) setActiveTab(data.activeTab);
           if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
@@ -111,7 +112,7 @@ export default function DashboardPage() {
 
   // Redireccionar si el usuario no está autenticado después de la carga
   useEffect(() => {
-    if (!authLoading && !isDataLoaded) return;
+    if (authLoading || !isDataLoaded) return; // Espera a que la carga inicial termine
     if (!user) {
       router.push('/');
     }
@@ -139,10 +140,34 @@ export default function DashboardPage() {
     setBackupText('');
   };
 
+  useEffect(() => {
+    if (authLoading || !isDataLoaded) {
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 95) {
+            clearInterval(interval);
+            return 95;
+          }
+          return prev + 5;
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingProgress(100);
+    }
+  }, [authLoading, isDataLoaded]);
+
   if (authLoading || !isDataLoaded) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <p>Cargando OMEGA...</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md space-y-4">
+          <div className="flex items-center justify-center gap-4">
+            <NeuralNetworkAnimation width={50} height={50} />
+            <h1 className="text-2xl font-bold">OMEGA</h1>
+          </div>
+          <p className="text-center text-muted-foreground">Cargando tu espacio de trabajo...</p>
+          <Progress value={loadingProgress} className="w-full" />
+        </div>
       </div>
     );
   }
