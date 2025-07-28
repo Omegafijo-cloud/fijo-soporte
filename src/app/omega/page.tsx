@@ -6,11 +6,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
+import { TransferenciasTab } from '@/components/transferencias-tab';
 
 // Placeholder components for each tab content
-const TransferenciasTab = () => <div id="transferencias" className="tab-content">Contenido de Transferencias</div>;
-const AvisosTab = () => <div id="avisos" className="tab-content">Contenido de Avisos</div>;
-const CopiaRespaldoTab = () => <div id="copia-respaldo" className="tab-content">Contenido de Copia de Respaldo</div>;
+const AvisosTab = () => <div id="avisos" className="tab-content p-6">Contenido de Avisos</div>;
+const CopiaRespaldoTab = () => <div id="copia-respaldo" className="tab-content p-6">Contenido de Copia de Respaldo</div>;
 
 export default function OmegaPage() {
   const [activeTab, setActiveTab] = useState('plantillas');
