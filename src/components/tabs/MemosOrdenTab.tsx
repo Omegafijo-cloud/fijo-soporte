@@ -11,44 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Trash2 } from 'lucide-react';
 
-const predefinedOrdenMemos = {
-  'cableado ethernet': {
-    fields: [
-      { id: 'asunto', label: 'ASUNTO', type: 'text' },
-      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
-      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
-      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
-      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
-      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
-      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
-      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
-      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
-    ],
-  },
-  'orden de repetidores': {
-    fields: [
-       { id: 'asunto', label: 'ASUNTO', type: 'text' },
-      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
-      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
-      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
-      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
-      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
-      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
-      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
-      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
-    ],
-  },
-    'instalación en plazo vigente': {
-    fields: [
-      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
-      { id: 'noOs', label: 'No. de O/S', type: 'text' },
-      { id: 'comentarios', label: 'Comentarios', type: 'textarea', defaultValue: 'Seguimiento a orden en tiempo Vigente' },
-      { id: 'horaVisita', label: 'Hora visita', type: 'text', defaultValue: '8:00 a 5:00' },
-      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea', defaultValue: 'Cliente solicita informacion sobre instalacion, se encuentra en tiempo vigente' },
-    ],
-  },
-};
-
 type MemoTemplate = {
   [key: string]: {
     fields: any[];
@@ -78,7 +40,16 @@ export default function MemosOrdenTab({
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    setFormData({});
+    const initialData: { [key: string]: any } = {};
+    const template = templates[templateKey];
+    if (template) {
+        template.fields.forEach(field => {
+            if (field.defaultValue) {
+                initialData[field.id] = field.defaultValue;
+            }
+        });
+    }
+    setFormData(initialData);
   };
   
   const handleAddTemplate = () => {
@@ -118,9 +89,9 @@ export default function MemosOrdenTab({
   const handleCopy = () => {
     if (!selectedTemplate) return;
 
-    let template = `TIPO DE MEMO DE ORDEN: ${selectedTemplate}\n\n`;
+    let template = `TIPO DE MEMO DE ORDEN: ${selectedTemplate.toUpperCase()}\n\n`;
     
-    const templateFields = (templates[selectedTemplate] || predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos]).fields;
+    const templateFields = templates[selectedTemplate].fields;
     templateFields.forEach(field => {
       template += `${field.label}: ${formData[field.id] || field.defaultValue || ''}\n`;
     });
@@ -139,7 +110,7 @@ export default function MemosOrdenTab({
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
-    const template = templates[selectedTemplate] || predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos];
+    const template = templates[selectedTemplate];
     if (!template) return null;
 
     return (
@@ -176,8 +147,13 @@ export default function MemosOrdenTab({
                 {Object.keys(templates).map(key => (
                     <SelectItem key={key} value={key}>
                         <div className="flex items-center justify-between w-full">
-                           <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                             <Button variant="ghost" size="icon" className="h-5 w-5 ml-4" onClick={(e) => { e.stopPropagation(); handleRemoveTemplate(key); }}>
+                           <span className="capitalize">{key}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 ml-4 hover:bg-destructive/10" 
+                              onClick={(e) => { e.stopPropagation(); handleRemoveTemplate(key); }}
+                            >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                         </div>
@@ -194,8 +170,8 @@ export default function MemosOrdenTab({
                         <DialogTitle>Añadir Nueva Plantilla de Orden</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-2">
-                        <Label htmlFor="new-template-name">Nombre de la Plantilla</Label>
-                        <Input id="new-template-name" value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} />
+                        <Label htmlFor="new-template-name-orden">Nombre de la Plantilla</Label>
+                        <Input id="new-template-name-orden" value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} />
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancelar</Button>
