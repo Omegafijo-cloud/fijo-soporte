@@ -1,27 +1,25 @@
-import type {Metadata} from 'next';
+// app/layout.js
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
+import { Inter } from 'next/font/google';
+import { FirebaseProvider } from '../context/FirebaseContext';
+import { AppStateProvider } from '../context/AppStateContext';
 
-export const metadata: Metadata = {
-  title: 'OMEGA - FIJO SOPORTE',
-  description: 'Herramienta integral para optimizar las operaciones de soporte técnico.',
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata = {
+  title: 'OMEGA - FIJO SOPORTE (Versión Corporativa)',
+  description: 'Herramienta integral de soporte técnico',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="es" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-      </head>
-      <body>
-        {children}
-        <Toaster />
+    <html lang="es">
+      <body className={inter.className}>
+        <AppStateProvider>
+          <FirebaseProvider>
+            {children}
+          </FirebaseProvider>
+        </AppStateProvider>
       </body>
     </html>
   );
