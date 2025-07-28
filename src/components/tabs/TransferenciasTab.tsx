@@ -35,7 +35,7 @@ export default function TransferenciasTab({
     if (newService.trim() && newValue.trim()) {
       setTransferItems([
         ...transferItems,
-        { service: newService, value: newValue, isCustom: true },
+        { service: newService.toUpperCase(), value: newValue, isCustom: true },
       ]);
       setNewService('');
       setNewValue('');
@@ -62,16 +62,14 @@ export default function TransferenciasTab({
                     <p className="font-semibold">{item.service}</p>
                     <p className="text-sm text-muted-foreground">{item.value}</p>
                   </div>
-                  {item.isCustom && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveTransfer(index)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveTransfer(index)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
