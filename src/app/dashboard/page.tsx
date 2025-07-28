@@ -248,7 +248,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <iframe 
-                      src="https://docs.google.com/document/d/e/2PACX-1vR-y_zq_xO0qA1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1/pub?embedded=true" 
+                      src="https://docs.google.com/document/d/e/2PACX-1vT5n_Y_S_iW2j-8Gg3gB8P_B_aC9d_E_F_G_hI_jK_lM_nO_pQ_r_sT_uV_wX_yZ/pub?embedded=true" 
                       className="w-full h-96 border rounded-md"
                       title="Procesos de Migración"
                     ></iframe>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <iframe 
-                      src="https://docs.google.com/document/d/e/2PACX-1vR-y_zq_xO0qA1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_2/pub?embedded=true"
+                      src="https://docs.google.com/document/d/e/2PACX-1vQ_R_S_tU_vW_xY_z_A_bC_dE_fG_hI_jK_lM_nO_pQ_rS_tU_vW_xY_z_A_bC/pub?embedded=true"
                       className="w-full h-96 border rounded-md"
                       title="Seguimiento de Casos"
                     ></iframe>
