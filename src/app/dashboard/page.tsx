@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { doc, setDoc, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
-import { Trash2 } from 'lucide-react';
 import 'intro.js/introjs.css';
 import introJs from 'intro.js';
 
@@ -27,11 +26,12 @@ import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
 import OmegaLogo from '@/components/OmegaLogo';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
+import AvisosTab from '@/components/tabs/AvisosTab';
 
 // --- Tipos de Estado ---
 
 type Notice = {
-  id: number;
+  id: string;
   title: string;
   url: string;
 };
@@ -135,12 +135,12 @@ type AppState = {
 
 const initialNotices: Notice[] = [
   { 
-    id: 1, 
+    id: '1', 
     title: 'PROCESOS DE MIGRACIÓN', 
     url: 'https://docs.google.com/document/d/e/2PACX-1vQbmQQdlbeHkpEMA9CwGFWUwj7gq4pR6Prx7fHng1MOUGqNUGUuRUUc94qogeiHj6Bu1MavE3wzpUDZ/pub?embedded=true' 
   },
   { 
-    id: 2, 
+    id: '2', 
     title: 'SEGUIMIENTO DE CASOS', 
     url: 'https://docs.google.com/document/d/e/2PACX-1vRketVsJaYapfC4lwnzYr1ndlm6WoCUmRsAY0TQEzYMVfhd3kXOwyuY-jWZG4YAx7qeqUWH50t_0-0Q/pub?embedded=true'
   }
@@ -779,13 +779,6 @@ export default function DashboardPage() {
     setBackupText('');
   };
   
-  const handleDeleteNotice = (id: number) => {
-    setNotices(prevNotices => prevNotices.filter(notice => notice.id !== id));
-    toast({
-      title: 'Aviso Eliminado',
-      description: 'El aviso ha sido eliminado de la lista.',
-    })
-  };
 
   // ----- Manejadores de Plantillas Globales -----
 
@@ -1042,40 +1035,10 @@ export default function DashboardPage() {
             </TabsContent>
 
             <TabsContent value="avisos" className="mt-4">
-                <Card>
-                <CardHeader>
-                    <CardTitle>Avisos Importantes</CardTitle>
-                    <CardDescription>Documentos importantes y recursos operativos de acceso rápido.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {notices.length > 0 ? (
-                    notices.map((notice) => (
-                        <Card key={notice.id}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-lg">{notice.title}</CardTitle>
-                            <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteNotice(notice.id)}
-                            className="text-muted-foreground hover:text-destructive"
-                            >
-                            <Trash2 className="h-5 w-5" />
-                            </Button>
-                        </CardHeader>
-                        <CardContent>
-                            <iframe 
-                            src={notice.url}
-                            className="w-full h-96 border rounded-md"
-                            title={notice.title}
-                            ></iframe>
-                        </CardContent>
-                        </Card>
-                    ))
-                    ) : (
-                    <p className="text-center text-muted-foreground">No hay avisos para mostrar.</p>
-                    )}
-                </CardContent>
-                </Card>
+                <AvisosTab
+                  notices={notices}
+                  setNotices={setNotices}
+                />
             </TabsContent>
 
             <TabsContent value="respaldo" className="mt-4">
