@@ -64,8 +64,8 @@ const PlantillasGenericasTab = () => {
     useEffect(() => {
         const pruebas = Object.entries(checkboxes)
             .filter(([, checked]) => checked)
-            .map(([label]) => label.replace(/\.$/, '')) // Quita el punto final para unir
-            .join('. '); // Une con punto y espacio
+            .map(([label]) => label.replace(/\.$/, ''))
+            .join('. ');
         setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas ? pruebas + '.' : '' }));
     }, [checkboxes]);
 
@@ -520,7 +520,122 @@ const MemosWFTab = () => {
         </div>
     );
 };
-const MemosOrdenTab = () => <div>Contenido de Memos de Orden</div>;
+
+// --- MEMOS DE ORDEN ---
+const memoOrdenTemplates: { [key: string]: { id: string; label: string; type: 'text' | 'textarea' }[] } = {
+    'cableado ethernet': [
+        { id: 'orden-metros-cable', label: 'Metros de cable requeridos:', type: 'text' },
+        { id: 'orden-tipo-cable', label: 'Tipo de cable:', type: 'text' },
+        { id: 'orden-observaciones', label: 'Observaciones:', type: 'textarea' },
+    ],
+    'orden de repetidores': [
+        { id: 'orden-cantidad-repetidores', label: 'Cantidad de repetidores:', type: 'text' },
+        { id: 'orden-modelo-repetidor', label: 'Modelo de repetidor:', type: 'text' },
+        { id: 'orden-ubicacion', label: 'Ubicación:', type: 'textarea' },
+    ],
+};
+
+const MemosOrdenTab = () => {
+    const [selectedMemo, setSelectedMemo] = useState('');
+    const [formData, setFormData] = useState<{ [key: string]: any }>({});
+    const { toast } = useToast();
+
+    const handleMemoChange = (value: string) => {
+        setSelectedMemo(value);
+        setFormData({}); // Reset form on new selection
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleClear = () => {
+        setSelectedMemo('');
+        setFormData({});
+        toast({ 
+            title: "Memo de Orden Limpio",
+            description: "Se han restablecido todos los campos."
+        });
+    };
+
+    const handleCopy = () => {
+        if (!selectedMemo) {
+            toast({
+                title: "Error",
+                description: "Por favor, seleccione un tipo de memo de Orden primero.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        let memoContent = `MEMO DE ORDEN: ${selectedMemo.toUpperCase()}\n\n`;
+        const templateFields = memoOrdenTemplates[selectedMemo];
+
+        if (templateFields) {
+            templateFields.forEach(field => {
+                memoContent += `${field.label} ${formData[field.id] || ''}\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(memoContent.trim().replace(/\n\s*\n/g, '\n')).then(() => {
+            toast({ 
+                title: "Memo de Orden Copiado",
+                description: "El memo ha sido copiado al portapapeles."
+            });
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+            toast({ title: "Error al Copiar", variant: "destructive" });
+        });
+    };
+
+    const renderDynamicFields = () => {
+        if (!selectedMemo) return <p className="text-muted-foreground text-center col-span-1 md:col-span-2 py-8">Seleccione un tipo de memo para ver el formulario.</p>;
+        
+        const fields = memoOrdenTemplates[selectedMemo];
+
+        return fields.map(field => (
+            <div className="space-y-2" key={field.id}>
+                <Label htmlFor={field.id}>{field.label}</Label>
+                {field.type === 'textarea' ? (
+                    <Textarea id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
+                ) : (
+                    <Input id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
+                )}
+            </div>
+        ));
+    };
+
+    return (
+        <div className="p-6">
+            <div className="max-w-3xl mx-auto space-y-6">
+                <div className="space-y-2">
+                    <Label>Tipo de Memo de Orden:</Label>
+                    <Select onValueChange={handleMemoChange} value={selectedMemo}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione una plantilla..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="cableado ethernet">Cableado Ethernet</SelectItem>
+                            <SelectItem value="orden de repetidores">Orden de Repetidores</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {renderDynamicFields()}
+                </div>
+
+                {selectedMemo && (
+                    <div className="flex gap-4 mt-4">
+                        <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4" />Copiar Memo de Orden</Button>
+                        <Button variant="destructive" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4" />Limpiar Memo de Orden</Button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 
 export function PlantillasTab() {
