@@ -64,10 +64,11 @@ const PlantillasGenericasTab = () => {
     useEffect(() => {
         const pruebas = Object.entries(checkboxes)
             .filter(([, checked]) => checked)
-            .map(([label]) => label)
-            .join(' ');
-        setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
+            .map(([label]) => label.replace(/\.$/, '')) // Quita el punto final para unir
+            .join('. '); // Une con punto y espacio
+        setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas ? pruebas + '.' : '' }));
     }, [checkboxes]);
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
@@ -112,7 +113,7 @@ Tipo Servicio: ${formData.tipoServicio}
 
 PRUEBAS REALIZADAS:
 ${formData.pruebasRealizadas}
-        `.trim();
+        `.trim().replace(/\n\s*\n/g, '\n');
 
         navigator.clipboard.writeText(plantilla).then(() => {
             toast({
@@ -254,14 +255,13 @@ const PlantillasQuejasTab = () => {
     useEffect(() => {
         const pruebas = Object.entries(checkboxes)
             .filter(([, checked]) => checked)
-            .map(([label]) => label)
-            .join(' ');
-        setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
+            .map(([label]) => label.replace(/\s\(Memo\)\.$/, ''))
+            .join('. ');
+        setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas ? pruebas + '.' : '' }));
     }, [checkboxes]);
 
     const handleMemoChange = (value: string) => {
         setSelectedMemo(value);
-        // Resetea el formulario manteniendo las pruebas (si las hay) y los checkboxes
         const currentPruebas = formData.pruebasRealizadas;
         setFormData({ pruebasRealizadas: currentPruebas || '' });
     };
@@ -306,7 +306,7 @@ const PlantillasQuejasTab = () => {
         
         memoContent += `\nPRUEBAS REALIZADAS:\n${formData.pruebasRealizadas || ''}`;
 
-        navigator.clipboard.writeText(memoContent.trim()).then(() => {
+        navigator.clipboard.writeText(memoContent.trim().replace(/\n\s*\n/g, '\n')).then(() => {
             toast({ 
                 title: "Memo de Queja Copiado",
                 description: "El memo ha sido copiado al portapapeles."
@@ -404,7 +404,122 @@ const PlantillasQuejasTab = () => {
 };
 
 
-const MemosWFTab = () => <div>Contenido de Memos de WF</div>;
+// --- MEMOS DE WF ---
+const memoWFTemplates: { [key: string]: { id: string; label: string; type: 'text' | 'textarea' }[] } = {
+    'migracion gpon': [
+        { id: 'wf-tipo-reporte', label: 'Tipo de reporte:', type: 'text' },
+        { id: 'wf-acepta-migracion', label: 'Acepta migración:', type: 'text' },
+        { id: 'wf-numero-contacto', label: 'Número de contacto:', type: 'text' },
+        { id: 'wf-correo-electronico', label: 'Correo electrónico:', type: 'text' },
+    ],
+    'inconvenientes con vpn': [
+        { id: 'wf-tipo-vpn', label: 'Tipo de VPN:', type: 'text' },
+        { id: 'wf-direccion-ip', label: 'Dirección IP:', type: 'text' },
+        { id: 'wf-problema-reportado', label: 'Problema reportado:', type: 'textarea' },
+    ],
+};
+
+const MemosWFTab = () => {
+    const [selectedMemo, setSelectedMemo] = useState('');
+    const [formData, setFormData] = useState<{ [key: string]: any }>({});
+    const { toast } = useToast();
+
+    const handleMemoChange = (value: string) => {
+        setSelectedMemo(value);
+        setFormData({}); // Reset form on new selection
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleClear = () => {
+        setSelectedMemo('');
+        setFormData({});
+        toast({ 
+            title: "Memo de WF Limpio",
+            description: "Se han restablecido todos los campos."
+        });
+    };
+
+    const handleCopy = () => {
+        if (!selectedMemo) {
+            toast({
+                title: "Error",
+                description: "Por favor, seleccione un tipo de memo de WF primero.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        let memoContent = `MEMO DE WF: ${selectedMemo.toUpperCase()}\n\n`;
+        const templateFields = memoWFTemplates[selectedMemo];
+
+        if (templateFields) {
+            templateFields.forEach(field => {
+                memoContent += `${field.label} ${formData[field.id] || ''}\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(memoContent.trim().replace(/\n\s*\n/g, '\n')).then(() => {
+            toast({ 
+                title: "Memo de WF Copiado",
+                description: "El memo ha sido copiado al portapapeles."
+            });
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+            toast({ title: "Error al Copiar", variant: "destructive" });
+        });
+    };
+
+    const renderDynamicFields = () => {
+        if (!selectedMemo) return <p className="text-muted-foreground text-center col-span-1 md:col-span-2 py-8">Seleccione un tipo de memo para ver el formulario.</p>;
+        
+        const fields = memoWFTemplates[selectedMemo];
+
+        return fields.map(field => (
+            <div className="space-y-2" key={field.id}>
+                <Label htmlFor={field.id}>{field.label}</Label>
+                {field.type === 'textarea' ? (
+                    <Textarea id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
+                ) : (
+                    <Input id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
+                )}
+            </div>
+        ));
+    };
+
+    return (
+        <div className="p-6">
+            <div className="max-w-3xl mx-auto space-y-6">
+                <div className="space-y-2">
+                    <Label>Tipo de Memo de WF:</Label>
+                    <Select onValueChange={handleMemoChange} value={selectedMemo}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione una plantilla..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="migracion gpon">Migración GPON</SelectItem>
+                            <SelectItem value="inconvenientes con vpn">Inconvenientes con VPN</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {renderDynamicFields()}
+                </div>
+
+                {selectedMemo && (
+                    <div className="flex gap-4 mt-4">
+                        <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4" />Copiar Memo WF</Button>
+                        <Button variant="destructive" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4" />Limpiar Memo WF</Button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 const MemosOrdenTab = () => <div>Contenido de Memos de Orden</div>;
 
 
@@ -432,5 +547,3 @@ export function PlantillasTab() {
     </Tabs>
   );
 }
-
-    
