@@ -1,16 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { X, MessageSquare, Notebook, Users, Palette } from 'lucide-react';
+import { X, MessageSquare, Notebook, Users, Palette, Send, Bot, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
 import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
+import { copilotChat, Message } from '@/ai/flows/chat';
+
 
 type ActiveWidget = 'notes' | 'users' | 'chat' | 'theme' | null;
 
@@ -54,6 +57,12 @@ export default function FloatingWidgets({
   const [primaryColor, setPrimaryColor] = useState(defaultThemeHex.primary);
   const [backgroundColor, setBackgroundColor] = useState(defaultThemeHex.background);
   const [accentColor, setAccentColor] = useState(defaultThemeHex.accent);
+  
+  // Chat state
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
 
   const applyTheme = (theme: {primary: string, background: string, accent: string}) => {
     const root = document.documentElement;
@@ -123,6 +132,32 @@ export default function FloatingWidgets({
       description: 'La lista de usuarios ha sido copiada al portapapeles.',
     });
   };
+  
+  const handleChatSubmit = async (e: FormEvent) => {
+      e.preventDefault();
+      if (!chatInput.trim() || isChatLoading) return;
+      
+      const newUserMessage: Message = { role: 'user', content: chatInput };
+      const newMessages = [...messages, newUserMessage];
+      setMessages(newMessages);
+      setChatInput('');
+      setIsChatLoading(true);
+
+      try {
+        const response = await copilotChat({ history: messages, prompt: chatInput });
+        const newAiMessage: Message = { role: 'model', content: response };
+        setMessages([...newMessages, newAiMessage]);
+      } catch (error) {
+        console.error("Error from AI chat:", error);
+        toast({
+            title: 'Error de Copilot',
+            description: 'No se pudo obtener una respuesta del asistente.',
+            variant: 'destructive',
+        });
+      } finally {
+        setIsChatLoading(false);
+      }
+  };
 
   const renderWidgetContent = () => {
     switch (activeWidget) {
@@ -168,12 +203,43 @@ export default function FloatingWidgets({
         );
       case 'chat':
         return (
-            <Card className="h-full flex items-center justify-center">
+             <Card className="h-full flex flex-col">
                 <CardHeader>
-                    <CardTitle>Copilot Chat</CardTitle>
+                    <CardTitle>OMEGA Copilot</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">El chatbot se mostrará aquí.</p>
+                <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
+                    <ScrollArea className="flex-1 pr-4">
+                        <div className="space-y-4">
+                            {messages.map((message, index) => (
+                                <div key={index} className={cn('flex items-start gap-3', message.role === 'user' ? 'justify-end' : 'justify-start')}>
+                                    {message.role === 'model' && <Bot className="h-6 w-6 text-primary" />}
+                                    <div className={cn('rounded-lg p-3 max-w-xs', message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                        <p className="text-sm">{message.content}</p>
+                                    </div>
+                                    {message.role === 'user' && <User className="h-6 w-6" />}
+                                </div>
+                            ))}
+                            {isChatLoading && (
+                                <div className="flex items-start gap-3 justify-start">
+                                    <Bot className="h-6 w-6 text-primary animate-pulse" />
+                                    <div className="rounded-lg p-3 bg-muted">
+                                        <p className="text-sm">Pensando...</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                    <form onSubmit={handleChatSubmit} className="flex gap-2 border-t pt-4">
+                        <Input 
+                           value={chatInput}
+                           onChange={(e) => setChatInput(e.target.value)}
+                           placeholder="Pregúntale algo al Copilot..."
+                           disabled={isChatLoading}
+                        />
+                        <Button type="submit" size="icon" disabled={isChatLoading}>
+                           <Send className="h-4 w-4" />
+                        </Button>
+                    </form>
                 </CardContent>
             </Card>
         );
@@ -265,7 +331,7 @@ export default function FloatingWidgets({
           activeWidget ? "translate-y-0" : "translate-y-[150%]"
         )}
       >
-        <div className="p-4 pt-0 h-[50vh] sm:h-auto max-h-[50vh] sm:max-h-[70vh]">
+        <div className="p-4 pt-0 h-[60vh] sm:h-auto max-h-[60vh] sm:max-h-[70vh]">
           {renderWidgetContent()}
         </div>
       </div>
