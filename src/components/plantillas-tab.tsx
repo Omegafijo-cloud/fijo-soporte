@@ -216,7 +216,7 @@ ${formData.pruebasRealizadas}
 };
 
 // --- PLANTILLAS DE QUEJAS ---
-const memoQuejasTemplates = {
+const memoQuejasTemplates: { [key: string]: { id: string; label: string; type: 'text' | 'textarea' }[] } = {
     'INTERNET DSL': [
         { id: 'luz-portadora', label: 'Luz Portadora:', type: 'text' },
         { id: 'snr', label: 'SNR:', type: 'text' },
@@ -231,6 +231,13 @@ const memoQuejasTemplates = {
     ],
 };
 
+const initialQuejasCheckboxState: CheckboxState = {
+    'Se solicita realizar descartes con cable de red y persiste el inconveniente (Memo).': false,
+    'Se realizan pruebas de velocidad y los parámetros son correctos (Memo).': false,
+    'Se realizan pruebas en el DECO y persiste el inconveniente (Memo).': false,
+    'Se reinicia el equipo de forma remota (Memo).': false,
+};
+
 const quejasCheckboxOptions = {
     nivelCero: { 'Se solicita realizar descartes con cable de red y persiste el inconveniente (Memo).': false },
     gponAdslHfc: { 'Se realizan pruebas de velocidad y los parámetros son correctos (Memo).': false },
@@ -241,12 +248,7 @@ const quejasCheckboxOptions = {
 const PlantillasQuejasTab = () => {
     const [selectedMemo, setSelectedMemo] = useState<string>('');
     const [formData, setFormData] = useState<{ [key: string]: any }>({});
-    const [checkboxes, setCheckboxes] = useState<CheckboxState>({
-        ...quejasCheckboxOptions.nivelCero,
-        ...quejasCheckboxOptions.gponAdslHfc,
-        ...quejasCheckboxOptions.tvHfcDthIptv,
-        ...quejasCheckboxOptions.otros,
-    });
+    const [checkboxes, setCheckboxes] = useState<CheckboxState>(initialQuejasCheckboxState);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -259,7 +261,9 @@ const PlantillasQuejasTab = () => {
 
     const handleMemoChange = (value: string) => {
         setSelectedMemo(value);
-        setFormData({ pruebasRealizadas: formData.pruebasRealizadas || '' }); // Reset form but keep pruebas
+        // Resetea el formulario manteniendo las pruebas (si las hay) y los checkboxes
+        const currentPruebas = formData.pruebasRealizadas;
+        setFormData({ pruebasRealizadas: currentPruebas || '' });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -274,23 +278,39 @@ const PlantillasQuejasTab = () => {
     const handleClear = () => {
         setSelectedMemo('');
         setFormData({});
-        const resetCheckboxes: CheckboxState = {};
-        Object.keys(checkboxes).forEach(key => {
-            resetCheckboxes[key] = false;
+        setCheckboxes(initialQuejasCheckboxState);
+        toast({ 
+            title: "Formulario de Queja Limpio",
+            description: "Se han restablecido todos los campos del memo."
         });
-        setCheckboxes(resetCheckboxes);
-        toast({ title: "Formulario de Queja Limpio" });
     };
 
     const handleCopy = () => {
+        if (!selectedMemo) {
+            toast({
+                title: "Error",
+                description: "Por favor, seleccione un tipo de memo primero.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         let memoContent = `MEMO DE QUEJA: ${selectedMemo}\n\n`;
-        memoQuejasTemplates[selectedMemo as keyof typeof memoQuejasTemplates]?.forEach(field => {
-            memoContent += `${field.label} ${formData[field.id] || ''}\n`;
-        });
+        const templateFields = memoQuejasTemplates[selectedMemo as keyof typeof memoQuejasTemplates];
+
+        if (templateFields) {
+            templateFields.forEach(field => {
+                memoContent += `${field.label} ${formData[field.id] || ''}\n`;
+            });
+        }
+        
         memoContent += `\nPRUEBAS REALIZADAS:\n${formData.pruebasRealizadas || ''}`;
 
         navigator.clipboard.writeText(memoContent.trim()).then(() => {
-            toast({ title: "Memo de Queja Copiado" });
+            toast({ 
+                title: "Memo de Queja Copiado",
+                description: "El memo ha sido copiado al portapapeles."
+            });
         }).catch(err => {
             console.error('Error al copiar: ', err);
             toast({ title: "Error al Copiar", variant: "destructive" });
@@ -298,7 +318,7 @@ const PlantillasQuejasTab = () => {
     };
 
     const renderDynamicFields = () => {
-        if (!selectedMemo) return <p className="text-muted-foreground text-center col-span-2">Seleccione un tipo de memo para ver el formulario.</p>;
+        if (!selectedMemo) return <p className="text-muted-foreground text-center col-span-2 py-8">Seleccione un tipo de memo para ver el formulario.</p>;
         
         const fields = memoQuejasTemplates[selectedMemo as keyof typeof memoQuejasTemplates];
 
@@ -306,9 +326,9 @@ const PlantillasQuejasTab = () => {
             <div className="space-y-2" key={field.id}>
                 <Label htmlFor={field.id}>{field.label}</Label>
                 {field.type === 'textarea' ? (
-                    <Textarea id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} />
+                    <Textarea id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
                 ) : (
-                    <Input id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} />
+                    <Input id={field.id} value={formData[field.id] || ''} onChange={handleInputChange} placeholder="..." />
                 )}
             </div>
         ));
@@ -351,7 +371,7 @@ const PlantillasQuejasTab = () => {
                     <>
                         <div className="space-y-2">
                             <Label htmlFor="pruebas-realizadas-quejas">PRUEBAS REALIZADAS:</Label>
-                            <Textarea id="pruebas-realizadas-quejas" rows={8} value={formData.pruebasRealizadas || ''} readOnly />
+                            <Textarea id="pruebas-realizadas-quejas" rows={8} value={formData.pruebasRealizadas || ''} readOnly className="bg-muted/50" />
                         </div>
                         <div className="flex gap-4 mt-4">
                             <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4" />Copiar Memo</Button>
