@@ -201,7 +201,7 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
       {/* Columna Derecha: Checkboxes */}
       <div className="space-y-4">
-        {renderCheckboxGroup('Nivel Cero', 'Nvel Cero')}
+        {renderCheckboxGroup('Nivel Cero', 'Nivel Cero')}
         {renderCheckboxGroup('GPON - ADSL - HFC', 'GPON - ADSL - HFC')}
         {renderCheckboxGroup('TV HFC - DTH - IPTV', 'TV HFC - DTH - IPTV')}
         {renderCheckboxGroup('Otros', 'Otros')}
