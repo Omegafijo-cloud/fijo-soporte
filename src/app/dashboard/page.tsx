@@ -163,7 +163,186 @@ const initialMemosWfTemplates: MemoTemplate = {
       { id: 'comentarioVpn', label: 'Comentario', type: 'textarea' },
     ],
   },
+  'filtrado mac': {
+    fields: [
+      { id: 'problemaReportado', label: 'Problema reportado', type: 'text' },
+      { id: 'numeroServicio', label: 'Número de Servicio', type: 'text' },
+      { id: 'nombreCliente', label: 'Nombre del cliente', type: 'text' },
+      { id: 'telContacto', label: 'Tel Contacto', type: 'text' },
+      { id: 'macAddress', label: 'MAC Address', type: 'text' },
+      { id: 'pruebas', label: 'Pruebas(si se efectúan)', type: 'textarea' },
+      { id: 'comentario', label: 'Comentario', type: 'textarea' },
+    ]
+  },
+  'cita incumplida': {
+    fields: [
+      { id: 'noOrden', label: 'No. Orden', type: 'text' },
+      { id: 'nombreContacto', label: 'Nombre contacto', type: 'text' },
+      { id: 'numeroReferencia', label: 'Numero de referencia', type: 'text' },
+      { id: 'fechaVisita', label: 'Fecha de visita', type: 'text' },
+      { id: 'horaVisita', label: 'Hora de visita', type: 'text' },
+      { id: 'gestorDespacho', label: 'Gestor de Despacho que atendió la llamada', type: 'text' },
+      { id: 'orden', label: 'Orden', type: 'text' },
+      { id: 'tipoOrden', label: 'tipo de orden', type: 'text' },
+      { id: 'tecnologia', label: 'tecnología', type: 'text' },
+      { id: 'region', label: 'Región', type: 'text' },
+      { id: 'fechaNuevaVisita', label: 'fecha de nueva visita', type: 'text' },
+      { id: 'horarioAmPm', label: 'horario am/pm', type: 'text' },
+      { id: 'nombreCliente', label: 'Nombre de cliente', type: 'text' },
+      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
+    ]
+  },
+  'vencido comercial': {
+    fields: [
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'noOs', label: 'No. de O/S', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text' },
+    ]
+  },
+  'velocidad mal configurada': {
+    fields: [
+      { id: 'noContacto', label: 'No. Contacto', type: 'text' },
+      { id: 'inconvenienteReportado', label: 'Inconveniente reportado', type: 'text' },
+      { id: 'virtualReportado', label: 'Virtual Reportado', type: 'text' },
+      { id: 'velocidadConfigPisa', label: 'Velocidad Config PISA', type: 'text' },
+      { id: 'velocidadConfigUmp', label: 'Velocidad config UMP', type: 'text' },
+    ]
+  },
+  'vencido operaciones': {
+    fields: [
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'noOs', label: 'No. de O/S', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea' },
+      { id: 'noQueja', label: 'No. Queja', type: 'text' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea' },
+    ]
+  },
+  'locucion mora activa': {
+    fields: [
+      { id: 'nombreReporta', label: 'Nombre de quien reporta', type: 'text' },
+      { id: 'numeroAfectado', label: 'Número afectado', type: 'text' },
+      { id: 'telRef', label: 'Tel de Ref', type: 'text' },
+      { id: 'osGenerada', label: 'O/S generada', type: 'text' },
+      { id: 'fechaPago', label: 'Fecha de pago', type: 'text' },
+      { id: 'ivr', label: 'IVR', type: 'text' },
+      { id: 'observaciones', label: 'Observaciones', type: 'textarea' },
+    ]
+  },
+  'bloqueo mayor a 2 horas': {
+    fields: [
+      { id: 'nombreReporta', label: 'Nombre de quien reporta', type: 'text' },
+      { id: 'servicioLiberar', label: 'Servicio a liberar', type: 'text' },
+      { id: 'noAfectado', label: 'No. afectado', type: 'text' },
+      { id: 'tipoBloqueo', label: 'Tipo de bloqueo', type: 'text' },
+      { id: 'telRef', label: 'Tel de Ref', type: 'text' },
+      { id: 'horaPago', label: 'Hora de Pago', type: 'text' },
+      { id: 'reincidente', label: 'Reincidente', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea' },
+    ]
+  },
+  'daño a la infraestructura': {
+    fields: [
+      { id: 'contacto', label: 'Contacto', type: 'text' },
+      { id: 'telefonoContacto', label: 'Teléfono de contacto', type: 'text' },
+      { id: 'direccionDanio', label: 'Dirección de daño', type: 'text' },
+      { id: 'danioReporta', label: 'Daño que reporta', type: 'textarea' },
+    ]
+  },
+  'claro video': {
+    fields: [
+      { id: 'nombreCliente', label: 'Nombre del Cliente', type: 'text' },
+      { id: 'numeroTelefonico', label: 'Número telefónico', type: 'text' },
+      { id: 'correoElectronico', label: 'Correo electrónico a registrar', type: 'text' },
+      { id: 'problemaReporta', label: 'Qué problema reporta', type: 'textarea' },
+      { id: 'fechaNacimiento', label: 'Fecha de nacimiento', type: 'text' },
+      { id: 'telefonosContacto', label: 'Telefonos de contacto', type: 'text' },
+      { id: 'plataforma', label: 'Plataforma donde está tratando de registrarse', type: 'text' },
+    ]
+  },
+  'reparación en tiempo vencido': {
+    fields: [
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'noOs', label: 'No. de O/S', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea' },
+      { id: 'noQueja', label: 'No. Queja', type: 'text' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea' },
+    ]
+  },
+  'mala atención al tecnico': {
+    fields: [
+      { id: 'motivo', label: 'Motivo', type: 'text' },
+      { id: 'numeroAfectado', label: 'Número afectado', type: 'text' },
+      { id: 'nombreCompletoCliente', label: 'Nombre completo del cliente', type: 'text' },
+      { id: 'nombreReporta', label: 'Nombre de quien reporta', type: 'text' },
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'fechaSolicitud', label: 'Fecha de solicitud', type: 'text' },
+      { id: 'servicioContratado', label: 'Servicio contratado', type: 'text' },
+      { id: 'direccionInstalacion', label: 'Dirección de instalación', type: 'text' },
+      { id: 'descripcionReclamo', label: 'Descripción del reclamo', type: 'textarea' },
+    ]
+  },
+  'check en rojo': {
+    fields: [
+      { id: 'numero', label: 'Número', type: 'text' },
+      { id: 'correoClaroVideo', label: 'Correo Claro Video', type: 'text' },
+      { id: 'planPaquete', label: 'Plan o paquete contratado', type: 'text' },
+      { id: 'checkErrorGui', label: 'Check con error en GUI', type: 'text' },
+      { id: 'numeroContacto', label: 'Número de contacto', type: 'text' },
+      { id: 'cliente', label: 'Cliente', type: 'text' },
+      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
+      { id: 'pruebasRealizadas', label: 'Pruebas realizadas', type: 'textarea' },
+    ]
+  },
+  'sin acceso a guía interactiva': {
+    fields: [
+      { id: 'numero', label: 'Número', type: 'text' },
+      { id: 'correoClaroVideo', label: 'Correo Claro Video', type: 'text' },
+      { id: 'planPaquete', label: 'Plan o paquete contratado', type: 'text' },
+      { id: 'checkAmcoPle', label: 'Check AMCO y PLE', type: 'text' },
+      { id: 'mensajeTv', label: 'Mensaje que muestra TV', type: 'text' },
+      { id: 'numeroContacto', label: 'Número de contacto', type: 'text' },
+      { id: 'cliente', label: 'Cliente', type: 'text' },
+      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
+      { id: 'pruebasRealizadas', label: 'Pruebas realizadas', type: 'textarea' },
+    ]
+  },
+  'configuración wifi': {
+    fields: [
+      { id: 'quienGeneraQueja', label: 'Quien genera queja', type: 'text' },
+      { id: 'luzPon', label: 'Luz Pon', type: 'text' },
+      { id: 'luzLos', label: 'Luz Los', type: 'text' },
+      { id: 'serie', label: 'Serie', type: 'text' },
+      { id: 'canalDanado', label: 'Canal dañado', type: 'text' },
+      { id: 'problemaReportado', label: 'Problema reportado', type: 'textarea' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea' },
+      { id: 'contactoEnSitio', label: 'Contacto en sitio', type: 'text' },
+      { id: 'telefonosReferencias', label: 'Teléfonos de referencias', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+    ]
+  },
+  'reparación en plazo vigente': {
+    fields: [
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea', defaultValue: 'Seguimiento a queja en tiempo Vigente' },
+      { id: 'noQueja', label: 'No. Queja', type: 'text' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text', defaultValue: '8:00 a 5:00' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea', defaultValue: 'Cl Indica que no ha llegado el técnico y le urge, por favor verificar.' },
+    ]
+  },
+  'otros wf': {
+    fields: [
+      { id: 'nombreContacto', label: 'Nombre de contacto', type: 'text' },
+      { id: 'telefonosReferencia', label: 'Teléfonos de referencia', type: 'text' },
+      { id: 'numeroOrdenQueja', label: 'Numero de orden y/o queja', type: 'text' },
+      { id: 'inconvenienteCliente', label: 'Inconveniente del cliente', type: 'textarea' },
+      { id: 'pruebasRealizada', label: 'Pruebas Realizada', type: 'textarea' },
+    ]
+  }
 };
+
 
 const initialMemosOrdenTemplates: MemoTemplate = {
   'cableado ethernet': {
