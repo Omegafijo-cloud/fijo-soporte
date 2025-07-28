@@ -16,50 +16,50 @@ type CheckboxState = {
 };
 
 const initialCheckboxState: CheckboxState = {
-  'Nivel Cero': {
-    'Saldos OK': false,
-    'No hay Fallas': false,
-    'No presenta bloqueo': false,
-    'No hay OS abiertas': false,
-    'No hay quejas': false,
-  },
-  'GPON - ADSL - HFC': {
-    'Se verifica estado de las luces del router': false,
-    'Envio reset en UMP': false,
-    'Se Desconecta y Conecta Corriente': false,
-    'Se Desconecta y Conecta en otro tomacorriente': false,
-    'Se verifica Splitter': false,
-    'Cambio de baterías': false,
-    'Se verifica Coaxial bien apretado': false,
-    'Se verifica cortes o daños en la fibra': false,
-    'Se manda a realizar test de velocidad (00 Megas)': false,
-    'Se realiza Ping (0% perdido)': false,
-    'Estado de la ONT activo': false,
-    'Niveles SNR en Rojo': false,
-    'Luz LOS en ROJO': false,
-    'Se envia reboot en Axiros': false,
-  },
-  'TV HFC - DTH - IPTV': {
-    'Se verifica Conexiones HDMI': false,
-    'Se Verifica Conexiones RCA': false,
-    'Se verifica cable Coaxial': false,
-    'XX Stb afectados': false,
-    'Se valida Serial No. XXXX': false,
-    'Mensaje que muestra Tv: XXX': false,
-    'Se Envia Comando XXXX': false,
-    'Se Envia Reset Fisico': false,
-    'Se verifica en la GUI, AMCO en verde': false,
-  },
-  Otros: {
-    'Se valida DPI ok, nombre completo ok, sin restricciones': false,
-    'Cliente no esta en Sitio': false,
-    'Cliente esta en Agencia': false,
-    'Cliente no quiere hacer pruebas': false,
-    'Se realiza cambio de contraseña con exito': false,
-    'Servicio funcionando de manera correcta': false,
-    'Se Genera Averia': false,
-    'Se envía reproceso': false,
-  },
+    'Nivel Cero': {
+        'Saldos OK': false,
+        'No hay Fallas': false,
+        'No presenta bloqueo': false,
+        'No hay OS abiertas': false,
+        'No hay quejas': false,
+    },
+    'GPON - ADSL - HFC': {
+        'Se verifica estado de las luces del router': false,
+        'Envio reset en UMP': false,
+        'Se Desconecta y Conecta Corriente': false,
+        'Se Desconecta y Conecta en otro tomacorriente': false,
+        'Se verifica Splitter': false,
+        'Cambio de baterías': false,
+        'Se verifica Coaxial bien apretado': false,
+        'Se verifica cortes o daños en la fibra': false,
+        'Se manda a realizar test de velocidad (00 Megas)': false,
+        'Se realiza Ping (0% perdido)': false,
+        'Estado de la ONT activo': false,
+        'Niveles SNR en Rojo': false,
+        'Luz LOS en ROJO': false,
+        'Se envia reboot en Axiros': false,
+    },
+    'TV HFC - DTH - IPTV': {
+        'Se verifica Conexiones HDMI': false,
+        'Se Verifica Conexiones RCA': false,
+        'Se verifica cable Coaxial': false,
+        'XX Stb afectados': false,
+        'Se valida Serial No. XXXX': false,
+        'Mensaje que muestra Tv: XXX': false,
+        'Se Envia Comando XXXX': false,
+        'Se Envia Reset Fisico': false,
+        'Se verifica en la GUI, AMCO en verde': false,
+    },
+    'Otros': {
+        'Se valida DPI ok, nombre completo ok, sin restricciones': false,
+        'Cliente no esta en Sitio': false,
+        'Cliente esta en Agencia': false,
+        'Cliente no quiere hacer pruebas': false,
+        'Se realiza cambio de contraseña con exito': false,
+        'Servicio funcionando de manera correcta': false,
+        'Se Genera Averia': false,
+        'Se envía reproceso': false,
+    },
 };
 
 const initialFormData = {
@@ -70,7 +70,12 @@ const initialFormData = {
     tipoServicio: '',
 }
 
-export default function PlantillasGenericasTab() {
+interface PlantillasGenericasTabProps {
+    backupText: string;
+    setBackupText: (text: string) => void;
+}
+
+export default function PlantillasGenericasTab({ backupText, setBackupText }: PlantillasGenericasTabProps) {
   const [formData, setFormData] = useState(initialFormData);
   const [pruebasRealizadas, setPruebasRealizadas] = useState('');
   const [checkboxes, setCheckboxes] = useState<CheckboxState>(initialCheckboxState);
@@ -119,10 +124,13 @@ Inconveniente: ${formData.inconveniente}
 
 PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
+    const newBackupText = `${template}\n\n--------------------------------------\n\n${backupText}`;
+    setBackupText(newBackupText);
+
     navigator.clipboard.writeText(template.trim());
     toast({
-      title: "Copiado",
-      description: "La plantilla ha sido copiada al portapapeles.",
+      title: "Copiado y Respaldado",
+      description: "La plantilla ha sido copiada y guardada en la copia de respaldo.",
     })
   }
 

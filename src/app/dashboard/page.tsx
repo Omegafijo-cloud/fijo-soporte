@@ -243,7 +243,10 @@ export default function DashboardPage() {
                     <TabsTrigger value="orden">MEMOS DE ORDEN</TabsTrigger>
                   </TabsList>
                   <TabsContent value="genericas" className="p-6">
-                    <PlantillasGenericasTab />
+                    <PlantillasGenericasTab 
+                        setBackupText={setBackupText} 
+                        backupText={backupText} 
+                    />
                   </TabsContent>
                   <TabsContent value="quejas" className="p-6">
                     <PlantillasQuejasTab />
