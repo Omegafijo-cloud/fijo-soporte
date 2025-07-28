@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users } from 'lucide-react';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
@@ -167,6 +167,19 @@ export default function OmegaPage() {
           </Card>
         )}
 
+        {/* Panel de Copilot Chat */}
+        {activeWidget === 'copilot' && (
+            <Card className="w-96 h-[60vh] shadow-lg animate-in slide-in-from-bottom-10 flex flex-col">
+                <CardContent className="p-2 flex-1">
+                    <iframe
+                        src="" // TODO: Reemplaza con la URL de tu Copilot Studio Chatbot
+                        className="w-full h-full border-0"
+                        title="Copilot Chat"
+                    ></iframe>
+                </CardContent>
+            </Card>
+        )}
+
         {/* Botones de Toggle para Widgets */}
         <div className="flex justify-end gap-3">
           <Button
@@ -174,6 +187,7 @@ export default function OmegaPage() {
             className="rounded-full h-12 w-12 shadow-lg"
             onClick={() => handleWidgetToggle('notas')}
             variant={activeWidget === 'notas' ? 'default' : 'secondary'}
+            title="Notas Rápidas"
           >
             {activeWidget === 'notas' ? <X /> : <StickyNote />}
           </Button>
@@ -182,8 +196,18 @@ export default function OmegaPage() {
             className="rounded-full h-12 w-12 shadow-lg"
             onClick={() => handleWidgetToggle('usuarios')}
             variant={activeWidget === 'usuarios' ? 'default' : 'secondary'}
+            title="Lista de Usuarios"
           >
             {activeWidget === 'usuarios' ? <X /> : <Users />}
+          </Button>
+          <Button
+            size="icon"
+            className="rounded-full h-12 w-12 shadow-lg"
+            onClick={() => handleWidgetToggle('copilot')}
+            variant={activeWidget === 'copilot' ? 'default' : 'secondary'}
+            title="Copilot Chat"
+          >
+            {activeWidget === 'copilot' ? <X /> : <MessageSquare />}
           </Button>
           {/* Aquí irán los otros botones de widgets */}
         </div>
