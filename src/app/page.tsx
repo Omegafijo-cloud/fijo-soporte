@@ -58,17 +58,17 @@ export default function LoginPage() {
        </div>
        <div className="relative z-10 flex flex-col items-center w-full">
         <div className="flex flex-col items-center justify-center text-center mb-10">
-          <div className="flex items-center justify-center gap-4 mb-4">
-             <OmegaLogo className="h-16 w-16 text-white" />
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
               OMEGA - FIJO SOPORTE
             </h1>
-          </div>
         </div>
         <Card className="w-full max-w-md shadow-2xl bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">Omega iniciar sesión</CardTitle>
-            <CardDescription className="text-center text-lg">
+             <div className="flex items-center justify-center gap-4">
+               <OmegaLogo className="h-10 w-10" />
+               <CardTitle className="text-3xl font-bold">Omega iniciar sesión</CardTitle>
+            </div>
+            <CardDescription className="text-center text-lg pt-2">
               Accede a tu cuenta para continuar
             </CardDescription>
           </CardHeader>
