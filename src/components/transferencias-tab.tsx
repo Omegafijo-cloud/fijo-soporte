@@ -14,7 +14,7 @@ interface TransferItem {
     value: string;
 }
 
-const defaultTransferItems: TransferItem[] = [
+const initialTransferItems: TransferItem[] = [
     { service: "SERVICIO MOVIL (LLAMADAS)", value: "*2" },
     { service: "SERVICIO MOVIL (DATOS)", value: "*3" },
     { service: "SERVICIO MOVIL (OTROS)", value: "*4" },
@@ -23,14 +23,14 @@ const defaultTransferItems: TransferItem[] = [
 ];
 
 export function TransferenciasTab() {
-    const [customItems, setCustomItems] = useState<TransferItem[]>([]);
+    const [items, setItems] = useState<TransferItem[]>(initialTransferItems);
     const [newService, setNewService] = useState('');
     const [newValue, setNewValue] = useState('');
     const { toast } = useToast();
 
     const handleAddItem = () => {
         if (newService.trim() && newValue.trim()) {
-            setCustomItems([...customItems, { service: newService, value: newValue }]);
+            setItems([...items, { service: newService, value: newValue }]);
             setNewService('');
             setNewValue('');
             toast({
@@ -47,8 +47,8 @@ export function TransferenciasTab() {
     };
 
     const handleRemoveItem = (index: number) => {
-        const updatedItems = customItems.filter((_, i) => i !== index);
-        setCustomItems(updatedItems);
+        const updatedItems = items.filter((_, i) => i !== index);
+        setItems(updatedItems);
         toast({
             title: "Transferencia Eliminada",
             description: "El destino de transferencia ha sido eliminado.",
@@ -64,7 +64,7 @@ export function TransferenciasTab() {
         });
     };
 
-    const renderItem = (item: TransferItem, index: number, isCustom: boolean) => (
+    const renderItem = (item: TransferItem, index: number) => (
         <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div className="flex-1">
                 <p className="font-semibold">{item.service}</p>
@@ -74,11 +74,9 @@ export function TransferenciasTab() {
                 <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(item.value)}>
                     <Copy className="h-4 w-4" />
                 </Button>
-                {isCustom && (
-                    <Button variant="destructive" size="icon" onClick={() => handleRemoveItem(index)}>
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                )}
+                <Button variant="destructive" size="icon" onClick={() => handleRemoveItem(index)}>
+                    <Trash2 className="h-4 w-4" />
+                </Button>
             </div>
         </div>
     );
@@ -94,23 +92,13 @@ export function TransferenciasTab() {
                             <CardDescription>Destinos predefinidos y personalizados para transferencias.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div>
-                                <h3 className="text-lg font-medium mb-2">Transferencias Predeterminadas</h3>
+                            {items.length > 0 ? (
                                 <div className="space-y-2">
-                                    {defaultTransferItems.map((item, index) => renderItem(item, index, false))}
+                                    {items.map((item, index) => renderItem(item, index))}
                                 </div>
-                            </div>
-                            <Separator />
-                            <div>
-                                <h3 className="text-lg font-medium mb-2">Mis Transferencias</h3>
-                                {customItems.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {customItems.map((item, index) => renderItem(item, index, true))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground text-center py-4">Aún no has añadido transferencias personalizadas.</p>
-                                )}
-                            </div>
+                            ) : (
+                                <p className="text-muted-foreground text-center py-4">Aún no hay transferencias en la lista.</p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
