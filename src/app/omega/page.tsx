@@ -73,7 +73,8 @@ export default function OmegaPage() {
   const [userList, setUserList] = useState('');
   const { toast } = useToast();
   
-  const [time, setTime] = useState(300); // 5 minutes in seconds
+  const [duration, setDuration] = useState(5); // Duración en minutos
+  const [time, setTime] = useState(duration * 60);
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -83,23 +84,26 @@ export default function OmegaPage() {
 
   // Efecto para el temporizador
   useEffect(() => {
-    if (isRunning) {
+    if (isRunning && time > 0) {
         timerRef.current = setInterval(() => {
-            setTime(prevTime => {
-                if (prevTime <= 0) {
-                    clearInterval(timerRef.current!);
-                    setIsRunning(false);
-                    return 0;
-                }
-                return prevTime - 1;
-            });
+            setTime(prevTime => prevTime - 1);
         }, 1000);
-    } else {
+    } else if (time <= 0 && isRunning) {
         clearInterval(timerRef.current!);
+        setIsRunning(false);
+        toast({ title: "¡Tiempo agotado!" });
     }
 
     return () => clearInterval(timerRef.current!);
-  }, [isRunning]);
+  }, [isRunning, time, toast]);
+
+  useEffect(() => {
+    setTime(duration * 60);
+    if(isRunning) {
+        setIsRunning(false);
+        toast({ title: "Temporizador reiniciado", description: "El temporizador se ha reiniciado con la nueva duración."});
+    }
+  }, [duration]);
 
   // Efecto para aplicar los colores al DOM
   useEffect(() => {
@@ -159,12 +163,25 @@ export default function OmegaPage() {
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const handleTimerStart = () => setIsRunning(true);
+  const handleTimerStart = () => {
+      if (time > 0) {
+          setIsRunning(true);
+      }
+  }
   const handleTimerStop = () => setIsRunning(false);
   const handleTimerReset = () => {
     setIsRunning(false);
-    setTime(300); // Reset to 5 minutes
+    setTime(duration * 60);
   };
+  
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDuration = parseInt(e.target.value, 10);
+    if (!isNaN(newDuration) && newDuration > 0) {
+        setDuration(newDuration);
+    } else if (e.target.value === '') {
+        setDuration(0);
+    }
+  }
 
 
   const renderTabContent = () => {
@@ -197,8 +214,16 @@ export default function OmegaPage() {
             <Timer className="h-6 w-6 text-primary" />
             <span className="font-mono text-lg font-semibold">{formatTime(time)}</span>
           </div>
-          <div className='flex items-center gap-1'>
-             <Button variant="ghost" size="icon" onClick={handleTimerStart} disabled={isRunning}><Play className="h-5 w-5"/></Button>
+           <div className='flex items-center gap-1'>
+            <Input 
+                type="number"
+                value={duration}
+                onChange={handleDurationChange}
+                className="w-20 h-9 text-center"
+                min="1"
+                placeholder="Mins"
+            />
+             <Button variant="ghost" size="icon" onClick={handleTimerStart} disabled={isRunning || time === 0}><Play className="h-5 w-5"/></Button>
              <Button variant="ghost" size="icon" onClick={handleTimerStop} disabled={!isRunning}><Square className="h-5 w-5"/></Button>
              <Button variant="ghost" size="icon" onClick={handleTimerReset}><RotateCw className="h-5 w-5"/></Button>
           </div>
