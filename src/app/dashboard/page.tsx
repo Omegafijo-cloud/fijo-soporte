@@ -136,13 +136,13 @@ type AppState = {
 const initialNotices: Notice[] = [
   { 
     id: 1, 
-    title: 'PROCESOS DE MIGRACIÓN (WF)', 
-    url: 'https://docs.google.com/document/d/1wRIr2nK1L9_s1g_j_9J8F_8n_k6lV_Z5t3bV5z6X7C/edit' 
+    title: 'PROCESOS DE MIGRACIÓN', 
+    url: 'https://docs.google.com/document/d/e/2PACX-1vQbmQQdlbeHkpEMA9CwGFWUwj7gq4pR6Prx7fHng1MOUGqNUGUuRUUc94qogeiHj6Bu1MavE3wzpUDZ/pub?embedded=true' 
   },
   { 
     id: 2, 
-    title: 'SEGUIMIENTO DE CASOS (DOC)', 
-    url: 'https://docs.google.com/document/d/1Xy_Z-v_z_6kG_8s_k6L_v_Z5t3bV5z6X7C/edit'
+    title: 'SEGUIMIENTO DE CASOS', 
+    url: 'https://docs.google.com/document/d/e/2PACX-1vRketVsJaYapfC4lwnzYr1ndlm6WoCUmRsAY0TQEzYMVfhd3kXOwyuY-jWZG4YAx7qeqUWH50t_0-0Q/pub?embedded=true'
   }
 ];
 
