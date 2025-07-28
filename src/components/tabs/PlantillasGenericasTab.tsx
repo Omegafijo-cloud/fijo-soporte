@@ -53,16 +53,14 @@ export default function PlantillasGenericasTab() {
 
   useEffect(() => {
     const generatePruebasText = () => {
-      let text = '';
+      const allCheckedItems: string[] = [];
       for (const group in checkboxes) {
         const checkedItems = Object.keys(checkboxes[group]).filter(
           (label) => checkboxes[group][label]
         );
-        if (checkedItems.length > 0) {
-          text += `${group.toUpperCase()}:\n- ${checkedItems.join('\n- ')}\n\n`;
-        }
+        allCheckedItems.push(...checkedItems);
       }
-      return text.trim();
+      return allCheckedItems.join(', ');
     };
     setPruebasRealizadas(generatePruebasText());
   }, [checkboxes]);
@@ -94,10 +92,9 @@ N° Incidencia: ${formData.nIncidencia}
 Tipo Servicio: ${formData.tipoServicio}
 Inconveniente: ${formData.inconveniente}
 
-PRUEBAS REALIZADAS:
-${pruebasRealizadas}`;
+PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
-    navigator.clipboard.writeText(template);
+    navigator.clipboard.writeText(template.trim());
     toast({
       title: "Copiado",
       description: "La plantilla ha sido copiada al portapapeles.",
@@ -162,7 +159,7 @@ ${pruebasRealizadas}`;
             </div>
             <div className="space-y-2">
               <Label htmlFor="pruebasRealizadas">PRUEBAS REALIZADAS</Label>
-              <Textarea id="pruebasRealizadas" value={pruebasRealizadas} readOnly rows={10} className="bg-muted" />
+              <Textarea id="pruebasRealizadas" value={pruebasRealizadas} readOnly rows={4} className="bg-muted" />
             </div>
             <div className="flex gap-2">
               <Button onClick={handleCopy}>Copiar Plantilla</Button>

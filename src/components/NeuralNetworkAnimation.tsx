@@ -40,8 +40,8 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.vx = Math.random() * 1 - 0.5;
-        this.vy = Math.random() * 1 - 0.5;
+        this.vx = Math.random() * 0.5 - 0.25;
+        this.vy = Math.random() * 0.5 - 0.25;
         this.color = color;
       }
 
@@ -66,15 +66,15 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
     }
     
     const neuronColors = [
-      'rgba(106, 27, 154, 0.8)', // Morado
-      'rgba(0, 188, 212, 0.8)',  // Turquesa
-      'rgba(26, 35, 126, 0.8)'   // Azul Oscuro
+      'rgba(106, 27, 154, 0.7)', // Morado
+      'rgba(0, 188, 212, 0.7)',  // Turquesa
+      'rgba(26, 35, 126, 0.7)'   // Azul Oscuro
     ];
-    const connectionColor = 'rgba(106, 27, 154, 0.3)';
-    const maxDistance = 120;
+    const connectionColor = 'rgba(106, 27, 154, 0.2)';
+    const maxDistance = 100;
     
     function initNeurons() {
-      const neuronCount = Math.floor((canvas.width * canvas.height) / 10000);
+      const neuronCount = Math.floor((canvas.width * canvas.height) / (width ? 10000 : 15000));
       for (let i = 0; i < neuronCount; i++) {
         const radius = Math.random() * 2 + 1;
         const x = Math.random() * (canvas.width - radius * 2) + radius;
@@ -95,8 +95,8 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
             ctx!.beginPath();
             ctx!.strokeStyle = connectionColor;
             ctx!.lineWidth = 1 - distance / maxDistance;
-            ctx!.moveTo(neurons[i].x, neurons[j].y);
-            ctx!.lineTo(neurons[j].x, neurons[i].y);
+            ctx!.moveTo(neurons[i].x, neurons[i].y);
+            ctx!.lineTo(neurons[j].x, neurons[j].y);
             ctx!.stroke();
           }
         }

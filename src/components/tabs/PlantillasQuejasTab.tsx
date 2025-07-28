@@ -103,16 +103,14 @@ export default function PlantillasQuejasTab() {
 
   useEffect(() => {
     const generatePruebasText = () => {
-      let text = '';
+       const allCheckedItems: string[] = [];
       for (const group in pruebasCheckboxes) {
-        const checkedItems = Object.keys(pruebasCheckboxes[group]).filter(
-          (label) => pruebasCheckboxes[group][label]
-        );
-        if (checkedItems.length > 0) {
-          text += `${group.replace(' (Memos)', '').toUpperCase()}:\n- ${checkedItems.map(l => l.replace(' (Memo)', '')).join('\n- ')}\n\n`;
-        }
+        const checkedItems = Object.keys(pruebasCheckboxes[group])
+          .filter((label) => pruebasCheckboxes[group][label])
+          .map(label => label.replace(' (Memo)', ''));
+        allCheckedItems.push(...checkedItems);
       }
-      return text.trim();
+      return allCheckedItems.join(', ');
     };
     setPruebasRealizadas(generatePruebasText());
   }, [pruebasCheckboxes]);
@@ -139,9 +137,9 @@ export default function PlantillasQuejasTab() {
     template += '\n';
     
     // Añadir pruebas realizadas
-    template += `PRUEBAS REALIZADAS:\n${pruebasRealizadas}`;
+    template += `PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
-    navigator.clipboard.writeText(template);
+    navigator.clipboard.writeText(template.trim());
     toast({
       title: "Memo Copiado",
       description: "La plantilla del memo ha sido copiada al portapapeles.",
@@ -209,7 +207,7 @@ export default function PlantillasQuejasTab() {
                 onCheckedChange={(checked) => handlePruebasCheckboxChange(groupKey, label, checked as boolean)}
               />
               <Label htmlFor={`pruebas-${groupKey}-${label}`} className="font-normal">
-                {label}
+                {label.replace(' (Memo)', '')}
               </Label>
             </div>
           ))}
@@ -247,7 +245,7 @@ export default function PlantillasQuejasTab() {
                     {renderDynamicFields()}
                      <div className="space-y-2">
                         <Label htmlFor="pruebasRealizadasMemo">PRUEBAS REALIZADAS</Label>
-                        <Textarea id="pruebasRealizadasMemo" value={pruebasRealizadas} readOnly rows={8} className="bg-muted" />
+                        <Textarea id="pruebasRealizadasMemo" value={pruebasRealizadas} readOnly rows={4} className="bg-muted" />
                     </div>
                      <div className="flex gap-2">
                         <Button onClick={handleCopy}>Copiar Memo</Button>
@@ -261,10 +259,10 @@ export default function PlantillasQuejasTab() {
 
        {/* Columna Derecha: Checkboxes de Pruebas */}
        <div className="space-y-4">
-        {renderPruebasCheckboxGroup('Nivel Cero (Memos)', 'Nivel Cero (Memos)')}
-        {renderPruebasCheckboxGroup('GPON - ADSL - HFC (Memos)', 'GPON - ADSL - HFC (Memos)')}
-        {renderPruebasCheckboxGroup('TV HFC - DTH - IPTV (Memos)', 'TV HFC - DTH - IPTV (Memos)')}
-        {renderPruebasCheckboxGroup('Otros (Memos)', 'Otros (Memos)')}
+        {renderPruebasCheckboxGroup('Nivel Cero', 'Nivel Cero (Memos)')}
+        {renderPruebasCheckboxGroup('GPON - ADSL - HFC', 'GPON - ADSL - HFC (Memos)')}
+        {renderPruebasCheckboxGroup('TV HFC - DTH - IPTV', 'TV HFC - DTH - IPTV (Memos)')}
+        {renderPruebasCheckboxGroup('Otros', 'Otros (Memos)')}
       </div>
     </div>
   );
