@@ -25,6 +25,7 @@ const predefinedMemoTemplates = {
 export default function PlantillasQuejasTab() {
     const { appData, updateMemoQuejasData, setAlert, setConfirm } = useContext(AppStateContext);
     const { selectedType, fields, checkboxValues } = appData.memoQuejasData;
+    const { genericFormData } = appData;
 
     const renderMemoFields = useCallback(() => {
         const templateFields = predefinedMemoTemplates[selectedType] || [];
@@ -98,40 +99,47 @@ export default function PlantillasQuejasTab() {
     }, [selectedType, fields, checkboxValues, updateMemoQuejasData]);
 
     const updateMemoPruebasRealizadas = useCallback(() => {
+        if (!selectedType) return;
         const testAreaId = predefinedMemoTemplates[selectedType]?.find(f => f.isTestArea)?.id;
         if (!testAreaId) return;
 
         const allCheckedValues = [];
-        // Checkboxes from Plantillas de Quejas tab
-        document.querySelectorAll('#sub-tab-quejas .checkbox-group input[type="checkbox"]:checked').forEach(cb => {
-            allCheckedValues.push(cb.value);
-        });
-        // Checkboxes from the dynamic memo form itself
+        if (genericFormData.pruebasRealizadas) {
+            allCheckedValues.push(genericFormData.pruebasRealizadas);
+        }
+
         Object.keys(checkboxValues).forEach(key => {
             if (checkboxValues[key]) {
-                const element = document.getElementById(key);
-                if (element) {
-                    allCheckedValues.push(element.value);
+                const checkboxElement = document.getElementById(key);
+                const labelElement = document.querySelector(`label[for='${key}']`);
+                if(labelElement) {
+                    allCheckedValues.push(labelElement.textContent);
                 }
             }
         });
 
-        updateMemoQuejasData('fields', { ...fields, [testAreaId]: allCheckedValues.join(', ') });
-    }, [selectedType, fields, checkboxValues, updateMemoQuejasData]);
+        // Use a Set to remove duplicates and then join
+        const uniqueValues = [...new Set(allCheckedValues.filter(Boolean))];
+        
+        // Only update if there's a change to prevent re-renders
+        if (fields[testAreaId] !== uniqueValues.join(', ')) {
+            updateMemoQuejasData('fields', { ...fields, [testAreaId]: uniqueValues.join(', ') });
+        }
+    }, [selectedType, fields, checkboxValues, genericFormData.pruebasRealizadas, updateMemoQuejasData]);
 
-    // Effect to update pruebasRealizadas whenever relevant checkboxes or selectedType changes
     useEffect(() => {
         updateMemoPruebasRealizadas();
-    }, [selectedType, checkboxValues, updateMemoPruebasRealizadas]);
+    }, [selectedType, checkboxValues, genericFormData.pruebasRealizadas]);
 
     const handleCopyMemoQueja = useCallback(() => {
         let content = '';
         const templateFields = predefinedMemoTemplates[selectedType] || [];
 
-        // Add "Quien genera queja" first
-        const quienGeneraChecked = Object.keys(checkboxValues).filter(key => key.startsWith('queja') && checkboxValues[key]);
+        const quienGeneraChecked = Object.keys(checkboxValues)
+            .filter(key => key.startsWith('queja') && checkboxValues[key])
+            .map(key => document.querySelector(`label[for='${key}']`)?.textContent || '');
         if (quienGeneraChecked.length > 0) {
-            content += `Quien genera queja: ${quienGeneraChecked.map(key => document.getElementById(key)?.value || '').join(', ')}\n`;
+            content += `Quien genera queja: ${quienGeneraChecked.join(', ')}\n`;
         }
 
         templateFields.forEach(field => {
@@ -156,8 +164,6 @@ export default function PlantillasQuejasTab() {
                 updateMemoQuejasData('selectedType', '');
                 updateMemoQuejasData('fields', {});
                 updateMemoQuejasData('checkboxValues', {});
-                // Reset also the general checkboxes for quejas tab
-                document.querySelectorAll('#sub-tab-quejas .checkbox-group input[type="checkbox"]').forEach(cb => cb.checked = false);
             },
         });
     }, [setConfirm, updateMemoQuejasData]);
@@ -252,8 +258,12 @@ export default function PlantillasQuejasTab() {
                                 <Label htmlFor={`${groupId}-${index}`} className="flex items-center text-lg text-gray-700 cursor-pointer flex-grow hover:text-purple-700 transition-colors">
                                     <Checkbox
                                         id={`${groupId}-${index}`}
+                                        value={item.label}
                                         checked={checkboxValues[`${groupId}-${index}`] || false}
-                                        onCheckedChange={(checked) => updateMemoQuejasData('checkboxValues', { ...checkboxValues, [`${groupId}-${index}`]: checked })}
+                                        onCheckedChange={(checked) => {
+                                            const newCheckboxValues = { ...checkboxValues, [`${groupId}-${index}`]: checked };
+                                            updateMemoQuejasData('checkboxValues', newCheckboxValues);
+                                        }}
                                         className="mr-3 scale-125 accent-cyan-500 min-w-5 min-h-5"
                                     />
                                     {item.label}
