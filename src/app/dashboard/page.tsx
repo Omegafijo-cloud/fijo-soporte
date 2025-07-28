@@ -622,12 +622,14 @@ export default function DashboardPage() {
       },
     }));
     
-    const newOrderedPruebas = checked
-      ? [...plantillasGenericasOrderedPruebas, label]
-      : plantillasGenericasOrderedPruebas.filter(item => item !== label);
-
-    setPlantillasGenericasOrderedPruebas(newOrderedPruebas);
-    setPlantillasGenericasPruebasRealizadas(newOrderedPruebas.join(', '));
+    setPlantillasGenericasOrderedPruebas(prevOrdered => {
+        const newOrderedPruebas = checked
+          ? [...prevOrdered, label]
+          : prevOrdered.filter(item => item !== label);
+        
+        setPlantillasGenericasPruebasRealizadas(newOrderedPruebas.join(', '));
+        return newOrderedPruebas;
+    });
   };
 
 
@@ -654,12 +656,14 @@ export default function DashboardPage() {
       },
     }));
 
-     const newOrderedPruebas = checked
-      ? [...plantillasQuejasOrderedPruebas, label]
-      : plantillasQuejasOrderedPruebas.filter(item => item !== label);
-
-    setPlantillasQuejasOrderedPruebas(newOrderedPruebas);
-    setPlantillasQuejasPruebasRealizadas(newOrderedPruebas.join(', '));
+     setPlantillasQuejasOrderedPruebas(prevOrdered => {
+        const newOrderedPruebas = checked
+          ? [...prevOrdered, label]
+          : prevOrdered.filter(item => item !== label);
+        
+        setPlantillasQuejasPruebasRealizadas(newOrderedPruebas.join(', '));
+        return newOrderedPruebas;
+    });
   };
 
   const handleClearMemosWf = () => {
@@ -763,9 +767,9 @@ export default function DashboardPage() {
                             formData={plantillasGenericasFormData}
                             setFormData={setPlantillasGenericasFormData}
                             checkboxes={plantillasGenericasCheckboxes}
+                            onCheckboxChange={handleGenericasCheckboxChange}
                             pruebasRealizadasText={plantillasGenericasPruebasRealizadas}
                             setPruebasRealizadasText={setPlantillasGenericasPruebasRealizadas}
-                            onCheckboxChange={handleGenericasCheckboxChange}
                             onCopy={handleCopyToClipboard}
                             onClear={handleClearGeneric}
                         />
@@ -779,9 +783,9 @@ export default function DashboardPage() {
                             checkboxValues={plantillasQuejasCheckboxValues}
                             setCheckboxValues={setPlantillasQuejasCheckboxValues}
                             pruebasCheckboxes={plantillasQuejasPruebasCheckboxes}
+                            onPruebasCheckboxChange={handleQuejasCheckboxChange}
                             pruebasRealizadasText={plantillasQuejasPruebasRealizadas}
                             setPruebasRealizadasText={setPlantillasQuejasPruebasRealizadas}
-                            onPruebasCheckboxChange={handleQuejasCheckboxChange}
                             onCopy={handleCopyToClipboard}
                             onClear={handleClearQuejas}
                         />
