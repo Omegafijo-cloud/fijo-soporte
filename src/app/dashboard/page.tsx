@@ -20,7 +20,6 @@ import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
-import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
 import OmegaLogo from '@/components/OmegaLogo';
@@ -87,12 +86,12 @@ const initialNotices: Notice[] = [
   { 
     id: 1, 
     title: 'PROCESOS DE MIGRACIÓN (WF)', 
-    url: 'https://docs.google.com/document/d/1Zt3bV5z6X7C_.../edit' 
+    url: 'https://docs.google.com/document/d/1wRIr2nK1L9_s1g_j_9J8F_8n_k6lV_Z5t3bV5z6X7C/edit?usp=sharing' 
   },
   { 
     id: 2, 
     title: 'SEGUIMIENTO DE CASOS (DOC)', 
-    url: 'https://docs.google.com/document/d/1aB4c8D_.../edit'
+    url: 'https://docs.google.com/document/d/1Xy_Z-v_z_6kG_8s_k6L_v_Z5t3bV5z6X7C/edit?usp=sharing'
   }
 ];
 
