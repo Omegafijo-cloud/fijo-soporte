@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare, Palette, RotateCcw } from 'lucide-react';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare, Palette, RotateCcw, Play, Square, RotateCw } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
@@ -15,21 +15,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
 // -- Funciones para convertir HSL a Hex y viceversa --
-// Estas son necesarias porque el input[type=color] trabaja con HEX,
-// pero el tema de ShadCN usa HSL.
-
-// Convierte un string "hsl(h, s%, l%)" a un objeto {h, s, l}
 const hslStringToObj = (hslStr: string) => {
     const [h, s, l] = hslStr.match(/\d+/g)?.map(Number) || [0, 0, 0];
     return { h, s, l };
 };
 
-// Convierte un objeto {h, s, l} a un string "h s l" para las variables CSS
 const hslObjToCssVar = (hslObj: { h: number, s: number, l: number }) => {
     return `${hslObj.h} ${hslObj.s}% ${hslObj.l}%`;
 };
 
-// Convierte HSL a HEX para el input de color
 const hslToHex = (h: number, s: number, l: number) => {
     s /= 100;
     l /= 100;
@@ -42,7 +36,6 @@ const hslToHex = (h: number, s: number, l: number) => {
     ).join('')}`;
 };
 
-// Convierte HEX a HSL
 const hexToHsl = (hex: string) => {
     let r = parseInt(hex.substring(1, 3), 16) / 255;
     let g = parseInt(hex.substring(3, 5), 16) / 255;
@@ -79,9 +72,34 @@ export default function OmegaPage() {
   const [quickNotes, setQuickNotes] = useState('');
   const [userList, setUserList] = useState('');
   const { toast } = useToast();
+  
+  const [time, setTime] = useState(300); // 5 minutes in seconds
+  const [isRunning, setIsRunning] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
 
   // State para los colores del tema
   const [themeColors, setThemeColors] = useState(defaultThemeColors);
+
+  // Efecto para el temporizador
+  useEffect(() => {
+    if (isRunning) {
+        timerRef.current = setInterval(() => {
+            setTime(prevTime => {
+                if (prevTime <= 0) {
+                    clearInterval(timerRef.current!);
+                    setIsRunning(false);
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+    } else {
+        clearInterval(timerRef.current!);
+    }
+
+    return () => clearInterval(timerRef.current!);
+  }, [isRunning]);
 
   // Efecto para aplicar los colores al DOM
   useEffect(() => {
@@ -92,7 +110,6 @@ export default function OmegaPage() {
     root.style.setProperty('--accent', hslObjToCssVar(themeColors.accent));
   }, [themeColors]);
   
-
   const handleWidgetToggle = (widgetName: string) => {
     setActiveWidget(prev => (prev === widgetName ? null : widgetName));
   };
@@ -136,6 +153,19 @@ export default function OmegaPage() {
     });
   }
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const handleTimerStart = () => setIsRunning(true);
+  const handleTimerStop = () => setIsRunning(false);
+  const handleTimerReset = () => {
+    setIsRunning(false);
+    setTime(300); // Reset to 5 minutes
+  };
+
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -163,9 +193,14 @@ export default function OmegaPage() {
           <h1 className="text-xl font-bold text-foreground">OMEGA-FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-muted px-3 py-1 rounded-lg">
             <Timer className="h-6 w-6 text-primary" />
-            <span className="font-mono text-lg">00:00</span>
+            <span className="font-mono text-lg font-semibold">{formatTime(time)}</span>
+          </div>
+          <div className='flex items-center gap-1'>
+             <Button variant="ghost" size="icon" onClick={handleTimerStart} disabled={isRunning}><Play className="h-5 w-5"/></Button>
+             <Button variant="ghost" size="icon" onClick={handleTimerStop} disabled={!isRunning}><Square className="h-5 w-5"/></Button>
+             <Button variant="ghost" size="icon" onClick={handleTimerReset}><RotateCw className="h-5 w-5"/></Button>
           </div>
           <Button variant="outline" size="sm">
             <LogOut className="mr-2 h-4 w-4" />
