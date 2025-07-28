@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,25 +8,56 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Trash2 } from 'lucide-react';
 
 const predefinedOrdenMemos = {
   'cableado ethernet': {
     fields: [
-      { id: 'puntosRed', label: 'Puntos de red a instalar', type: 'text' },
-      { id: 'distanciaCableado', label: 'Distancia de cableado (metros)', type: 'text' },
-      { id: 'observacionesOrden', label: 'Observaciones', type: 'textarea' },
+      { id: 'asunto', label: 'ASUNTO', type: 'text' },
+      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
+      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
+      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
+      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
+      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
+      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
+      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
+      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
     ],
   },
   'orden de repetidores': {
     fields: [
-      { id: 'cantidadRepetidores', label: 'Cantidad de Repetidores', type: 'text' },
-      { id: 'modeloRepetidor', label: 'Modelo de Repetidor', type: 'text' },
-      { id: 'ubicacionInstalacion', label: 'Ubicación de instalación', type: 'textarea' },
+       { id: 'asunto', label: 'ASUNTO', type: 'text' },
+      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
+      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
+      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
+      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
+      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
+      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
+      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
+      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
+    ],
+  },
+    'instalación en plazo vigente': {
+    fields: [
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'noOs', label: 'No. de O/S', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea', defaultValue: 'Seguimiento a orden en tiempo Vigente' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text', defaultValue: '8:00 a 5:00' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea', defaultValue: 'Cliente solicita informacion sobre instalacion, se encuentra en tiempo vigente' },
     ],
   },
 };
 
+type MemoTemplate = {
+  [key: string]: {
+    fields: any[];
+  }
+}
+
 interface MemosOrdenTabProps {
+  templates: MemoTemplate;
+  setTemplates: (templates: MemoTemplate) => void;
   selectedTemplate: string;
   setSelectedTemplate: (value: string) => void;
   formData: { [key: string]: any };
@@ -33,17 +65,51 @@ interface MemosOrdenTabProps {
 }
 
 export default function MemosOrdenTab({
+  templates,
+  setTemplates,
   selectedTemplate,
   setSelectedTemplate,
   formData,
   setFormData
 }: MemosOrdenTabProps) {
   const { toast } = useToast();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
     setFormData({});
   };
+  
+  const handleAddTemplate = () => {
+    if (!newTemplateName.trim()) {
+        toast({ title: 'Error', description: 'El nombre de la plantilla no puede estar vacío.', variant: 'destructive' });
+        return;
+    }
+    const newKey = newTemplateName.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (templates[newKey]) {
+        toast({ title: 'Error', description: 'Ya existe una plantilla con este nombre.', variant: 'destructive' });
+        return;
+    }
+    setTemplates({
+        ...templates,
+        [newKey]: { fields: [{ id: 'asunto', label: 'Asunto', type: 'text' }] }
+    });
+    setNewTemplateName('');
+    setIsAddDialogOpen(false);
+    toast({ title: 'Éxito', description: 'Plantilla añadida correctamente.' });
+  }
+  
+  const handleRemoveTemplate = (templateKey: string) => {
+    const newTemplates = { ...templates };
+    delete newTemplates[templateKey];
+    setTemplates(newTemplates);
+    if (selectedTemplate === templateKey) {
+        setSelectedTemplate('');
+        setFormData({});
+    }
+    toast({ title: 'Éxito', description: 'Plantilla eliminada correctamente.' });
+  }
 
   const handleInputChange = (id: string, value: string) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -54,9 +120,9 @@ export default function MemosOrdenTab({
 
     let template = `TIPO DE MEMO DE ORDEN: ${selectedTemplate}\n\n`;
     
-    const templateFields = predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos].fields;
+    const templateFields = (templates[selectedTemplate] || predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos]).fields;
     templateFields.forEach(field => {
-      template += `${field.label}: ${formData[field.id] || ''}\n`;
+      template += `${field.label}: ${formData[field.id] || field.defaultValue || ''}\n`;
     });
 
     navigator.clipboard.writeText(template);
@@ -73,7 +139,7 @@ export default function MemosOrdenTab({
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
-    const template = predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos];
+    const template = templates[selectedTemplate] || predefinedOrdenMemos[selectedTemplate as keyof typeof predefinedOrdenMemos];
     if (!template) return null;
 
     return (
@@ -82,9 +148,9 @@ export default function MemosOrdenTab({
           <div key={field.id} className="space-y-2">
             <Label htmlFor={field.id}>{field.label}</Label>
             {field.type === 'textarea' ? (
-              <Textarea id={field.id} value={formData[field.id] || ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
+              <Textarea id={field.id} value={formData[field.id] ?? field.defaultValue ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
             ) : (
-              <Input id={field.id} type={field.type} value={formData[field.id] || ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
+              <Input id={field.id} type={field.type} value={formData[field.id] ?? field.defaultValue ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
             )}
           </div>
         ))}
@@ -101,16 +167,43 @@ export default function MemosOrdenTab({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Tipo de Memo</Label>
-          <Select onValueChange={handleTemplateChange} value={selectedTemplate}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccione una plantilla..." />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(predefinedOrdenMemos).map(key => (
-                <SelectItem key={key} value={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <div className="flex gap-2">
+            <Select onValueChange={handleTemplateChange} value={selectedTemplate}>
+                <SelectTrigger>
+                <SelectValue placeholder="Seleccione una plantilla..." />
+                </SelectTrigger>
+                <SelectContent>
+                {Object.keys(templates).map(key => (
+                    <SelectItem key={key} value={key}>
+                        <div className="flex items-center justify-between w-full">
+                           <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                             <Button variant="ghost" size="icon" className="h-5 w-5 ml-4" onClick={(e) => { e.stopPropagation(); handleRemoveTemplate(key); }}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                    </SelectItem>
+                ))}
+                </SelectContent>
+            </Select>
+             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button>Añadir</Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Añadir Nueva Plantilla de Orden</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="new-template-name">Nombre de la Plantilla</Label>
+                        <Input id="new-template-name" value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleAddTemplate}>Guardar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            </div>
         </div>
 
         {selectedTemplate && (

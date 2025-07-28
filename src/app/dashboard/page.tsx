@@ -42,6 +42,13 @@ type TransferItem = {
   isCustom?: boolean;
 };
 
+type MemoTemplate = {
+  [key: string]: {
+    fields: any[];
+    checkboxes?: any;
+  }
+}
+
 // Tipos para el estado global de la aplicación
 type AppState = {
   activeTab?: string;
@@ -66,9 +73,11 @@ type AppState = {
   plantillasQuejas_pruebasCheckboxes?: CheckboxState;
   plantillasQuejas_pruebasRealizadas?: string;
 
+  memosWf_templates?: MemoTemplate;
   memosWf_selectedTemplate?: string;
   memosWf_formData?: any;
 
+  memosOrden_templates?: MemoTemplate;
   memosOrden_selectedTemplate?: string;
   memosOrden_formData?: any;
   
@@ -86,12 +95,12 @@ const initialNotices: Notice[] = [
   { 
     id: 1, 
     title: 'PROCESOS DE MIGRACIÓN (WF)', 
-    url: 'https://docs.google.com/document/d/1wRIr2nK1L9_s1g_j_9J8F_8n_k6lV_Z5t3bV5z6X7C/edit?usp=sharing' 
+    url: 'https://docs.google.com/document/d/1wRIr2nK1L9_s1g_j_9J8F_8n_k6lV_Z5t3bV5z6X7C/edit' 
   },
   { 
     id: 2, 
     title: 'SEGUIMIENTO DE CASOS (DOC)', 
-    url: 'https://docs.google.com/document/d/1Xy_Z-v_z_6kG_8s_k6L_v_Z5t3bV5z6X7C/edit?usp=sharing'
+    url: 'https://docs.google.com/document/d/1Xy_Z-v_z_6kG_8s_k6L_v_Z5t3bV5z6X7C/edit'
   }
 ];
 
@@ -123,6 +132,68 @@ const initialTransferItems: TransferItem[] = [
   { service: 'SOPORTE NIVEL 2', value: '103' },
 ];
 
+const initialMemosWfTemplates: MemoTemplate = {
+  'migracion gpon': {
+    fields: [
+      { id: 'tipoReporte', label: 'Tipo de reporte', type: 'text' },
+      { id: 'aceptaMigracion', label: 'Acepta migración', type: 'text' },
+      { id: 'facturaCon', label: 'Factura Con', type: 'text' },
+      { id: 'titularServicio', label: 'Titular del servicio', type: 'text' },
+      { id: 'contactoEnSitio', label: 'Contacto en sitio', type: 'text' },
+      { id: 'noContacto', label: 'No. Contacto', type: 'text' },
+      { id: 'direccion', label: 'Dirección', type: 'text' },
+      { id: 'horarioVisita', label: 'Horario de visita', type: 'text' },
+      { id: 'comentario', label: 'Comentario', type: 'textarea' },
+    ],
+  },
+  'inconvenientes con vpn': {
+    fields: [
+      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
+      { id: 'tipoCpe', label: 'Tipo de CPE', type: 'text' },
+      { id: 'macCableModem', label: 'MAC Cable Modem o CPE', type: 'text' },
+      { id: 'problemaReportado', label: 'Problema reportado', type: 'text' },
+      { id: 'nombreCliente', label: 'Nombre del cliente', type: 'text' },
+      { id: 'telContacto', label: 'Tel Contacto', type: 'text' },
+      { id: 'nombreVpn', label: 'Nombre completo herramienta o aplicativo de vpn', type: 'text' },
+      { id: 'puertosUdpTcp', label: 'Puertos UDP y TCP que desee verificar', type: 'text' },
+      { id: 'errorAplicativo', label: 'Numero o nombre de error que da el aplicativo', type: 'text' },
+      { id: 'ipDestino', label: 'Si es VPN, hacía que IP intenta conectarse', type: 'text' },
+      { id: 'macComputadora', label: 'MAC Address de la computadora', type: 'text' },
+      { id: 'pruebasVpn', label: 'Pruebas(si se efectúan)', type: 'textarea' },
+      { id: 'comentarioVpn', label: 'Comentario', type: 'textarea' },
+    ],
+  },
+};
+
+const initialMemosOrdenTemplates: MemoTemplate = {
+  'cableado ethernet': {
+    fields: [
+      { id: 'asunto', label: 'ASUNTO', type: 'text' },
+      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
+      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
+      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
+      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
+      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
+      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
+      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
+      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
+    ],
+  },
+  'orden de repetidores': {
+    fields: [
+       { id: 'asunto', label: 'ASUNTO', type: 'text' },
+      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
+      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
+      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
+      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
+      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
+      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
+      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
+      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
+    ],
+  },
+};
+
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -153,10 +224,12 @@ export default function DashboardPage() {
   const [plantillasQuejasPruebas, setPlantillasQuejasPruebas] = useState('');
   
   // Estado para Memos WF
+  const [memosWfTemplates, setMemosWfTemplates] = useState<MemoTemplate>(initialMemosWfTemplates);
   const [memosWfSelectedTemplate, setMemosWfSelectedTemplate] = useState('');
   const [memosWfFormData, setMemosWfFormData] = useState({});
 
   // Estado para Memos Orden
+  const [memosOrdenTemplates, setMemosOrdenTemplates] = useState<MemoTemplate>(initialMemosOrdenTemplates);
   const [memosOrdenSelectedTemplate, setMemosOrdenSelectedTemplate] = useState('');
   const [memosOrdenFormData, setMemosOrdenFormData] = useState({});
   
@@ -182,8 +255,10 @@ export default function DashboardPage() {
       plantillasQuejas_checkboxValues: plantillasQuejasCheckboxValues,
       plantillasQuejas_pruebasCheckboxes: plantillasQuejasPruebasCheckboxes,
       plantillasQuejas_pruebasRealizadas: plantillasQuejasPruebas,
+      memosWf_templates: memosWfTemplates,
       memosWf_selectedTemplate: memosWfSelectedTemplate,
       memosWf_formData: memosWfFormData,
+      memosOrden_templates: memosOrdenTemplates,
       memosOrden_selectedTemplate: memosOrdenSelectedTemplate,
       memosOrden_formData: memosOrdenFormData,
       herramientas_minutos: herramientasMinutos,
@@ -196,7 +271,8 @@ export default function DashboardPage() {
       plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasPruebas,
       plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
       plantillasQuejasPruebasCheckboxes, plantillasQuejasPruebas,
-      memosWfSelectedTemplate, memosWfFormData, memosOrdenSelectedTemplate, memosOrdenFormData,
+      memosWfTemplates, memosWfSelectedTemplate, memosWfFormData, 
+      memosOrdenTemplates, memosOrdenSelectedTemplate, memosOrdenFormData,
       herramientasMinutos, transferenciasItems, transferenciasNewService, transferenciasNewValue
   ]);
 
@@ -249,10 +325,12 @@ export default function DashboardPage() {
           if(data.plantillasQuejas_checkboxValues) setPlantillasQuejasCheckboxValues(data.plantillasQuejas_checkboxValues);
           if(data.plantillasQuejas_pruebasCheckboxes) setPlantillasQuejasPruebasCheckboxes(data.plantillasQuejas_pruebasCheckboxes);
           if(data.plantillasQuejas_pruebasRealizadas) setPlantillasQuejasPruebas(data.plantillasQuejas_pruebasRealizadas);
-
+          
+          if(data.memosWf_templates) setMemosWfTemplates(data.memosWf_templates);
           if(data.memosWf_selectedTemplate) setMemosWfSelectedTemplate(data.memosWf_selectedTemplate);
           if(data.memosWf_formData) setMemosWfFormData(data.memosWf_formData);
           
+          if(data.memosOrden_templates) setMemosOrdenTemplates(data.memosOrden_templates);
           if(data.memosOrden_selectedTemplate) setMemosOrdenSelectedTemplate(data.memosOrden_selectedTemplate);
           if(data.memosOrden_formData) setMemosOrdenFormData(data.memosOrden_formData);
 
@@ -291,6 +369,15 @@ export default function DashboardPage() {
     await saveStateToFirebase(); 
     await signOut(auth);
     router.push('/');
+  };
+  
+    const formatUserName = (email: string | null | undefined): string => {
+    if (!email) return '';
+    const namePart = email.split('@')[0];
+    const names = namePart.split('.');
+    return names
+      .map(name => name.charAt(0).toUpperCase() + name.slice(1))
+      .join(' ');
   };
 
   const handleCopyBackup = () => {
@@ -356,6 +443,7 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">
+           <span className="text-sm font-medium">{formatUserName(user.email)}</span>
           <Timer />
           <Button onClick={handleLogout} variant="destructive" size="sm">
             Salir
@@ -414,6 +502,8 @@ export default function DashboardPage() {
                   </TabsContent>
                   <TabsContent value="wf" className="p-6">
                     <MemosWfTab 
+                      templates={memosWfTemplates}
+                      setTemplates={setMemosWfTemplates}
                       selectedTemplate={memosWfSelectedTemplate}
                       setSelectedTemplate={setMemosWfSelectedTemplate}
                       formData={memosWfFormData}
@@ -422,6 +512,8 @@ export default function DashboardPage() {
                   </TabsContent>
                   <TabsContent value="orden" className="p-6">
                     <MemosOrdenTab 
+                       templates={memosOrdenTemplates}
+                       setTemplates={setMemosOrdenTemplates}
                        selectedTemplate={memosOrdenSelectedTemplate}
                        setSelectedTemplate={setMemosOrdenSelectedTemplate}
                        formData={memosOrdenFormData}
@@ -447,7 +539,7 @@ export default function DashboardPage() {
                newService={transferenciasNewService}
                setNewService={setTransferenciasNewService}
                newValue={transferenciasNewValue}
-               setNewValue={setTransferenciasNewValue}
+               setNewValue={setNewValue}
             />
           </TabsContent>
 
