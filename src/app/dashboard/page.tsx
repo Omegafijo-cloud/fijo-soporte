@@ -23,6 +23,7 @@ import FloatingWidgets from '@/components/FloatingWidgets';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
 import OmegaLogo from '@/components/OmegaLogo';
+import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 
 // --- Tipos de Estado ---
 
@@ -615,183 +616,188 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">
-        <div className="flex items-center gap-2">
-           <OmegaLogo className="h-8 w-8" />
-          <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
-        </div>
-        <div className="flex items-center gap-4">
-           <span className="text-sm font-medium">{formatUserName(user.email)}</span>
-          <Timer />
-          <Button onClick={handleLogout} variant="destructive" size="sm">
-            Salir
-          </Button>
-        </div>
-      </header>
+    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      <div className="absolute inset-0 z-0">
+        <NeuralNetworkAnimation />
+      </div>
+      <div className="relative z-10 flex flex-1 flex-col">
+        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+            <div className="flex items-center gap-2">
+            <OmegaLogo className="h-8 w-8" />
+            <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
+            </div>
+            <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">{formatUserName(user.email)}</span>
+            <Timer />
+            <Button onClick={handleLogout} variant="destructive" size="sm">
+                Salir
+            </Button>
+            </div>
+        </header>
 
-      <main className="flex-1 p-4 md:p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="plantillas">PLANTILLAS</TabsTrigger>
-            <TabsTrigger value="herramientas">HERRAMIENTAS</TabsTrigger>
-            <TabsTrigger value="transferencias">TRANSFERENCIAS</TabsTrigger>
-            <TabsTrigger value="avisos">AVISOS</TabsTrigger>
-            <TabsTrigger value="respaldo">COPIA DE RESPALDO</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="plantillas" className="mt-4">
-            <Card>
-              <CardContent className="p-0">
-                <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
-                    <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
-                    <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
-                    <TabsTrigger value="wf">MEMOS DE WF</TabsTrigger>
-                    <TabsTrigger value="orden">MEMOS DE ORDEN</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="genericas" className="p-6">
-                    <PlantillasGenericasTab 
-                        backupText={backupText}
-                        setBackupText={setBackupText}
-                        formData={plantillasGenericasFormData}
-                        setFormData={setPlantillasGenericasFormData}
-                        checkboxes={plantillasGenericasCheckboxes}
-                        setCheckboxes={setPlantillasGenericasCheckboxes}
-                        pruebasRealizadas={plantillasGenericasPruebas}
-                        setPruebasRealizadas={setPlantillasGenericasPruebas}
-                        initialCheckboxes={initialPlantillasGenericasCheckboxes}
-                        initialFormData={initialPlantillasGenericasFormData}
-                    />
-                  </TabsContent>
-                  <TabsContent value="quejas" className="p-6">
-                    <PlantillasQuejasTab 
-                        selectedTemplate={plantillasQuejasSelectedTemplate}
-                        setSelectedTemplate={setPlantillasQuejasSelectedTemplate}
-                        formData={plantillasQuejasFormData}
-                        setFormData={setPlantillasQuejasFormData}
-                        checkboxValues={plantillasQuejasCheckboxValues}
-                        setCheckboxValues={setPlantillasQuejasCheckboxValues}
-                        pruebasCheckboxes={plantillasQuejasPruebasCheckboxes}
-                        setPruebasCheckboxes={setPlantillasQuejasPruebasCheckboxes}
-                        pruebasRealizadas={plantillasQuejasPruebas}
-                        setPruebasRealizadas={setPlantillasQuejasPruebas}
-                        initialPruebasCheckboxState={initialPlantillasQuejasCheckboxes}
-                    />
-                  </TabsContent>
-                  <TabsContent value="wf" className="p-6">
-                    <MemosWfTab 
-                      templates={memosWfTemplates}
-                      setTemplates={setMemosWfTemplates}
-                      selectedTemplate={memosWfSelectedTemplate}
-                      setSelectedTemplate={setMemosWfSelectedTemplate}
-                      formData={memosWfFormData}
-                      setFormData={setMemosWfFormData}
-                    />
-                  </TabsContent>
-                  <TabsContent value="orden" className="p-6">
-                    <MemosOrdenTab 
-                       templates={memosOrdenTemplates}
-                       setTemplates={setMemosOrdenTemplates}
-                       selectedTemplate={memosOrdenSelectedTemplate}
-                       setSelectedTemplate={setMemosOrdenSelectedTemplate}
-                       formData={memosOrdenFormData}
-                       setFormData={setMemosOrdenFormData}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="herramientas" className="mt-4">
-            <HerramientasTab 
-              minutos={herramientasMinutos}
-              setMinutos={setHerramientasMinutos}
-            />
-          </TabsContent>
-          
-          <TabsContent value="transferencias" className="mt-4">
-            <TransferenciasTab 
-               transferItems={transferenciasItems}
-               setTransferItems={setTransferenciasItems}
-               newService={transferenciasNewService}
-               setNewService={setTransferenciasNewService}
-               newValue={transferenciasNewValue}
-               setNewValue={setTransferenciasNewValue}
-            />
-          </TabsContent>
-
-          <TabsContent value="avisos" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Avisos Importantes</CardTitle>
-                <CardDescription>Documentos importantes y recursos operativos de acceso rápido.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {notices.length > 0 ? (
-                  notices.map((notice) => (
-                    <Card key={notice.id}>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-lg">{notice.title}</CardTitle>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteNotice(notice.id)}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </Button>
-                      </CardHeader>
-                      <CardContent>
-                        <iframe 
-                          src={notice.url}
-                          className="w-full h-96 border rounded-md"
-                          title={notice.title}
-                        ></iframe>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground">No hay avisos para mostrar.</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="respaldo" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Copia de Respaldo</CardTitle>
-                <CardDescription>Almacena copias de seguridad de texto importante. El contenido se borra al cerrar sesión.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea 
-                  placeholder="Pegue aquí el texto que desea respaldar..." 
-                  rows={20}
-                  value={backupText}
-                  onChange={(e) => setBackupText(e.target.value)}
+        <main className="flex-1 p-4 md:p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="plantillas">PLANTILLAS</TabsTrigger>
+                <TabsTrigger value="herramientas">HERRAMIENTAS</TabsTrigger>
+                <TabsTrigger value="transferencias">TRANSFERENCIAS</TabsTrigger>
+                <TabsTrigger value="avisos">AVISOS</TabsTrigger>
+                <TabsTrigger value="respaldo">COPIA DE RESPALDO</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="plantillas" className="mt-4">
+                <Card>
+                <CardContent className="p-0">
+                    <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
+                        <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
+                        <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
+                        <TabsTrigger value="wf">MEMOS DE WF</TabsTrigger>
+                        <TabsTrigger value="orden">MEMOS DE ORDEN</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="genericas" className="p-6">
+                        <PlantillasGenericasTab 
+                            backupText={backupText}
+                            setBackupText={setBackupText}
+                            formData={plantillasGenericasFormData}
+                            setFormData={setPlantillasGenericasFormData}
+                            checkboxes={plantillasGenericasCheckboxes}
+                            setCheckboxes={setPlantillasGenericasCheckboxes}
+                            pruebasRealizadas={plantillasGenericasPruebas}
+                            setPruebasRealizadas={setPlantillasGenericasPruebas}
+                            initialCheckboxes={initialPlantillasGenericasCheckboxes}
+                            initialFormData={initialPlantillasGenericasFormData}
+                        />
+                    </TabsContent>
+                    <TabsContent value="quejas" className="p-6">
+                        <PlantillasQuejasTab 
+                            selectedTemplate={plantillasQuejasSelectedTemplate}
+                            setSelectedTemplate={setPlantillasQuejasSelectedTemplate}
+                            formData={plantillasQuejasFormData}
+                            setFormData={setPlantillasQuejasFormData}
+                            checkboxValues={plantillasQuejasCheckboxValues}
+                            setCheckboxValues={setPlantillasQuejasCheckboxValues}
+                            pruebasCheckboxes={plantillasQuejasPruebasCheckboxes}
+                            setPruebasCheckboxes={setPlantillasQuejasPruebasCheckboxes}
+                            pruebasRealizadas={plantillasQuejasPruebas}
+                            setPruebasRealizadas={setPlantillasQuejasPruebas}
+                            initialPruebasCheckboxState={initialPlantillasQuejasCheckboxes}
+                        />
+                    </TabsContent>
+                    <TabsContent value="wf" className="p-6">
+                        <MemosWfTab 
+                        templates={memosWfTemplates}
+                        setTemplates={setMemosWfTemplates}
+                        selectedTemplate={memosWfSelectedTemplate}
+                        setSelectedTemplate={setMemosWfSelectedTemplate}
+                        formData={memosWfFormData}
+                        setFormData={setMemosWfFormData}
+                        />
+                    </TabsContent>
+                    <TabsContent value="orden" className="p-6">
+                        <MemosOrdenTab 
+                        templates={memosOrdenTemplates}
+                        setTemplates={setMemosOrdenTemplates}
+                        selectedTemplate={memosOrdenSelectedTemplate}
+                        setSelectedTemplate={setMemosOrdenSelectedTemplate}
+                        formData={memosOrdenFormData}
+                        setFormData={setMemosOrdenFormData}
+                        />
+                    </TabsContent>
+                    </Tabs>
+                </CardContent>
+                </Card>
+            </TabsContent>
+            
+            <TabsContent value="herramientas" className="mt-4">
+                <HerramientasTab 
+                minutos={herramientasMinutos}
+                setMinutos={setHerramientasMinutos}
                 />
-                <div className="flex gap-2">
-                  <Button onClick={handleCopyBackup}>Copiar Respaldo</Button>
-                  <Button variant="outline" onClick={handleClearBackup}>Limpiar Respaldo</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
+            </TabsContent>
+            
+            <TabsContent value="transferencias" className="mt-4">
+                <TransferenciasTab 
+                transferItems={transferenciasItems}
+                setTransferItems={setTransferenciasItems}
+                newService={transferenciasNewService}
+                setNewService={setTransferenciasNewService}
+                newValue={transferenciasNewValue}
+                setNewValue={setTransferenciasNewValue}
+                />
+            </TabsContent>
 
-      <FloatingWidgets 
-        notesText={notesText}
-        setNotesText={setNotesText}
-        usersText={usersText}
-        setUsersText={setUsersText}
-      />
+            <TabsContent value="avisos" className="mt-4">
+                <Card>
+                <CardHeader>
+                    <CardTitle>Avisos Importantes</CardTitle>
+                    <CardDescription>Documentos importantes y recursos operativos de acceso rápido.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {notices.length > 0 ? (
+                    notices.map((notice) => (
+                        <Card key={notice.id}>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-lg">{notice.title}</CardTitle>
+                            <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteNotice(notice.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                            >
+                            <Trash2 className="h-5 w-5" />
+                            </Button>
+                        </CardHeader>
+                        <CardContent>
+                            <iframe 
+                            src={notice.url}
+                            className="w-full h-96 border rounded-md"
+                            title={notice.title}
+                            ></iframe>
+                        </CardContent>
+                        </Card>
+                    ))
+                    ) : (
+                    <p className="text-center text-muted-foreground">No hay avisos para mostrar.</p>
+                    )}
+                </CardContent>
+                </Card>
+            </TabsContent>
 
-      <footer className="p-4 text-center text-xs text-muted-foreground">
-        Desarrollado por: Keiner Valera
-      </footer>
+            <TabsContent value="respaldo" className="mt-4">
+                <Card>
+                <CardHeader>
+                    <CardTitle>Copia de Respaldo</CardTitle>
+                    <CardDescription>Almacena copias de seguridad de texto importante. El contenido se borra al cerrar sesión.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Textarea 
+                    placeholder="Pegue aquí el texto que desea respaldar..." 
+                    rows={20}
+                    value={backupText}
+                    onChange={(e) => setBackupText(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                    <Button onClick={handleCopyBackup}>Copiar Respaldo</Button>
+                    <Button variant="outline" onClick={handleClearBackup}>Limpiar Respaldo</Button>
+                    </div>
+                </CardContent>
+                </Card>
+            </TabsContent>
+            </Tabs>
+        </main>
+
+        <FloatingWidgets 
+            notesText={notesText}
+            setNotesText={setNotesText}
+            usersText={usersText}
+            setUsersText={setUsersText}
+        />
+
+        <footer className="p-4 text-center text-xs text-muted-foreground">
+            Desarrollado por: Keiner Valera
+        </footer>
+      </div>
     </div>
   );
 }
