@@ -10,6 +10,7 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
+import OmegaLogo from '@/components/OmegaLogo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -58,9 +59,7 @@ export default function LoginPage() {
        <div className="relative z-10 flex flex-col items-center w-full">
         <div className="flex flex-col items-center justify-center text-center mb-10">
           <div className="flex items-center justify-center gap-4 mb-4">
-             <div className="hidden md:block">
-                <NeuralNetworkAnimation width={60} height={60} />
-            </div>
+             <OmegaLogo className="h-16 w-16 text-white" />
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
               OMEGA - FIJO SOPORTE
             </h1>

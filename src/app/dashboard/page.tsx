@@ -23,6 +23,7 @@ import FloatingWidgets from '@/components/FloatingWidgets';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
+import OmegaLogo from '@/components/OmegaLogo';
 
 // --- Tipos de Estado ---
 
@@ -336,7 +337,7 @@ export default function DashboardPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-4">
           <div className="flex items-center justify-center gap-4">
-            <NeuralNetworkAnimation width={50} height={50} />
+            <OmegaLogo className="w-12 h-12" />
             <h1 className="text-2xl font-bold">OMEGA</h1>
           </div>
           <p className="text-center text-muted-foreground">Cargando tu espacio de trabajo...</p>
@@ -352,7 +353,7 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
-           <NeuralNetworkAnimation width={40} height={40} />
+           <OmegaLogo className="h-8 w-8" />
           <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">

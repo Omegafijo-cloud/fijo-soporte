@@ -46,10 +46,11 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
       }
 
       draw() {
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = this.color;
-        ctx!.fill();
+        if (!ctx) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
       }
 
       update() {
@@ -74,6 +75,7 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
     const maxDistance = 100;
     
     function initNeurons() {
+      if (!canvas) return;
       const neuronCount = Math.floor((canvas.width * canvas.height) / (width ? 10000 : 15000));
       for (let i = 0; i < neuronCount; i++) {
         const radius = Math.random() * 2 + 1;
@@ -85,6 +87,7 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
     }
     
     function connectNeurons() {
+      if (!ctx) return;
       for (let i = 0; i < neurons.length; i++) {
         for (let j = i; j < neurons.length; j++) {
           const dx = neurons[i].x - neurons[j].x;
@@ -92,19 +95,20 @@ const NeuralNetworkAnimation: React.FC<NeuralNetworkAnimationProps> = ({ width, 
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < maxDistance) {
-            ctx!.beginPath();
-            ctx!.strokeStyle = connectionColor;
-            ctx!.lineWidth = 1 - distance / maxDistance;
-            ctx!.moveTo(neurons[i].x, neurons[i].y);
-            ctx!.lineTo(neurons[j].x, neurons[j].y);
-            ctx!.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = connectionColor;
+            ctx.lineWidth = 1 - distance / maxDistance;
+            ctx.moveTo(neurons[i].x, neurons[i].y);
+            ctx.lineTo(neurons[j].x, neurons[j].y);
+            ctx.stroke();
           }
         }
       }
     }
 
     function animate() {
-      ctx!.clearRect(0, 0, canvas.width, canvas.height);
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       neurons.forEach(neuron => {
         neuron.update();
         neuron.draw();

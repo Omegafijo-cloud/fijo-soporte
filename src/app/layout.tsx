@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "OMEGA - FIJO SOPORTE",
-  description: "Herramienta integral de soporte técnico",
+  description: "Herramienta integral de soporte técnico para FIJO",
 };
 
 export default function RootLayout({
