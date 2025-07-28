@@ -19,6 +19,7 @@ import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
+import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 
 // Tipos para el estado
 type AppState = {
@@ -142,13 +143,7 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
-           <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
-            <circle cx="50" cy="50" r="45" stroke="hsl(var(--primary))" strokeWidth="5" fill="none"/>
-            <circle cx="50" cy="50" r="30" fill="hsl(var(--primary) / 0.1)"/>
-            <ellipse cx="50" cy="50" rx="40" ry="20" transform="rotate(-30 50 50)" stroke="hsl(var(--primary) / 0.5)" strokeWidth="3" fill="none"/>
-            <ellipse cx="50" cy="50" rx="40" ry="20" transform="rotate(30 50 50)" stroke="hsl(var(--primary) / 0.7)" strokeWidth="3" fill="none"/>
-            <circle cx="50" cy="50" r="8" fill="hsl(var(--primary))"/>
-          </svg>
+           <NeuralNetworkAnimation width={40} height={40} />
           <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">
