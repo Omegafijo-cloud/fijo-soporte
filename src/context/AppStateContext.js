@@ -30,7 +30,10 @@ export const defaultAppData = {
 const AppStateContext = createContext(null);
 
 export const AppStateProvider = ({ children }) => {
-  const { db, userId } = useContext(FirebaseContext);
+  const firebaseContext = useContext(FirebaseContext);
+  const db = firebaseContext?.db;
+  const userId = firebaseContext?.user?.uid;
+  
   const [appData, setAppData] = useState(defaultAppData);
   const [isSaving, setIsSaving] = useState(false);
   const saveDataTimeoutRef = useRef(null);
@@ -63,8 +66,7 @@ export const AppStateProvider = ({ children }) => {
     saveDataTimeoutRef.current = setTimeout(async () => {
       setIsSaving(true);
       const dataToSave = getUIDataForSave();
-      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Use global __app_id
-      const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData`, 'appState');
+      const userDocRef = doc(db, 'users', userId, 'appState', 'data');
       try {
         await setDoc(userDocRef, dataToSave, { merge: true });
       } catch (error) {
@@ -153,6 +155,7 @@ export const AppStateProvider = ({ children }) => {
     noticeModalOpen,
     setNoticeModalOpen,
     defaultAppData, // Also expose defaultAppData for resets
+    isInitialLoadRef, // pass ref to be set by Firebase context on load
   };
 
   return (
