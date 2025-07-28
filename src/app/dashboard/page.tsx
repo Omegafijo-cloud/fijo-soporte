@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { Trash2 } from 'lucide-react';
 
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
@@ -23,6 +24,12 @@ import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
 
+type Notice = {
+  id: number;
+  title: string;
+  url: string;
+};
+
 // Tipos para el estado
 type AppState = {
   backupText?: string;
@@ -30,7 +37,21 @@ type AppState = {
   activeSubTab?: string;
   notesText?: string;
   usersText?: string;
+  notices?: Notice[];
 };
+
+const initialNotices: Notice[] = [
+  { 
+    id: 1, 
+    title: 'PROCESOS DE MIGRACIÓN (WF)', 
+    url: 'https://docs.google.com/document/d/e/2PACX-1vT5n_Y_S_iW2j-8Gg3gB8P_B_aC9d_E_F_G_hI_jK_lM_nO_pQ_r_sT_uV_wX_yZ/pub?embedded=true' 
+  },
+  { 
+    id: 2, 
+    title: 'SEGUIMIENTO DE CASOS (DOC)', 
+    url: 'https://docs.google.com/document/d/e/2PACX-1vQ_R_S_tU_vW_xY_z_A_bC_dE_fG_hI_jK_lM_nO_pQ_rS_tU_vW_xY_z_A_bC/pub?embedded=true'
+  }
+];
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -44,6 +65,7 @@ export default function DashboardPage() {
   const [activeSubTab, setActiveSubTab] = useState('genericas');
   const [notesText, setNotesText] = useState('');
   const [usersText, setUsersText] = useState('');
+  const [notices, setNotices] = useState<Notice[]>(initialNotices);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -56,8 +78,9 @@ export default function DashboardPage() {
       activeSubTab,
       notesText,
       usersText,
+      notices,
     };
-  }, [backupText, activeTab, activeSubTab, notesText, usersText]);
+  }, [backupText, activeTab, activeSubTab, notesText, usersText, notices]);
 
   const saveStateToFirebase = useCallback(async () => {
     if (!user || !isDataLoaded) return;
@@ -81,7 +104,7 @@ export default function DashboardPage() {
       saveStateToFirebase();
     }, 1500); // Guardar 1.5s después del último cambio
     return () => clearTimeout(handler);
-  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab, notesText, usersText]);
+  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab, notesText, usersText, notices]);
 
 
   // Cargar estado desde Firebase
@@ -95,6 +118,7 @@ export default function DashboardPage() {
           if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
           if (data.notesText) setNotesText(data.notesText);
           if (data.usersText) setUsersText(data.usersText);
+          if (data.notices) setNotices(data.notices);
           
           isInitialLoad.current = false;
         } else if (!docSnap.exists()) {
@@ -139,6 +163,14 @@ export default function DashboardPage() {
 
   const handleClearBackup = () => {
     setBackupText('');
+  };
+  
+  const handleDeleteNotice = (id: number) => {
+    setNotices(prevNotices => prevNotices.filter(notice => notice.id !== id));
+    toast({
+      title: 'Aviso Eliminado',
+      description: 'El aviso ha sido eliminado de la lista.',
+    })
   };
 
   useEffect(() => {
@@ -242,30 +274,32 @@ export default function DashboardPage() {
                 <CardDescription>Documentos importantes y recursos operativos de acceso rápido.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">PROCESOS DE MIGRACIÓN (WF)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <iframe 
-                      src="https://docs.google.com/document/d/e/2PACX-1vT5n_Y_S_iW2j-8Gg3gB8P_B_aC9d_E_F_G_hI_jK_lM_nO_pQ_r_sT_uV_wX_yZ/pub?embedded=true" 
-                      className="w-full h-96 border rounded-md"
-                      title="Procesos de Migración"
-                    ></iframe>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">SEGUIMIENTO DE CASOS (DOC)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <iframe 
-                      src="https://docs.google.com/document/d/e/2PACX-1vQ_R_S_tU_vW_xY_z_A_bC_dE_fG_hI_jK_lM_nO_pQ_rS_tU_vW_xY_z_A_bC/pub?embedded=true"
-                      className="w-full h-96 border rounded-md"
-                      title="Seguimiento de Casos"
-                    ></iframe>
-                  </CardContent>
-                </Card>
+                {notices.length > 0 ? (
+                  notices.map((notice) => (
+                    <Card key={notice.id}>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-lg">{notice.title}</CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteNotice(notice.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </CardHeader>
+                      <CardContent>
+                        <iframe 
+                          src={notice.url}
+                          className="w-full h-96 border rounded-md"
+                          title={notice.title}
+                        ></iframe>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground">No hay avisos para mostrar.</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
