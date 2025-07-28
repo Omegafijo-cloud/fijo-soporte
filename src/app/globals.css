@@ -1,270 +1,76 @@
-/* app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Paleta de Colores Base - Se modificarán con JS */
-:root {
-    --azul-oscuro: #1A237E;
-    --morado: #6A1B9A;
-    --turquesa: #00BCD4;
-    --gris-claro: #F0F0F0;
-    --blanco: #FFFFFF;
-    --texto-oscuro: #333;
-    --texto-intermedio: #555;
-    --texto-claro: #ccc; /* Para tabs no activas */
-    --rojo-claro: #e74c3c;
-    --rojo-oscuro: #c0392b;
-    --verde-claro: #28a745;
-    --verde-oscuro: #218838;
-    
-    /* Colores para la animación de neuronas */
-    --neuron-color-1-rgb: "106, 27, 154"; /* Morado */
-    --neuron-color-2-rgb: "0, 188, 212";   /* Turquesa */
-    --neuron-color-3-rgb: "26, 35, 126";   /* Azul Oscuro */
-    --neuron-connection-rgb: "106, 27, 154"; /* Morado para conexiones por defecto */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
 }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    padding-bottom: 80px; /* Adjust if footer is fixed */
-    overflow-x: hidden;
-}
-
-/* Custom styles for elements not directly covered by ShadCN/Tailwind, or for specific overrides */
-.shadow-text {
-    text-shadow: 2px 2px 8px rgba(26, 35, 126, 0.4);
-}
-
-/* Widget panel animation */
-@keyframes fadeInScale {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.animate-fadeInScale {
-    animation: fadeInScale 0.3s ease-out forwards;
-}
-
-/* General button styles for consistency */
-.button {
-    background: linear-gradient(to right, var(--morado), var(--azul-oscuro));
-    border: none;
-    color: var(--blanco);
-    padding: 14px 28px;
-    font-size: 17px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to right, var(--azul-oscuro), var(--morado));
-}
-
-.button.clear-button {
-    background: linear-gradient(to right, var(--rojo-claro), var(--rojo-oscuro));
-}
-.button.clear-button:hover {
-    background: linear-gradient(to right, var(--rojo-oscuro), var(--rojo-claro));
-}
-
-.manage-button {
-    background: var(--morado); 
-    color: var(--blanco);
-    padding: 5px 10px;
-    font-size: 12px;
-    border-radius: 15px;
-    cursor: pointer;
-    border: none;
-    margin-left: 10px;
-    text-transform: none;
-    font-weight: 500;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-}
-.manage-button.remove-item { background: var(--rojo-claro); }
-.manage-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-/* ShadCN overrides for better visual consistency with theme */
-.shadcn-button { /* Use this class on ShadCN Button components if you need to apply these specific styles */
-    @apply bg-gradient-to-r from-[var(--morado)] to-[var(--azul-oscuro)] text-[var(--blanco)] font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105;
-}
-
-.shadcn-input, .shadcn-textarea, .shadcn-select-trigger {
-    @apply w-full p-3 rounded-lg border border-gray-300 focus:border-[var(--turquesa)] focus:ring-4 focus:ring-[rgba(0,188,212,0.2)] transition-all duration-300;
-}
-
-/* Specific styles for the iframe error message */
-.iframe-error-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    background-color: #fdd;
-    color: #c00;
-    border: 1px solid #f00;
-    border-radius: 8px;
-    font-size: 1.1em;
-    text-align: center;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-/* Responsive adjustments for header and tabs */
-@media (max-width: 1200px) {
-    header {
-        height: auto;
-        flex-wrap: wrap;
-        padding-bottom: 10px;
-    }
-    header > svg {
-        margin-right: 10px;
-    }
-    header > span {
-        flex-basis: 100%;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    header > div:nth-child(3) { /* Timer container */
-        flex-basis: 100%;
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-    header > div:last-child { /* Data actions container */
-        flex-basis: 100%;
-        justify-content: center;
-        margin-left: 0;
-    }
-    .tab-list {
-        top: 120px; /* Adjust for taller header */
-    }
-    .tab-content {
-        padding-top: 120px; /* Adjust for taller header */
-    }
-    .sub-tab-list {
-        top: 165px; /* Adjust for taller main tab list */
-    }
-}
-
-@media (max-width: 768px) {
-    .widget-panel {
-        width: calc(100% - 20px);
-        max-width: 340px;
-        height: auto;
-        max-height: 60vh;
-        bottom: 75px !important; /* Adjust for smaller button container */
-        right: 10px !important;
-    }
-    .widget-toggle-button {
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-    }
-    .fixed.bottom-2.right-2 { /* bottomWidgetsContainer */
-        padding: 5px;
-        gap: 5px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 480px) {
-    body {
-        padding-bottom: 60px;
-    }
-    .widget-toggle-button {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-    }
-    .widget-panel {
-        min-height: 280px;
-        max-height: 55vh;
-    }
-}
-
-/* Specific styles for Plantillas Genericas Tab */
-.form-container, .checkbox-group {
-    @apply bg-white bg-opacity-90 p-6 rounded-2xl shadow-xl;
-}
-
-.form-container h2, .checkbox-group h3 {
-    @apply text-center font-bold text-blue-800 mb-6 pb-4 border-b-2 border-b-purple-300;
-}
-.form-container h2 { @apply text-3xl; }
-.checkbox-group h3 { @apply text-2xl; }
-
-.form-group label {
-    @apply block text-lg font-medium text-gray-700 mb-2;
-}
-
-.checkbox-item-container {
-    @apply flex items-center justify-between mb-4;
-}
-
-.checkbox-item-container label {
-    @apply flex items-center text-lg text-gray-700 cursor-pointer flex-grow hover:text-purple-700 transition-colors;
-}
-
-.checkbox-item-container input[type="checkbox"] {
-    @apply mr-3 scale-125 accent-cyan-500 min-w-5 min-h-5;
-}
-
-/* TMO Calculator specific styles */
-.tmo-message-box {
-    @apply bg-white bg-opacity-95 p-8 rounded-2xl shadow-xl w-full md:w-[calc(50%-0.75rem)] min-h-[200px] flex items-center justify-center text-center text-3xl md:text-4xl font-extrabold text-blue-800 border-4 border-cyan-500 leading-tight;
-}
-
-.tmo-converter-box {
-    @apply bg-white bg-opacity-95 p-8 rounded-2xl shadow-xl w-full md:w-[calc(50%-0.75rem)] border-t-4 border-t-purple-700 text-center;
-}
-
-.seconds-result-display {
-    @apply mt-8 p-4 rounded-xl border-2 text-4xl font-extrabold transition-all duration-300;
-}
-
-.seconds-result-red {
-    @apply bg-red-100 border-red-700 text-red-700;
-}
-
-.seconds-result-green {
-    @apply bg-green-100 border-green-700 text-green-700;
-}
-
-/* Transferencias Tab */
-.transfers-list-container {
-    @apply bg-cyan-100 p-4 rounded-lg border border-cyan-300;
-}
-
-.transfers-list-item {
-    @apply flex items-center justify-between py-2 border-b border-cyan-200 last:border-b-0 text-lg text-gray-700;
-}
-
-/* Avisos Tab */
-.document-viewer-box {
-    @apply bg-white bg-opacity-95 p-6 rounded-2xl shadow-xl w-full md:w-[calc(50%-0.75rem)] min-h-[350px] flex flex-col;
-}
-
-.document-iframe-container {
-    @apply flex-grow flex items-center justify-center w-full h-full;
-}
-
-.document-iframe {
-    @apply w-full h-full border-none rounded-lg;
-}
-
-/* Copia de Respaldo Tab */
-.backup-textarea {
-    @apply w-full p-4 rounded-lg border border-gray-300 text-lg text-gray-800 min-h-[250px] focus:border-cyan-500 focus:ring-4 focus:ring-cyan-200;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
