@@ -2,30 +2,40 @@
 'use client';
 
 import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
-import { auth as firebaseAuth, db as firestoreDb } from '../lib/firebase';
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { AppStateContext } from './AppStateContext'; // We need this for the alert setter
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
+import { app } from '../lib/firebase'; // Import the initialized app
+import { AppStateContext } from './AppStateContext'; // Import AppStateContext
 
 const FirebaseContext = createContext(null);
 
 export const FirebaseProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [auth, setAuth] = useState(null);
+  const [db, setDb] = useState(null);
   const unsubscribeRef = React.useRef(null);
   
-  // Get setAlert from AppStateContext to show login/logout errors
-  const { setAlert } = useContext(AppStateContext);
+  const appStateContext = useContext(AppStateContext);
+
+  // Initialize Firebase services
+  useEffect(() => {
+    if (app) {
+      setAuth(getAuth(app));
+      setDb(getFirestore(app));
+    }
+  }, []);
 
   // Firestore Listener Setup
   const setupFirestoreListener = useCallback((uid, { setAppData, defaultAppData, isInitialLoadRef }) => {
-    if (!uid || !firestoreDb) return;
+    if (!uid || !db) return;
 
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
     }
     
-    const userDocRef = doc(firestoreDb, 'users', uid, 'appState', 'data');
+    const appId = 'claro-template-generator'; // Replace with a dynamic app ID if needed
+    const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'userData', 'appState');
 
     unsubscribeRef.current = onSnapshot(userDocRef, (docSnap) => {
       isInitialLoadRef.current = true; // Set flag to prevent saving on this load
@@ -44,56 +54,68 @@ export const FirebaseProvider = ({ children }) => {
       setTimeout(() => { isInitialLoadRef.current = false; }, 500);
     }, (error) => {
       console.error("Error en el listener de Firestore:", error);
-      if (setAlert) {
-        setAlert({ isOpen: true, message: 'Error al cargar datos de Firebase.' });
+      if (appStateContext?.setAlert) {
+        appStateContext.setAlert({ isOpen: true, message: 'Error al cargar datos de Firebase.' });
       }
     });
     
     // Return the unsubscribe function for cleanup
     return unsubscribeRef.current;
-  }, [setAlert]); // setAlert is a dependency now
+  }, [db, appStateContext]); // setAlert is a dependency now
 
-  // Auth Listener is now simpler, the coordination happens in HomePage
+  // Auth Listener
   useEffect(() => {
-    if (!firebaseAuth) { 
+    if (!auth) { 
       setIsAuthReady(true);
       return;
     }
-    const unsubscribeAuth = onAuthStateChanged(firebaseAuth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthReady(true);
+      if (!currentUser && unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [auth]);
 
 
   // Login handler
   const handleLogin = useCallback(async (email, password) => {
+    if (!auth) {
+        if(appStateContext?.setAlert) appStateContext.setAlert({isOpen: true, message: 'Servicio de autenticación no disponible.'});
+        return;
+    }
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error("Error al iniciar sesión:", error.code, error.message);
-      setAlert({isOpen: true, message: 'Credenciales incorrectas. Por favor, verifique.'})
+      if(appStateContext?.setAlert) appStateContext.setAlert({isOpen: true, message: 'Credenciales incorrectas. Por favor, verifique.'})
     }
-  }, [setAlert]);
+  }, [auth, appStateContext]);
 
   // Logout handler
   const handleLogout = useCallback(async () => {
+    if (!auth) {
+        if(appStateContext?.setAlert) appStateContext.setAlert({isOpen: true, message: 'Servicio de autenticación no disponible.'});
+        return;
+    }
     try {
-      await signOut(firebaseAuth);
+      await signOut(auth);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
-      setAlert({isOpen: true, message: 'Error al cerrar sesión.'})
+      if(appStateContext?.setAlert) appStateContext.setAlert({isOpen: true, message: 'Error al cerrar sesión.'})
     }
-  }, [setAlert]);
+  }, [auth, appStateContext]);
 
 
   const contextValue = {
     user,
     isAuthReady,
-    auth: firebaseAuth,
-    db: firestoreDb,
+    auth,
+    db,
     handleLogin,
     handleLogout,
     setupFirestoreListener, // Expose the listener setup function

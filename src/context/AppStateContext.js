@@ -66,7 +66,8 @@ export const AppStateProvider = ({ children }) => {
     saveDataTimeoutRef.current = setTimeout(async () => {
       setIsSaving(true);
       const dataToSave = getUIDataForSave();
-      const userDocRef = doc(db, 'users', userId, 'appState', 'data');
+      const appId = 'claro-template-generator'; // Replace with a dynamic app ID if needed
+      const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'appState');
       try {
         await setDoc(userDocRef, dataToSave, { merge: true });
       } catch (error) {
@@ -83,10 +84,6 @@ export const AppStateProvider = ({ children }) => {
     // Only trigger save if not the initial load from Firebase
     if (!isInitialLoadRef.current) {
       triggerSave();
-    } else {
-      // After the first render, set isInitialLoadRef to false
-      // This allows subsequent changes to trigger saves
-      isInitialLoadRef.current = false;
     }
   }, [appData, triggerSave]);
 
