@@ -11,6 +11,7 @@ import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
 import MemosWfTab from '@/components/tabs/MemosWfTab';
 import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
+import HerramientasTab from '@/components/tabs/HerramientasTab';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -97,15 +98,7 @@ export default function DashboardPage() {
           </TabsContent>
           
           <TabsContent value="herramientas" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Herramientas</CardTitle>
-                <CardDescription>Utilidades para optimizar el trabajo.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Aquí irá la Calculadora TMO y otras herramientas.</p>
-              </CardContent>
-            </Card>
+            <HerramientasTab />
           </TabsContent>
           
           <TabsContent value="transferencias" className="mt-4">
