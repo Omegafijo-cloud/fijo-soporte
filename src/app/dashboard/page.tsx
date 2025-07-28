@@ -101,8 +101,20 @@ export default function DashboardPage() {
         setIsDataLoaded(true);
       });
       return () => unsub();
+    } else {
+        // Si no hay usuario, marcamos la carga como completa para que la redirección pueda ocurrir.
+        if (!authLoading) {
+            setIsDataLoaded(true);
+        }
     }
-  }, [user]);
+  }, [user, authLoading]);
+
+  // Redireccionar si el usuario no está autenticado después de la carga
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/');
+    }
+  }, [authLoading, user, router]);
 
 
   // ----- Manejadores y otros -----
@@ -126,17 +138,12 @@ export default function DashboardPage() {
     setBackupText('');
   };
 
-  if (authLoading || !isDataLoaded) {
+  if (authLoading || !isDataLoaded || !user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
         <p>Cargando OMEGA...</p>
       </div>
     );
-  }
-
-  if (!user) {
-    router.push('/');
-    return null;
   }
 
   return (
