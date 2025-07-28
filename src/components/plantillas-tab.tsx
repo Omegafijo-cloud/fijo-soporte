@@ -64,8 +64,8 @@ const PlantillasGenericasTab = () => {
     useEffect(() => {
         const pruebas = Object.entries(checkboxes)
             .filter(([, checked]) => checked)
-            .map(([label]) => `- ${label}`)
-            .join('\n');
+            .map(([label]) => label)
+            .join(' ');
         setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
     }, [checkboxes]);
 
@@ -254,8 +254,8 @@ const PlantillasQuejasTab = () => {
     useEffect(() => {
         const pruebas = Object.entries(checkboxes)
             .filter(([, checked]) => checked)
-            .map(([label]) => `- ${label}`)
-            .join('\n');
+            .map(([label]) => label)
+            .join(' ');
         setFormData(prev => ({ ...prev, pruebasRealizadas: pruebas }));
     }, [checkboxes]);
 
@@ -432,3 +432,5 @@ export function PlantillasTab() {
     </Tabs>
   );
 }
+
+    
