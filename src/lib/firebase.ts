@@ -9,7 +9,8 @@ const firebaseConfig = {
   projectId: "omega---fijo-soporte",
   storageBucket: "omega---fijo-soporte.appspot.com",
   messagingSenderId: "725387515426",
-  appId: "1:725387515426:web:3fcd5944419093e8dadc7b"
+  appId: "1:725387515426:web:3fcd5944419093e8dadc7b",
+  measurementId: "G-HQ4R55SDNZ"
 };
 
 // Initialize Firebase
