@@ -3,15 +3,50 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save } from 'lucide-react';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
 import { AvisosTab } from '@/components/avisos-tab';
 import { CopiaRespaldoTab } from '@/components/copia-respaldo-tab';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function OmegaPage() {
   const [activeTab, setActiveTab] = useState('plantillas');
+  const [activeWidget, setActiveWidget] = useState<string | null>(null);
+  const [quickNotes, setQuickNotes] = useState('');
+  const { toast } = useToast();
+
+  const handleWidgetToggle = (widgetName: string) => {
+    setActiveWidget(prev => (prev === widgetName ? null : widgetName));
+  };
+  
+  const handleCopyFromWidget = (content: string, title: string) => {
+    if (!content) {
+      toast({
+        title: `Nada que copiar en ${title}`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    navigator.clipboard.writeText(content).then(() => {
+      toast({
+        title: `${title} copiado`,
+        description: 'El contenido ha sido copiado al portapapeles.',
+      });
+    });
+  };
+
+  const handleClearWidget = (setter: (value: string) => void, title: string) => {
+    setter('');
+    toast({
+      title: `${title} limpiado`,
+      description: 'El contenido ha sido borrado.',
+    });
+  };
+
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -82,6 +117,44 @@ export default function OmegaPage() {
             </Card>
         </div>
       </main>
+
+      {/* Widgets Inferiores Flotantes */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+         {/* Panel de Notas Rápidas */}
+         {activeWidget === 'notas' && (
+          <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
+            <CardContent className="p-4 space-y-3">
+              <h4 className="font-semibold text-center">Notas Rápidas</h4>
+              <Textarea 
+                placeholder="Escribe tus notas aquí..." 
+                rows={8}
+                value={quickNotes}
+                onChange={(e) => setQuickNotes(e.target.value)}
+              />
+              <div className="flex justify-between gap-2">
+                <Button size="sm" onClick={() => handleCopyFromWidget(quickNotes, 'Notas Rápidas')} className="flex-1">
+                  <Copy className="mr-2 h-4 w-4" /> Copiar
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleClearWidget(setQuickNotes, 'Notas Rápidas')} className="flex-1">
+                  <Trash2 className="mr-2 h-4 w-4" /> Limpiar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Botones de Toggle para Widgets */}
+        <div className="flex justify-end gap-3">
+          <Button
+            size="icon"
+            className="rounded-full h-12 w-12 shadow-lg"
+            onClick={() => handleWidgetToggle('notas')}
+          >
+            {activeWidget === 'notas' ? <X /> : <StickyNote />}
+          </Button>
+          {/* Aquí irán los otros botones de widgets */}
+        </div>
+      </div>
 
       <footer className="py-4 text-center text-sm text-muted-foreground">
         Desarrollado por: Keiner Valera
