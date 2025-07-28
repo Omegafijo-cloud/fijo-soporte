@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,14 +9,67 @@ import { Input } from '@/components/ui/input';
 import { X, MessageSquare, Notebook, Users, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { hexToHsl } from '@/lib/utils';
 
 type ActiveWidget = 'notes' | 'users' | 'chat' | 'theme' | null;
+
+const defaultTheme = {
+  primary: '222.2 47.4% 11.2%',
+  background: '0 0% 100%',
+  accent: '210 40% 96.1%',
+};
+
+const defaultThemeHex = {
+    primary: '#1c3d5a',
+    background: '#ffffff',
+    accent: '#f0f2f5',
+}
 
 export default function FloatingWidgets() {
   const [activeWidget, setActiveWidget] = useState<ActiveWidget>(null);
   const [notesText, setNotesText] = useState('');
   const [usersText, setUsersText] = useState('');
   const { toast } = useToast();
+  
+  const [primaryColor, setPrimaryColor] = useState(defaultThemeHex.primary);
+  const [backgroundColor, setBackgroundColor] = useState(defaultThemeHex.background);
+  const [accentColor, setAccentColor] = useState(defaultThemeHex.accent);
+
+  const applyTheme = (theme: {primary: string, background: string, accent: string}) => {
+    const root = document.documentElement;
+    root.style.setProperty('--primary', hexToHsl(theme.primary));
+    root.style.setProperty('--background', hexToHsl(theme.background));
+    root.style.setProperty('--accent', hexToHsl(theme.accent));
+  };
+
+  const handleColorChange = (colorType: 'primary' | 'background' | 'accent', value: string) => {
+    let newTheme = { primary: primaryColor, background: backgroundColor, accent: accentColor };
+    if (colorType === 'primary') {
+      setPrimaryColor(value);
+      newTheme.primary = value;
+    } else if (colorType === 'background') {
+      setBackgroundColor(value);
+      newTheme.background = value;
+    } else if (colorType === 'accent') {
+        setAccentColor(value);
+        newTheme.accent = value;
+    }
+    applyTheme(newTheme);
+  };
+
+  const handleRestoreDefaults = () => {
+    setPrimaryColor(defaultThemeHex.primary);
+    setBackgroundColor(defaultThemeHex.background);
+    setAccentColor(defaultThemeHex.accent);
+    const root = document.documentElement;
+    root.style.setProperty('--primary', defaultTheme.primary);
+    root.style.setProperty('--background', defaultTheme.background);
+    root.style.setProperty('--accent', defaultTheme.accent);
+     toast({
+      title: 'Tema Restaurado',
+      description: 'Los colores han vuelto a sus valores predeterminados.',
+    });
+  };
 
   const toggleWidget = (widget: ActiveWidget) => {
     setActiveWidget(prev => (prev === widget ? null : widget));
@@ -102,17 +155,17 @@ export default function FloatingWidgets() {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label>Color Primario</Label>
-                        <Input type="color" defaultValue="#6A1B9A" className="p-1 h-10"/>
+                        <Input type="color" value={primaryColor} onChange={(e) => handleColorChange('primary', e.target.value)} className="p-1 h-10"/>
                     </div>
                     <div className="space-y-2">
                         <Label>Color de Fondo</Label>
-                        <Input type="color" defaultValue="#00BCD4" className="p-1 h-10"/>
+                        <Input type="color" value={backgroundColor} onChange={(e) => handleColorChange('background', e.target.value)} className="p-1 h-10"/>
                     </div>
                      <div className="space-y-2">
                         <Label>Color de Acento</Label>
-                        <Input type="color" defaultValue="#1A237E" className="p-1 h-10"/>
+                        <Input type="color" value={accentColor} onChange={(e) => handleColorChange('accent', e.target.value)} className="p-1 h-10"/>
                     </div>
-                    <Button>Restaurar Predeterminados</Button>
+                    <Button onClick={handleRestoreDefaults}>Restaurar Predeterminados</Button>
                 </CardContent>
             </Card>
         );
