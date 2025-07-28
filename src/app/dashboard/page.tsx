@@ -84,9 +84,9 @@ export default function DashboardPage() {
   // Cargar estado desde Firebase
   useEffect(() => {
     if (user) {
-      const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (doc) => {
-        if (doc.exists() && isInitialLoad.current) {
-          const data = doc.data() as AppState;
+      const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (docSnap) => {
+        if (docSnap.exists() && isInitialLoad.current) {
+          const data = docSnap.data() as AppState;
           console.log("Datos cargados de Firebase:", data);
           if (data.backupText) setBackupText(data.backupText);
           if (data.activeTab) setActiveTab(data.activeTab);
@@ -95,7 +95,7 @@ export default function DashboardPage() {
           if (data.usersText) setUsersText(data.usersText);
           
           isInitialLoad.current = false;
-        } else if (!doc.exists()) {
+        } else if (!docSnap.exists()) {
              isInitialLoad.current = false;
         }
         setIsDataLoaded(true);
@@ -111,10 +111,11 @@ export default function DashboardPage() {
 
   // Redireccionar si el usuario no está autenticado después de la carga
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !isDataLoaded) return;
+    if (!user) {
       router.push('/');
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, isDataLoaded, router]);
 
 
   // ----- Manejadores y otros -----
@@ -138,13 +139,15 @@ export default function DashboardPage() {
     setBackupText('');
   };
 
-  if (authLoading || !isDataLoaded || !user) {
+  if (authLoading || !isDataLoaded) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
         <p>Cargando OMEGA...</p>
       </div>
     );
   }
+  
+  if (!user) return null; // Previene el renderizado del dashboard si no hay usuario
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
