@@ -26,8 +26,8 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    // Esto no debería pasar si la lógica de AuthContext y el router funcionan bien,
-    // pero es una buena práctica mantenerlo como salvaguarda.
+    // This will be handled by the AuthContext and router logic, so we can return null
+    // or a redirect component. For now, let's prevent rendering if no user.
     return null;
   }
 
@@ -67,12 +67,27 @@ export default function DashboardPage() {
           
           <TabsContent value="plantillas" className="mt-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Plantillas</CardTitle>
-                <CardDescription>Gestión de scripts y formularios.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Aquí irán las sub-pestañas para Plantillas Genéricas, Quejas, WF y Orden.</p>
+              <CardContent className="p-6">
+                <Tabs defaultValue="genericas" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
+                    <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
+                    <TabsTrigger value="wf">MEMOS DE WF</TabsTrigger>
+                    <TabsTrigger value="orden">MEMOS DE ORDEN</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="genericas" className="mt-4">
+                    <p>Contenido de Plantillas Genéricas irá aquí.</p>
+                  </TabsContent>
+                  <TabsContent value="quejas" className="mt-4">
+                    <p>Contenido de Plantillas de Quejas irá aquí.</p>
+                  </TabsContent>
+                  <TabsContent value="wf" className="mt-4">
+                    <p>Contenido de Memos de WF irá aquí.</p>
+                  </TabsContent>
+                  <TabsContent value="orden" className="mt-4">
+                    <p>Contenido de Memos de Orden irá aquí.</p>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
