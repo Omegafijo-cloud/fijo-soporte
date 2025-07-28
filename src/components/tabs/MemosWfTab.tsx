@@ -46,6 +46,8 @@ export default function MemosWfTab({
         template.fields.forEach(field => {
             if (field.defaultValue) {
                 initialData[field.id] = field.defaultValue;
+            } else {
+                initialData[field.id] = '';
             }
         });
     }
@@ -72,7 +74,6 @@ export default function MemosWfTab({
   }
 
   const handleRemoveTemplate = (templateKey: string) => {
-    // Prevent deletion of predefined templates if necessary, though current setup allows it
     const newTemplates = { ...templates };
     delete newTemplates[templateKey];
     setTemplates(newTemplates);
@@ -95,7 +96,7 @@ export default function MemosWfTab({
     const template = templates[selectedTemplate];
     
     template.fields.forEach(field => {
-      templateText += `${field.label}: ${formData[field.id] || field.defaultValue || ''}\n`;
+      templateText += `${field.label}: ${formData[field.id] || ''}\n`;
     });
 
     navigator.clipboard.writeText(templateText);
@@ -106,8 +107,22 @@ export default function MemosWfTab({
   };
 
   const handleClear = () => {
-    setSelectedTemplate('');
-    setFormData({});
+    if (selectedTemplate) {
+        const template = templates[selectedTemplate];
+        const initialData: { [key: string]: any } = {};
+        if (template) {
+            template.fields.forEach(field => {
+                if (field.defaultValue) {
+                    initialData[field.id] = field.defaultValue;
+                } else {
+                    initialData[field.id] = '';
+                }
+            });
+        }
+        setFormData(initialData);
+    } else {
+        setFormData({});
+    }
   };
 
   const renderDynamicFields = () => {
@@ -121,9 +136,9 @@ export default function MemosWfTab({
           <div key={field.id} className="space-y-2">
             <Label htmlFor={field.id}>{field.label}</Label>
             {field.type === 'textarea' ? (
-              <Textarea id={field.id} value={formData[field.id] ?? field.defaultValue ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
+              <Textarea id={field.id} value={formData[field.id] ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
             ) : (
-              <Input id={field.id} type={field.type} value={formData[field.id] ?? field.defaultValue ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
+              <Input id={field.id} type={field.type} value={formData[field.id] ?? ''} onChange={(e) => handleInputChange(field.id, e.target.value)} />
             )}
           </div>
         ))}
@@ -147,7 +162,7 @@ export default function MemosWfTab({
                 </SelectTrigger>
                 <SelectContent>
                 {Object.keys(templates).map(key => (
-                     <SelectItem key={key} value={key}>
+                     <SelectItem key={key} value={key} onSelect={(e) => e.preventDefault()}>
                         <div className="flex items-center justify-between w-full">
                            <span className="capitalize">{key}</span>
                            <Button 
@@ -189,7 +204,7 @@ export default function MemosWfTab({
             {renderDynamicFields()}
             <div className="flex gap-2">
               <Button onClick={handleCopy}>Copiar Memo WF</Button>
-              <Button variant="outline" onClick={handleClear}>Limpiar Memo WF</Button>
+              <Button variant="outline" onClick={handleClear}>Limpiar</Button>
             </div>
           </div>
         )}
