@@ -495,7 +495,7 @@ export default function DashboardPage() {
       const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (docSnap) => {
         if (docSnap.exists() && isInitialLoad.current) {
           const data = docSnap.data() as AppState;
-          // Cargar estado general
+          
           if (data.activeTab) setActiveTab(data.activeTab);
           if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
           if (data.backupText) setBackupText(data.backupText);
@@ -503,12 +503,10 @@ export default function DashboardPage() {
           if (data.usersText) setUsersText(data.usersText);
           if (data.notices) setNotices(data.notices);
 
-          // Cargar estado de pestañas
           if (data.plantillasGenericas_formData) setPlantillasGenericasFormData(data.plantillasGenericas_formData);
           if (data.plantillasGenericas_checkboxes) setPlantillasGenericasCheckboxes(data.plantillasGenericas_checkboxes);
           if (data.plantillasGenericas_orderedPruebas) setPlantillasGenericasOrderedPruebas(data.plantillasGenericas_orderedPruebas);
           if (data.plantillasGenericas_pruebasRealizadas) setPlantillasGenericasPruebasRealizadas(data.plantillasGenericas_pruebasRealizadas);
-
 
           if(data.plantillasQuejas_selectedTemplate) setPlantillasQuejasSelectedTemplate(data.plantillasQuejas_selectedTemplate);
           if(data.plantillasQuejas_formData) setPlantillasQuejasFormData(data.plantillasQuejas_formData);
@@ -519,12 +517,32 @@ export default function DashboardPage() {
 
           
           if(data.memosWf_templates) setMemosWfTemplates(data.memosWf_templates);
-          if(data.memosWf_selectedTemplate) setMemosWfSelectedTemplate(data.memosWf_selectedTemplate);
-          if(data.memosWf_formData) setMemosWfFormData(data.memosWf_formData);
+          if (data.memosWf_selectedTemplate && data.memosWf_templates && data.memosWf_templates[data.memosWf_selectedTemplate]) {
+              setMemosWfSelectedTemplate(data.memosWf_selectedTemplate);
+              const template = data.memosWf_templates[data.memosWf_selectedTemplate];
+              const initialData: { [key: string]: any } = {};
+              template.fields.forEach(field => {
+                  initialData[field.id] = field.defaultValue || '';
+              });
+              const mergedData = { ...initialData, ...data.memosWf_formData };
+              setMemosWfFormData(mergedData);
+          } else if (data.memosWf_formData) {
+              setMemosWfFormData(data.memosWf_formData);
+          }
           
           if(data.memosOrden_templates) setMemosOrdenTemplates(data.memosOrden_templates);
-          if(data.memosOrden_selectedTemplate) setMemosOrdenSelectedTemplate(data.memosOrden_selectedTemplate);
-          if(data.memosOrden_formData) setMemosOrdenFormData(data.memosOrden_formData);
+           if (data.memosOrden_selectedTemplate && data.memosOrden_templates && data.memosOrden_templates[data.memosOrden_selectedTemplate]) {
+              setMemosOrdenSelectedTemplate(data.memosOrden_selectedTemplate);
+              const template = data.memosOrden_templates[data.memosOrden_selectedTemplate];
+              const initialData: { [key: string]: any } = {};
+              template.fields.forEach(field => {
+                  initialData[field.id] = field.defaultValue || '';
+              });
+              const mergedData = { ...initialData, ...data.memosOrden_formData };
+              setMemosOrdenFormData(mergedData);
+          } else if (data.memosOrden_formData) {
+              setMemosOrdenFormData(data.memosOrden_formData);
+          }
 
           if(data.herramientas_minutos) setHerramientasMinutos(data.herramientas_minutos);
 

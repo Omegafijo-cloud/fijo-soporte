@@ -44,15 +44,11 @@ export default function MemosOrdenTab({
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    const initialData: { [key: string]: any } = {};
     const template = templates[templateKey];
+    const initialData: { [key: string]: any } = {};
     if (template) {
         template.fields.forEach(field => {
-            if (field.defaultValue) {
-                initialData[field.id] = field.defaultValue;
-            } else {
-                initialData[field.id] = '';
-            }
+            initialData[field.id] = field.defaultValue || '';
         });
     }
     setFormData(initialData);
