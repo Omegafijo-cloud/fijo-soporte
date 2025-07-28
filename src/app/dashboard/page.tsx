@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
+import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -80,7 +81,7 @@ export default function DashboardPage() {
                     <PlantillasGenericasTab />
                   </TabsContent>
                   <TabsContent value="quejas" className="p-6">
-                    <p>Contenido de Plantillas de Quejas irá aquí.</p>
+                    <PlantillasQuejasTab />
                   </TabsContent>
                   <TabsContent value="wf" className="p-6">
                     <p>Contenido de Memos de WF irá aquí.</p>
