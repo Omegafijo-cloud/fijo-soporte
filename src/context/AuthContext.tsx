@@ -9,6 +9,7 @@ import {
   setDoc,
   getDoc,
 } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
-        const db = getFirestore();
+        // Ensure user document exists
         const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         if (!userDoc.exists()) {
@@ -33,6 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 email: user.email,
                 createdAt: new Date(),
             });
+            // Create the state subcollection document too
+            await setDoc(doc(db, 'users', user.uid, 'state', 'appState'), {});
         }
       } else {
         setUser(null);

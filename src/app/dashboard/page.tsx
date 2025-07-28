@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
@@ -19,13 +20,87 @@ import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
 
+// Tipos para el estado
+type AppState = {
+  backupText?: string;
+  activeTab?: string;
+  activeSubTab?: string;
+  // Añadiremos más estados aquí
+};
+
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [backupText, setBackupText] = useState('');
   const { toast } = useToast();
+  const isInitialLoad = useRef(true);
+
+  // Estados Centralizados
+  const [backupText, setBackupText] = useState('');
+  const [activeTab, setActiveTab] = useState('plantillas');
+  const [activeSubTab, setActiveSubTab] = useState('genericas');
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // ----- Lógica de persistencia de datos -----
+
+  const getAppState = useCallback((): AppState => {
+    return {
+      backupText,
+      activeTab,
+      activeSubTab,
+    };
+  }, [backupText, activeTab, activeSubTab]);
+
+  const saveStateToFirebase = useCallback(async () => {
+    if (!user || !isDataLoaded) return;
+    const appState = getAppState();
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'state', 'appState'), appState, { merge: true });
+    } catch (error) {
+      console.error("Error saving state to Firebase:", error);
+      toast({
+        title: 'Error de Guardado',
+        description: 'No se pudo guardar el estado de la aplicación.',
+        variant: 'destructive',
+      });
+    }
+  }, [user, getAppState, isDataLoaded, toast]);
+  
+  // Debounce para el guardado
+  useEffect(() => {
+    if (isInitialLoad.current || !isDataLoaded) return;
+    const handler = setTimeout(() => {
+      saveStateToFirebase();
+    }, 1500); // Guardar 1.5s después del último cambio
+    return () => clearTimeout(handler);
+  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab]);
+
+
+  // Cargar estado desde Firebase
+  useEffect(() => {
+    if (user) {
+      const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (doc) => {
+        if (doc.exists() && isInitialLoad.current) {
+          const data = doc.data() as AppState;
+          console.log("Datos cargados de Firebase:", data);
+          if (data.backupText) setBackupText(data.backupText);
+          if (data.activeTab) setActiveTab(data.activeTab);
+          if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
+          
+          isInitialLoad.current = false;
+        } else if (!doc.exists()) {
+             isInitialLoad.current = false;
+        }
+        setIsDataLoaded(true);
+      });
+      return () => unsub();
+    }
+  }, [user]);
+
+
+  // ----- Manejadores y otros -----
 
   const handleLogout = async () => {
+    await saveStateToFirebase(); // Guardar el estado final antes de salir
     await signOut(auth);
     router.push('/');
   };
@@ -43,23 +118,21 @@ export default function DashboardPage() {
     setBackupText('');
   };
 
-  if (loading) {
+  if (authLoading || !isDataLoaded) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <p>Cargando...</p>
+        <p>Cargando OMEGA...</p>
       </div>
     );
   }
 
   if (!user) {
-    // Redirige al login si no hay usuario y no está cargando
     router.push('/');
     return null;
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      {/* Barra Superior Fija */}
       <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
@@ -72,7 +145,6 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold">OMEGA - FIJO SOPORTE</h1>
         </div>
         <div className="flex items-center gap-4">
-          {/* Placeholder para el temporizador */}
           <div className="text-sm font-medium">00:00:00</div>
           <Button onClick={handleLogout} variant="destructive" size="sm">
             Salir
@@ -80,9 +152,8 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Contenido Principal con Pestañas */}
       <main className="flex-1 p-4 md:p-6">
-        <Tabs defaultValue="plantillas" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="plantillas">PLANTILLAS</TabsTrigger>
             <TabsTrigger value="herramientas">HERRAMIENTAS</TabsTrigger>
@@ -94,7 +165,7 @@ export default function DashboardPage() {
           <TabsContent value="plantillas" className="mt-4">
             <Card>
               <CardContent className="p-0">
-                <Tabs defaultValue="genericas" className="w-full">
+                <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
                     <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
                     <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
@@ -186,7 +257,6 @@ export default function DashboardPage() {
 
       <FloatingWidgets />
 
-      {/* Placeholder para la firma del desarrollador */}
       <footer className="p-4 text-center text-xs text-muted-foreground">
         Desarrollado por: Keiner Valera
       </footer>
