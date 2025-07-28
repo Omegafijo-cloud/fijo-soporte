@@ -22,20 +22,20 @@ interface FloatingWidgetsProps {
 }
 
 const defaultTheme = {
-  primary: '222.2 47.4% 11.2%',
+  primary: '236 65% 33%',
   background: '0 0% 100%',
-  accent: '210 40% 96.1%',
+  accent: '282 69% 38%',
 };
 
 const defaultThemeHex = {
-    primary: '#1c3d5a',
-    background: '#ffffff',
-    accent: '#f0f2f5',
+    primary: '#1A237E',
+    background: '#FFFFFF',
+    accent: '#6A1B9A',
 };
 
 const colorPalettes = [
-  { name: 'Omega', colors: { primary: '#1c3d5a', background: '#ffffff', accent: '#f0f2f5' } },
-  { name: 'Abismo', colors: { primary: '#e2e8f0', background: '#0f172a', accent: '#1e293b' } },
+  { name: 'Omega', colors: { primary: '#1A237E', background: '#FFFFFF', accent: '#6A1B9A' } },
+  { name: 'Abismo', colors: { primary: '#e2e8f0', background: '#0f172a', accent: '#94a3b8' } },
   { name: 'Bosque', colors: { primary: '#2f6241', background: '#f0f5f1', accent: '#dbece2' } },
   { name: 'Amanecer', colors: { primary: '#c2410c', background: '#fff7ed', accent: '#ffedd5' } },
   { name: 'Corporativo', colors: { primary: '#2563eb', background: '#ffffff', accent: '#f0f9ff' } },
@@ -272,5 +272,3 @@ export default function FloatingWidgets({
     </>
   );
 }
-
-    
