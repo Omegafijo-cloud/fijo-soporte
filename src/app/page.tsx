@@ -2,48 +2,69 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, OAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import OmegaLogo from '@/components/OmegaLogo';
 
+const ALLOWED_DOMAINS = ['unireformada.edu.co', 'aliados.claro.com.gt', 'atlanticqi.com'];
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loadingMicrosoft, setLoadingMicrosoft] = useState(false);
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!authLoading && user) {
       router.push('/dashboard');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleMicrosoftSignIn = async () => {
+    setLoadingMicrosoft(true);
     setError(null);
+    const provider = new OAuthProvider('microsoft.com');
+    provider.setCustomParameters({
+        // Optional: prompt=select_account forces account selection
+        prompt: 'select_account',
+    });
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user.email;
+      if (!userEmail) {
+        throw new Error("No se pudo obtener el correo del usuario.");
+      }
+      
+      const domain = userEmail.split('@')[1];
+      if (!ALLOWED_DOMAINS.includes(domain)) {
+        await signOut(auth);
+        setError(`El dominio '${domain}' no está autorizado para acceder a esta aplicación.`);
+        setLoadingMicrosoft(false);
+        return;
+      }
+      
       router.push('/dashboard');
+
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Credenciales inválidas. Por favor, revise su correo y contraseña.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('El formato del correo electrónico no es válido.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        setError('Ya existe una cuenta con el mismo correo electrónico pero con un método de inicio de sesión diferente.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('El proceso de inicio de sesión fue cancelado.');
       } else {
-        setError('Ocurrió un error al intentar iniciar sesión.');
+        setError('Ocurrió un error al intentar iniciar sesión con Microsoft.');
       }
+    } finally {
+        setLoadingMicrosoft(false);
     }
   };
 
-  if (loading || user) {
+  if (authLoading || user) {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background">
             <p>Verificando sesión...</p>
@@ -69,42 +90,22 @@ export default function LoginPage() {
                <CardTitle className="text-3xl font-bold">Omega iniciar sesión</CardTitle>
             </div>
             <CardDescription className="text-center text-lg pt-2">
-              Accede a tu cuenta para continuar
+              Accede con tu cuenta de Microsoft
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-lg">Correo Electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@correo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-12 text-lg"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-lg">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="********"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 text-lg"
-                />
-              </div>
-              {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-              <Button type="submit" className="w-full h-12 text-lg font-bold">
-                Acceder
-              </Button>
-            </form>
+            <div className="space-y-6">
+                <Button 
+                    onClick={handleMicrosoftSignIn} 
+                    className="w-full h-12 text-lg font-bold"
+                    disabled={loadingMicrosoft}
+                >
+                  {loadingMicrosoft ? 'Iniciando...' : 'Iniciar sesión con Microsoft'}
+                </Button>
+                {error && <p className="text-sm font-medium text-destructive text-center">{error}</p>}
+            </div>
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Solo los usuarios autorizados pueden iniciar sesión.
+              Solo los usuarios con dominios autorizados pueden iniciar sesión.
             </p>
           </CardContent>
         </Card>
