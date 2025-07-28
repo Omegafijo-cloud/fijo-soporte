@@ -17,23 +17,48 @@ type CheckboxState = {
 
 const initialCheckboxState: CheckboxState = {
   'Nivel Cero': {
-    'Contraseña de router': false,
-    'Reiniciar router': false,
-    'Validar luces del router': false,
+    'Saldos OK': false,
+    'No hay Fallas': false,
+    'No presenta bloqueo': false,
+    'No hay OS abiertas': false,
+    'No hay quejas': false,
   },
   'GPON - ADSL - HFC': {
-    'Prueba de velocidad': false,
-    'Verificar cableado': false,
-    'Revisar configuración de red': false,
+    'Se verifica estado de las luces del router': false,
+    'Envio reset en UMP': false,
+    'Se Desconecta y Conecta Corriente': false,
+    'Se Desconecta y Conecta en otro tomacorriente': false,
+    'Se verifica Splitter': false,
+    'Cambio de baterías': false,
+    'Se verifica Coaxial bien apretado': false,
+    'Se verifica cortes o daños en la fibra': false,
+    'Se manda a realizar test de velocidad (00 Megas)': false,
+    'Se realiza Ping (0% perdido)': false,
+    'Estado de la ONT activo': false,
+    'Niveles SNR en Rojo': false,
+    'Luz LOS en ROJO': false,
+    'Se envia reboot en Axiros': false,
   },
   'TV HFC - DTH - IPTV': {
-    'Reiniciar decodificador': false,
-    'Verificar señal': false,
-    'Sincronizar control remoto': false,
+    'Se verifica Conexiones HDMI': false,
+    'Se Verifica Conexiones RCA': false,
+    'Se verifica cable Coaxial': false,
+    'XX Stb afectados': false,
+    'Se valida Serial No. XXXX': false,
+    'Mensaje que muestra Tv: XXX': false,
+    'Se Envia Comando XXXX': false,
+    'Se Envia Reset Fisico': false,
+    'Se verifica en la GUI, AMCO en verde': false,
   },
   Otros: {
-    'Consulta de facturación': false,
-    'Actualización de datos': false,
+    'Se valida DPI ok, nombre completo ok, sin restricciones': false,
+    'Cliente no esta en Sitio': false,
+    'Cliente esta en Agencia': false,
+    'Cliente no quiere hacer pruebas': false,
+    'Se realiza cambio de contraseña con exito': false,
+    'Servicio funcionando de manera correcta': false,
+    'Se Genera Averia': false,
+    'Se envía reproceso': false,
   },
 };
 
@@ -159,7 +184,12 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
             </div>
             <div className="space-y-2">
               <Label htmlFor="pruebasRealizadas">PRUEBAS REALIZADAS</Label>
-              <Textarea id="pruebasRealizadas" value={pruebasRealizadas} readOnly rows={4} className="bg-muted" />
+              <Textarea 
+                id="pruebasRealizadas" 
+                value={pruebasRealizadas} 
+                onChange={(e) => setPruebasRealizadas(e.target.value)}
+                rows={4} 
+              />
             </div>
             <div className="flex gap-2">
               <Button onClick={handleCopy}>Copiar Plantilla</Button>
@@ -171,7 +201,7 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
       {/* Columna Derecha: Checkboxes */}
       <div className="space-y-4">
-        {renderCheckboxGroup('Nivel Cero', 'Nivel Cero')}
+        {renderCheckboxGroup('Nivel Cero', 'Nvel Cero')}
         {renderCheckboxGroup('GPON - ADSL - HFC', 'GPON - ADSL - HFC')}
         {renderCheckboxGroup('TV HFC - DTH - IPTV', 'TV HFC - DTH - IPTV')}
         {renderCheckboxGroup('Otros', 'Otros')}
