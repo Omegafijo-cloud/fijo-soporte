@@ -7,10 +7,8 @@ import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save } from
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
-
-// Placeholder components for each tab content
-const AvisosTab = () => <div id="avisos" className="tab-content p-6">Contenido de Avisos</div>;
-const CopiaRespaldoTab = () => <div id="copia-respaldo" className="tab-content p-6">Contenido de Copia de Respaldo</div>;
+import { AvisosTab } from '@/components/avisos-tab';
+import { CopiaRespaldoTab } from '@/components/copia-respaldo-tab';
 
 export default function OmegaPage() {
   const [activeTab, setActiveTab] = useState('plantillas');
