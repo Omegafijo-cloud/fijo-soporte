@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
 import MemosWfTab from '@/components/tabs/MemosWfTab';
@@ -17,10 +21,25 @@ import TransferenciasTab from '@/components/tabs/TransferenciasTab';
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [backupText, setBackupText] = useState('');
+  const { toast } = useToast();
 
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
+  };
+
+  const handleCopyBackup = () => {
+    if (!backupText) return;
+    navigator.clipboard.writeText(backupText);
+    toast({
+      title: 'Copia de Respaldo Copiada',
+      description: 'El contenido ha sido copiado al portapapeles.',
+    });
+  };
+
+  const handleClearBackup = () => {
+    setBackupText('');
   };
 
   if (loading) {
@@ -32,8 +51,6 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    // This will be handled by the AuthContext and router logic, so we can return null
-    // or a redirect component. For now, let's prevent rendering if no user.
     return null;
   }
 
@@ -73,7 +90,7 @@ export default function DashboardPage() {
           
           <TabsContent value="plantillas" className="mt-4">
             <Card>
-              <CardContent className="p-0"> {/* Changed padding to 0 to allow full-width tabs */}
+              <CardContent className="p-0">
                 <Tabs defaultValue="genericas" className="w-full">
                   <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
                     <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
@@ -109,11 +126,32 @@ export default function DashboardPage() {
           <TabsContent value="avisos" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Avisos</CardTitle>
-                <CardDescription>Documentos importantes y recursos operativos.</CardDescription>
+                <CardTitle>Avisos Importantes</CardTitle>
+                <CardDescription>Documentos importantes y recursos operativos de acceso rápido.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p>Aquí irán los visores de documentos.</p>
+              <CardContent className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">PROCESOS DE MIGRACIÓN (WF)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <iframe 
+                      src="https://docs.google.com/document/d/12345/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
+                      className="w-full h-96 border rounded-md"
+                    ></iframe>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">SEGUIMIENTO DE CASOS (DOC)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <iframe 
+                      src="https://docs.google.com/document/d/67890/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
+                      className="w-full h-96 border rounded-md"
+                    ></iframe>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>
@@ -122,10 +160,19 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Copia de Respaldo</CardTitle>
-                <CardDescription>Almacena copias de seguridad de texto importante.</CardDescription>
+                <CardDescription>Almacena copias de seguridad de texto importante. El contenido se borra al cerrar sesión.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p>Aquí irá el área de texto para la copia de respaldo.</p>
+              <CardContent className="space-y-4">
+                <Textarea 
+                  placeholder="Pegue aquí el texto que desea respaldar..." 
+                  rows={20}
+                  value={backupText}
+                  onChange={(e) => setBackupText(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button onClick={handleCopyBackup}>Copiar Respaldo</Button>
+                  <Button variant="outline" onClick={handleClearBackup}>Limpiar Respaldo</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
