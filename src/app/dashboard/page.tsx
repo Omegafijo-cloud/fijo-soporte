@@ -353,15 +353,6 @@ const initialMemosWfTemplates: MemoTemplate = {
       { id: 'horaVisita', label: 'Hora visita', type: 'text' },
     ]
   },
-  'velocidad mal configurada': {
-    fields: [
-      { id: 'noContacto', label: 'No. Contacto', type: 'text' },
-      { id: 'inconvenienteReportado', label: 'Inconveniente reportado', type: 'text' },
-      { id: 'virtualReportado', label: 'Virtual Reportado', type: 'text' },
-      { id: 'velocidadConfigPisa', label: 'Velocidad Config PISA', type: 'text' },
-      { id: 'velocidadConfigUmp', label: 'Velocidad config UMP', type: 'text' },
-    ]
-  },
   'vencido operaciones': {
     fields: [
       { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
@@ -381,26 +372,6 @@ const initialMemosWfTemplates: MemoTemplate = {
       { id: 'fechaPago', label: 'Fecha de pago', type: 'text' },
       { id: 'ivr', label: 'IVR', type: 'text' },
       { id: 'observaciones', label: 'Observaciones', type: 'textarea' },
-    ]
-  },
-  'bloqueo mayor a 2 horas': {
-    fields: [
-      { id: 'nombreReporta', label: 'Nombre de quien reporta', type: 'text' },
-      { id: 'servicioLiberar', label: 'Servicio a liberar', type: 'text' },
-      { id: 'noAfectado', label: 'No. afectado', type: 'text' },
-      { id: 'tipoBloqueo', label: 'Tipo de bloqueo', type: 'text' },
-      { id: 'telRef', label: 'Tel de Ref', type: 'text' },
-      { id: 'horaPago', label: 'Hora de Pago', type: 'text' },
-      { id: 'reincidente', label: 'Reincidente', type: 'text' },
-      { id: 'comentarios', label: 'Comentarios', type: 'textarea' },
-    ]
-  },
-  'daño a la infraestructura': {
-    fields: [
-      { id: 'contacto', label: 'Contacto', type: 'text' },
-      { id: 'telefonoContacto', label: 'Teléfono de contacto', type: 'text' },
-      { id: 'direccionDanio', label: 'Dirección de daño', type: 'text' },
-      { id: 'danioReporta', label: 'Daño que reporta', type: 'textarea' },
     ]
   },
   'claro video': {
@@ -437,18 +408,6 @@ const initialMemosWfTemplates: MemoTemplate = {
       { id: 'descripcionReclamo', label: 'Descripción del reclamo', type: 'textarea' },
     ]
   },
-  'check en rojo': {
-    fields: [
-      { id: 'numero', label: 'Número', type: 'text' },
-      { id: 'correoClaroVideo', label: 'Correo Claro Video', type: 'text' },
-      { id: 'planPaquete', label: 'Plan o paquete contratado', type: 'text' },
-      { id: 'checkErrorGui', label: 'Check con error en GUI', type: 'text' },
-      { id: 'numeroContacto', label: 'Número de contacto', type: 'text' },
-      { id: 'cliente', label: 'Cliente', type: 'text' },
-      { id: 'descripcion', label: 'Descripción', type: 'textarea' },
-      { id: 'pruebasRealizadas', label: 'Pruebas realizadas', type: 'textarea' },
-    ]
-  },
   'sin acceso a guía interactiva': {
     fields: [
       { id: 'numero', label: 'Número', type: 'text' },
@@ -462,36 +421,13 @@ const initialMemosWfTemplates: MemoTemplate = {
       { id: 'pruebasRealizadas', label: 'Pruebas realizadas', type: 'textarea' },
     ]
   },
-  'configuración wifi': {
-    fields: [
-      { id: 'quienGeneraQueja', label: 'Quien genera queja', type: 'text' },
-      { id: 'luzPon', label: 'Luz Pon', type: 'text' },
-      { id: 'luzLos', label: 'Luz Los', type: 'text' },
-      { id: 'serie', label: 'Serie', type: 'text' },
-      { id: 'canalDanado', label: 'Canal dañado', type: 'text' },
-      { id: 'problemaReportado', label: 'Problema reportado', type: 'textarea' },
-      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea' },
-      { id: 'contactoEnSitio', label: 'Contacto en sitio', type: 'text' },
-      { id: 'telefonosReferencias', label: 'Teléfonos de referencias', type: 'text' },
-      { id: 'direccion', label: 'Dirección', type: 'text' },
-    ]
-  },
-  'reparación en plazo vigente': {
+  'reparacion en plazo vigente': {
     fields: [
       { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
       { id: 'comentarios', label: 'Comentarios', type: 'textarea', defaultValue: 'Seguimiento a queja en tiempo Vigente' },
       { id: 'noQueja', label: 'No. Queja', type: 'text' },
       { id: 'horaVisita', label: 'Hora visita', type: 'text', defaultValue: '8:00 a 5:00' },
       { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea', defaultValue: 'Cl Indica que no ha llegado el técnico y le urge, por favor verificar.' },
-    ]
-  },
-  'otros wf': {
-    fields: [
-      { id: 'nombreContacto', label: 'Nombre de contacto', type: 'text' },
-      { id: 'telefonosReferencia', label: 'Teléfonos de referencia', type: 'text' },
-      { id: 'numeroOrdenQueja', label: 'Numero de orden y/o queja', type: 'text' },
-      { id: 'inconvenienteCliente', label: 'Inconveniente del cliente', type: 'textarea' },
-      { id: 'pruebasRealizada', label: 'Pruebas Realizada', type: 'textarea' },
     ]
   }
 };
@@ -511,17 +447,13 @@ const initialMemosOrdenTemplates: MemoTemplate = {
       { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
     ],
   },
-  'orden de repetidores': {
+  'instalacion en plazo vigente': {
     fields: [
-       { id: 'asunto', label: 'ASUNTO', type: 'text' },
-      { id: 'numeroServicio', label: 'NUMERO DE SERVICIO', type: 'text' },
-      { id: 'nombreTitular', label: 'NOMBRE DE TITULAR', type: 'text' },
-      { id: 'dpiTitular', label: 'DPI TITULAR', type: 'text' },
-      { id: 'telefonoReferencia', label: 'TELEFONO REFERENCIA', type: 'text' },
-      { id: 'direccionInstalacion', label: 'DIRECCIÓN INSTALACIÓN', type: 'text' },
-      { id: 'horarioVisita', label: 'HORARIO DE VISITA', type: 'text' },
-      { id: 'observaciones', label: 'OBSERVACIONES', type: 'textarea' },
-      { id: 'tiendaCallCenter', label: 'TIENDA / CALL CENTER', type: 'text' },
+      { id: 'telefonoReferencia', label: 'Teléfono de referencia', type: 'text' },
+      { id: 'noOs', label: 'No. de O/S', type: 'text' },
+      { id: 'comentarios', label: 'Comentarios', type: 'textarea', defaultValue: 'Seguimiento a orden en tiempo Vigente' },
+      { id: 'horaVisita', label: 'Hora visita', type: 'text', defaultValue: '8:00 a 5:00' },
+      { id: 'pruebasRealizadas', label: 'Pruebas Realizadas', type: 'textarea', defaultValue: 'Cliente solicita informacion sobre instalacion, se encuentra en tiempo vigente' },
     ],
   },
 };
@@ -790,9 +722,12 @@ export default function DashboardPage() {
     };
     setPlantillasGenericasCheckboxes(newCheckboxes);
 
-    const newOrderedPruebas = checked
-        ? [...plantillasGenericasOrderedPruebas, label]
-        : plantillasGenericasOrderedPruebas.filter(item => item !== label);
+    let newOrderedPruebas;
+    if (checked) {
+      newOrderedPruebas = [...plantillasGenericasOrderedPruebas, label];
+    } else {
+      newOrderedPruebas = plantillasGenericasOrderedPruebas.filter(item => item !== label);
+    }
     
     setPlantillasGenericasOrderedPruebas(newOrderedPruebas);
     setPlantillasGenericasPruebasRealizadas(newOrderedPruebas.join(', '));
@@ -814,9 +749,12 @@ export default function DashboardPage() {
     };
     setPlantillasQuejasPruebasCheckboxes(newCheckboxes);
 
-    const newOrderedPruebas = checked
-        ? [...plantillasQuejasOrderedPruebas, label]
-        : plantillasQuejasOrderedPruebas.filter(item => item !== label);
+    let newOrderedPruebas;
+    if (checked) {
+        newOrderedPruebas = [...plantillasQuejasOrderedPruebas, label];
+    } else {
+        newOrderedPruebas = plantillasQuejasOrderedPruebas.filter(item => item !== label);
+    }
 
     setPlantillasQuejasOrderedPruebas(newOrderedPruebas);
     setPlantillasQuejasPruebasRealizadas(newOrderedPruebas.join(', '));
