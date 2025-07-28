@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -67,24 +68,24 @@ export default function DashboardPage() {
           
           <TabsContent value="plantillas" className="mt-4">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-0"> {/* Changed padding to 0 to allow full-width tabs */}
                 <Tabs defaultValue="genericas" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
                     <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
                     <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
                     <TabsTrigger value="wf">MEMOS DE WF</TabsTrigger>
                     <TabsTrigger value="orden">MEMOS DE ORDEN</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="genericas" className="mt-4">
-                    <p>Contenido de Plantillas Genéricas irá aquí.</p>
+                  <TabsContent value="genericas" className="p-6">
+                    <PlantillasGenericasTab />
                   </TabsContent>
-                  <TabsContent value="quejas" className="mt-4">
+                  <TabsContent value="quejas" className="p-6">
                     <p>Contenido de Plantillas de Quejas irá aquí.</p>
                   </TabsContent>
-                  <TabsContent value="wf" className="mt-4">
+                  <TabsContent value="wf" className="p-6">
                     <p>Contenido de Memos de WF irá aquí.</p>
                   </TabsContent>
-                  <TabsContent value="orden" className="mt-4">
+                  <TabsContent value="orden" className="p-6">
                     <p>Contenido de Memos de Orden irá aquí.</p>
                   </TabsContent>
                 </Tabs>
