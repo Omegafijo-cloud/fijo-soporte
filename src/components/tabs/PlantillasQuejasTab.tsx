@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { FilePenLine } from 'lucide-react';
 
 type TemplateField = {
   id: string;
@@ -41,6 +43,10 @@ type CheckboxState = {
   };
 };
 
+type CheckboxConfig = {
+    [group: string]: { [oldLabel: string]: string };
+};
+
 type RadioGroupState = {
     [group: string]: string;
 }
@@ -54,12 +60,62 @@ interface PlantillasQuejasTabProps {
     checkboxValues: CheckboxState;
     setCheckboxValues: (value: CheckboxState) => void;
     pruebasCheckboxes: CheckboxState;
+    checkboxConfig: CheckboxConfig;
+    setCheckboxConfig: (config: CheckboxConfig) => void;
     pruebasRealizadasText: string;
     setPruebasRealizadasText: (text: string) => void;
     onPruebasCheckboxChange: (group: string, label: string, checked: boolean) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
 }
+
+const EditableCheckboxLabel = ({ group, label, config, setConfig }: { group: string, label: string, config: CheckboxConfig, setConfig: (config: CheckboxConfig) => void }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [newLabel, setNewLabel] = useState(config[group]?.[label] || label);
+
+    const handleSave = () => {
+        const newConfig = {
+            ...config,
+            [group]: {
+                ...config[group],
+                [label]: newLabel
+            }
+        };
+        setConfig(newConfig);
+        setIsEditing(false);
+    };
+    
+    const displayedLabel = config[group]?.[label] || label;
+
+    return (
+        <div className="flex items-center justify-between w-full">
+            <Label htmlFor={`pruebas-${group}-${label}`} className="font-normal flex-grow">
+                {displayedLabel}
+            </Label>
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-2 shrink-0">
+                        <FilePenLine className="h-3 w-3" />
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Editar Opción</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="edit-label-quejas">Nuevo texto de la opción</Label>
+                        <Input id="edit-label-quejas" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>Guardar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+};
+
 
 export default function PlantillasQuejasTab({
     templates,
@@ -70,6 +126,8 @@ export default function PlantillasQuejasTab({
     checkboxValues,
     setCheckboxValues,
     pruebasCheckboxes,
+    checkboxConfig,
+    setCheckboxConfig,
     pruebasRealizadasText,
     setPruebasRealizadasText,
     onPruebasCheckboxChange,
@@ -216,9 +274,7 @@ export default function PlantillasQuejasTab({
                 checked={pruebasCheckboxes[groupKey]?.[label] || false}
                 onCheckedChange={(checked) => onPruebasCheckboxChange(groupKey, label, checked as boolean)}
               />
-              <Label htmlFor={`pruebas-${groupKey}-${label}`} className="font-normal">
-                {label}
-              </Label>
+               <EditableCheckboxLabel group={groupKey} label={label} config={checkboxConfig} setConfig={setCheckboxConfig} />
             </div>
           ))}
         </div>

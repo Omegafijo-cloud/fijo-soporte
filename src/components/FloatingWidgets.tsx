@@ -274,7 +274,7 @@ export default function FloatingWidgets({
             <span className="sr-only">Toggle theme</span>
         </Button>
       </div>
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+      <div id="floating-widgets-container" className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
         {(['notes', 'users', 'theme'] as ActiveWidget[]).map(widget => (
           <Button
             key={widget}
@@ -324,5 +324,3 @@ export default function FloatingWidgets({
     </>
   );
 }
-
-    

@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
 import { Trash2 } from 'lucide-react';
+import 'intro.js/introjs.css';
+import introJs from 'intro.js';
 
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
@@ -19,6 +21,7 @@ import MemosWfTab from '@/components/tabs/MemosWfTab';
 import MemosOrdenTab from '@/components/tabs/MemosOrdenTab';
 import HerramientasTab from '@/components/tabs/HerramientasTab';
 import TransferenciasTab from '@/components/tabs/TransferenciasTab';
+import ArchivosTab from '@/components/tabs/ArchivosTab';
 import FloatingWidgets from '@/components/FloatingWidgets';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
@@ -35,6 +38,10 @@ type Notice = {
 
 type CheckboxState = {
   [group: string]: { [label: string]: boolean };
+};
+
+type CheckboxConfig = {
+    [group: string]: { [oldLabel: string]: string };
 };
 
 type TransferItem = {
@@ -68,6 +75,12 @@ type MemoTemplate = {
   [key: string]: BaseTemplate;
 }
 
+type ArchivoItem = {
+  id: string;
+  title: string;
+  content: string;
+};
+
 // Tipos para el estado global de la aplicación
 type AppState = {
   activeTab?: string;
@@ -80,10 +93,14 @@ type AppState = {
 
   // Avisos
   notices?: Notice[];
+  
+  // Tutorial
+  tutorialCompleted?: boolean;
 
   // Estado de Pestañas
   plantillasGenericas_formData?: any;
   plantillasGenericas_checkboxes?: CheckboxState;
+  plantillasGenericas_checkboxConfig?: CheckboxConfig;
   plantillasGenericas_pruebasRealizadas?: string;
   plantillasGenericas_orderedPruebas?: string[];
 
@@ -92,6 +109,7 @@ type AppState = {
   plantillasQuejas_formData?: any;
   plantillasQuejas_checkboxValues?: CheckboxState;
   plantillasQuejas_pruebasCheckboxes?: CheckboxState;
+  plantillasQuejas_checkboxConfig?: CheckboxConfig;
   plantillasQuejas_pruebasRealizadas?: string;
   plantillasQuejas_orderedPruebas?: string[];
 
@@ -108,6 +126,8 @@ type AppState = {
   transferencias_items?: TransferItem[];
   transferencias_newService?: string;
   transferencias_newValue?: string;
+  
+  archivos_items?: ArchivoItem[];
 };
 
 
@@ -478,6 +498,7 @@ export default function DashboardPage() {
   // Estado para Plantillas Genéricas
   const [plantillasGenericasFormData, setPlantillasGenericasFormData] = useState(initialPlantillasGenericasFormData);
   const [plantillasGenericasCheckboxes, setPlantillasGenericasCheckboxes] = useState<CheckboxState>(initialPlantillasGenericasCheckboxes);
+  const [plantillasGenericasCheckboxConfig, setPlantillasGenericasCheckboxConfig] = useState<CheckboxConfig>({});
   const [plantillasGenericasOrderedPruebas, setPlantillasGenericasOrderedPruebas] = useState<string[]>([]);
   const [plantillasGenericasPruebasRealizadas, setPlantillasGenericasPruebasRealizadas] = useState('');
 
@@ -488,6 +509,7 @@ export default function DashboardPage() {
   const [plantillasQuejasFormData, setPlantillasQuejasFormData] = useState({});
   const [plantillasQuejasCheckboxValues, setPlantillasQuejasCheckboxValues] = useState<CheckboxState>({});
   const [plantillasQuejasPruebasCheckboxes, setPlantillasQuejasPruebasCheckboxes] = useState<CheckboxState>(initialPlantillasQuejasCheckboxes);
+  const [plantillasQuejasCheckboxConfig, setPlantillasQuejasCheckboxConfig] = useState<CheckboxConfig>({});
   const [plantillasQuejasOrderedPruebas, setPlantillasQuejasOrderedPruebas] = useState<string[]>([]);
   const [plantillasQuejasPruebasRealizadas, setPlantillasQuejasPruebasRealizadas] = useState('');
 
@@ -509,6 +531,9 @@ export default function DashboardPage() {
   const [transferenciasItems, setTransferenciasItems] = useState<TransferItem[]>(initialTransferItems);
   const [transferenciasNewService, setTransferenciasNewService] = useState('');
   const [transferenciasNewValue, setTransferenciasNewValue] = useState('');
+  
+  // Estado para Archivos
+  const [archivosItems, setArchivosItems] = useState<ArchivoItem[]>([]);
 
 
   // ----- Lógica de persistencia de datos -----
@@ -518,6 +543,7 @@ export default function DashboardPage() {
       activeTab, activeSubTab, backupText, notesText, usersText, notices,
       plantillasGenericas_formData: plantillasGenericasFormData,
       plantillasGenericas_checkboxes: plantillasGenericasCheckboxes,
+      plantillasGenericas_checkboxConfig: plantillasGenericasCheckboxConfig,
       plantillasGenericas_orderedPruebas: plantillasGenericasOrderedPruebas,
       plantillasGenericas_pruebasRealizadas: plantillasGenericasPruebasRealizadas,
       plantillasQuejas_templates: plantillasQuejasTemplates,
@@ -525,6 +551,7 @@ export default function DashboardPage() {
       plantillasQuejas_formData: plantillasQuejasFormData,
       plantillasQuejas_checkboxValues: plantillasQuejasCheckboxValues,
       plantillasQuejas_pruebasCheckboxes: plantillasQuejasPruebasCheckboxes,
+      plantillasQuejas_checkboxConfig: plantillasQuejasCheckboxConfig,
       plantillasQuejas_orderedPruebas: plantillasQuejasOrderedPruebas,
       plantillasQuejas_pruebasRealizadas: plantillasQuejasPruebasRealizadas,
       memosWf_templates: memosWfTemplates,
@@ -537,15 +564,17 @@ export default function DashboardPage() {
       transferencias_items: transferenciasItems,
       transferencias_newService: transferenciasNewService,
       transferencias_newValue: transferenciasNewValue,
+      archivos_items: archivosItems,
     };
   }, [
       activeTab, activeSubTab, backupText, notesText, usersText, notices,
-      plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasOrderedPruebas, plantillasGenericasPruebasRealizadas,
+      plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasCheckboxConfig, plantillasGenericasOrderedPruebas, plantillasGenericasPruebasRealizadas,
       plantillasQuejasTemplates, plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
-      plantillasQuejasPruebasCheckboxes, plantillasQuejasOrderedPruebas, plantillasQuejasPruebasRealizadas,
+      plantillasQuejasPruebasCheckboxes, plantillasQuejasCheckboxConfig, plantillasQuejasOrderedPruebas, plantillasQuejasPruebasRealizadas,
       memosWfTemplates, memosWfSelectedTemplate, memosWfFormData, 
       memosOrdenTemplates, memosOrdenSelectedTemplate, memosOrdenFormData,
-      herramientasMinutos, transferenciasItems, transferenciasNewService, transferenciasNewValue
+      herramientasMinutos, transferenciasItems, transferenciasNewService, transferenciasNewValue,
+      archivosItems,
   ]);
 
   const saveStateToFirebase = useCallback(async () => {
@@ -589,6 +618,7 @@ export default function DashboardPage() {
 
           if (data.plantillasGenericas_formData) setPlantillasGenericasFormData(data.plantillasGenericas_formData);
           if (data.plantillasGenericas_checkboxes) setPlantillasGenericasCheckboxes(data.plantillasGenericas_checkboxes);
+          if (data.plantillasGenericas_checkboxConfig) setPlantillasGenericasCheckboxConfig(data.plantillasGenericas_checkboxConfig);
           if (data.plantillasGenericas_orderedPruebas) setPlantillasGenericasOrderedPruebas(data.plantillasGenericas_orderedPruebas);
           if (data.plantillasGenericas_pruebasRealizadas) setPlantillasGenericasPruebasRealizadas(data.plantillasGenericas_pruebasRealizadas);
 
@@ -597,6 +627,7 @@ export default function DashboardPage() {
           if(data.plantillasQuejas_formData) setPlantillasQuejasFormData(data.plantillasQuejas_formData);
           if(data.plantillasQuejas_checkboxValues) setPlantillasQuejasCheckboxValues(data.plantillasQuejas_checkboxValues);
           if(data.plantillasQuejas_pruebasCheckboxes) setPlantillasQuejasPruebasCheckboxes(data.plantillasQuejas_pruebasCheckboxes);
+          if (data.plantillasQuejas_checkboxConfig) setPlantillasQuejasCheckboxConfig(data.plantillasQuejas_checkboxConfig);
           if (data.plantillasQuejas_orderedPruebas) setPlantillasQuejasOrderedPruebas(data.plantillasQuejas_orderedPruebas);
           if (data.plantillasQuejas_pruebasRealizadas) setPlantillasQuejasPruebasRealizadas(data.plantillasQuejas_pruebasRealizadas);
 
@@ -635,6 +666,8 @@ export default function DashboardPage() {
           if(data.transferencias_newService) setTransferenciasNewService(data.transferencias_newService);
           if(data.transferencias_newValue) setTransferenciasNewValue(data.transferencias_newValue);
           
+          if(data.archivos_items) setArchivosItems(data.archivos_items);
+          
           isInitialLoad.current = false;
         } else if (!docSnap.exists()) {
              isInitialLoad.current = false;
@@ -648,6 +681,62 @@ export default function DashboardPage() {
         }
     }
   }, [user, authLoading]);
+
+    // ----- Tutorial -----
+    useEffect(() => {
+        const checkAndRunTutorial = async () => {
+            if (user && isDataLoaded && !isInitialLoad.current) {
+                const docRef = doc(db, 'users', user.uid, 'state', 'appState');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && !docSnap.data()?.tutorialCompleted) {
+                    const intro = introJs();
+                    intro.setOptions({
+                        steps: [
+                            {
+                                element: '#main-tabs',
+                                title: 'Pestañas Principales',
+                                intro: 'Aquí puedes navegar entre las diferentes secciones de la aplicación como Plantillas, Herramientas, Archivos y más.',
+                                position: 'bottom'
+                            },
+                            {
+                                element: '#sub-tabs',
+                                title: 'Sub-Pestañas de Plantillas',
+                                intro: 'Dentro de Plantillas, puedes elegir entre diferentes tipos como Genéricas, de Quejas, y Memos.',
+                                position: 'bottom'
+                            },
+                            {
+                                element: '#timer-widget',
+                                title: 'Temporizador',
+                                intro: 'Usa este temporizador para llevar un control de tus llamadas o tareas. Puedes configurarlo haciendo clic en él.',
+                                position: 'left'
+                            },
+                            {
+                                element: '#floating-widgets-container',
+                                title: 'Widgets Flotantes',
+                                intro: 'Estos botones te dan acceso rápido a notas, listas de usuarios, personalización del tema y el Copilot de OMEGA. ¡Pruébalos!',
+                                position: 'left'
+                            },
+                        ],
+                        showBullets: false,
+                        showStepNumbers: true,
+                        exitOnOverlayClick: false,
+                        doneLabel: 'Entendido, ¡no mostrar más!',
+                    });
+
+                    intro.oncomplete(async () => {
+                        await updateDoc(docRef, { tutorialCompleted: true });
+                    });
+                     intro.onexit(async () => {
+                        await updateDoc(docRef, { tutorialCompleted: true });
+                    });
+
+                    intro.start();
+                }
+            }
+        };
+
+        checkAndRunTutorial();
+    }, [user, isDataLoaded]);
 
   // Redireccionar si el usuario no está autenticado después de la carga
   useEffect(() => {
@@ -721,12 +810,14 @@ export default function DashboardPage() {
         [group]: { ...plantillasGenericasCheckboxes[group], [label]: checked }
     };
     setPlantillasGenericasCheckboxes(newCheckboxes);
+    
+    const displayedLabel = plantillasGenericasCheckboxConfig[group]?.[label] || label;
 
     let newOrderedPruebas;
     if (checked) {
-      newOrderedPruebas = [...plantillasGenericasOrderedPruebas, label];
+      newOrderedPruebas = [...plantillasGenericasOrderedPruebas, displayedLabel];
     } else {
-      newOrderedPruebas = plantillasGenericasOrderedPruebas.filter(item => item !== label);
+      newOrderedPruebas = plantillasGenericasOrderedPruebas.filter(item => item !== displayedLabel);
     }
     
     setPlantillasGenericasOrderedPruebas(newOrderedPruebas);
@@ -749,11 +840,13 @@ export default function DashboardPage() {
     };
     setPlantillasQuejasPruebasCheckboxes(newCheckboxes);
 
+    const displayedLabel = plantillasQuejasCheckboxConfig[group]?.[label] || label;
+
     let newOrderedPruebas;
     if (checked) {
-        newOrderedPruebas = [...plantillasQuejasOrderedPruebas, label];
+        newOrderedPruebas = [...plantillasQuejasOrderedPruebas, displayedLabel];
     } else {
-        newOrderedPruebas = plantillasQuejasOrderedPruebas.filter(item => item !== label);
+        newOrderedPruebas = plantillasQuejasOrderedPruebas.filter(item => item !== displayedLabel);
     }
 
     setPlantillasQuejasOrderedPruebas(newOrderedPruebas);
@@ -829,7 +922,9 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
             <span className="text-sm font-medium">{formatUserName(user.email)}</span>
-            <Timer />
+            <div id="timer-widget">
+              <Timer />
+            </div>
             <Button onClick={handleLogout} variant="destructive" size="sm">
                 Salir
             </Button>
@@ -837,11 +932,12 @@ export default function DashboardPage() {
         </header>
 
         <main className="flex-1 p-4 md:p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" id="main-tabs">
+            <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="plantillas">PLANTILLAS</TabsTrigger>
                 <TabsTrigger value="herramientas">HERRAMIENTAS</TabsTrigger>
                 <TabsTrigger value="transferencias">TRANSFERENCIAS</TabsTrigger>
+                <TabsTrigger value="archivos">ARCHIVOS</TabsTrigger>
                 <TabsTrigger value="avisos">AVISOS</TabsTrigger>
                 <TabsTrigger value="respaldo">COPIA DE RESPALDO</TabsTrigger>
             </TabsList>
@@ -849,7 +945,7 @@ export default function DashboardPage() {
             <TabsContent value="plantillas" className="mt-4">
                 <Card>
                 <CardContent className="p-0">
-                    <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
+                    <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full" id="sub-tabs">
                     <TabsList className="grid w-full grid-cols-4 rounded-t-lg rounded-b-none">
                         <TabsTrigger value="genericas">PLANTILLAS GENERICAS</TabsTrigger>
                         <TabsTrigger value="quejas">PLANTILLAS DE QUEJAS</TabsTrigger>
@@ -861,6 +957,8 @@ export default function DashboardPage() {
                             formData={plantillasGenericasFormData}
                             setFormData={setPlantillasGenericasFormData}
                             checkboxes={plantillasGenericasCheckboxes}
+                            checkboxConfig={plantillasGenericasCheckboxConfig}
+                            setCheckboxConfig={setPlantillasGenericasCheckboxConfig}
                             onCheckboxChange={handleGenericasCheckboxChange}
                             pruebasRealizadasText={plantillasGenericasPruebasRealizadas}
                             setPruebasRealizadasText={setPlantillasGenericasPruebasRealizadas}
@@ -878,6 +976,8 @@ export default function DashboardPage() {
                             checkboxValues={plantillasQuejasCheckboxValues}
                             setCheckboxValues={setPlantillasQuejasCheckboxValues}
                             pruebasCheckboxes={plantillasQuejasPruebasCheckboxes}
+                            checkboxConfig={plantillasQuejasCheckboxConfig}
+                            setCheckboxConfig={setPlantillasQuejasCheckboxConfig}
                             onPruebasCheckboxChange={handleQuejasCheckboxChange}
                             pruebasRealizadasText={plantillasQuejasPruebasRealizadas}
                             setPruebasRealizadasText={setPlantillasQuejasPruebasRealizadas}
@@ -929,6 +1029,13 @@ export default function DashboardPage() {
                 setNewService={setTransferenciasNewService}
                 newValue={transferenciasNewValue}
                 setNewValue={setTransferenciasNewValue}
+                />
+            </TabsContent>
+            
+            <TabsContent value="archivos" className="mt-4">
+                <ArchivosTab 
+                  items={archivosItems}
+                  setItems={setArchivosItems}
                 />
             </TabsContent>
 

@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { FilePenLine } from 'lucide-react';
 
 type CheckboxState = {
   [group: string]: {
@@ -14,10 +16,16 @@ type CheckboxState = {
   };
 };
 
+type CheckboxConfig = {
+    [group: string]: { [oldLabel: string]: string };
+};
+
 interface PlantillasGenericasTabProps {
     formData: any;
     setFormData: (data: any) => void;
     checkboxes: CheckboxState;
+    checkboxConfig: CheckboxConfig;
+    setCheckboxConfig: (config: CheckboxConfig) => void;
     pruebasRealizadasText: string;
     setPruebasRealizadasText: (text: string) => void;
     onCheckboxChange: (group: string, label: string, checked: boolean) => void;
@@ -25,10 +33,59 @@ interface PlantillasGenericasTabProps {
     onClear: () => void;
 }
 
+const EditableCheckboxLabel = ({ group, label, config, setConfig }: { group: string, label: string, config: CheckboxConfig, setConfig: (config: CheckboxConfig) => void }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [newLabel, setNewLabel] = useState(config[group]?.[label] || label);
+
+    const handleSave = () => {
+        const newConfig = {
+            ...config,
+            [group]: {
+                ...config[group],
+                [label]: newLabel
+            }
+        };
+        setConfig(newConfig);
+        setIsEditing(false);
+    };
+    
+    const displayedLabel = config[group]?.[label] || label;
+
+    return (
+        <div className="flex items-center justify-between w-full">
+            <Label htmlFor={`${group}-${label}`} className="font-normal flex-grow">
+                {displayedLabel}
+            </Label>
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-2 shrink-0">
+                        <FilePenLine className="h-3 w-3" />
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Editar Opción</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="edit-label">Nuevo texto de la opción</Label>
+                        <Input id="edit-label" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>Guardar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+};
+
 export default function PlantillasGenericasTab({ 
     formData,
     setFormData,
     checkboxes,
+    checkboxConfig,
+    setCheckboxConfig,
     pruebasRealizadasText,
     setPruebasRealizadasText,
     onCheckboxChange,
@@ -67,9 +124,7 @@ PRUEBAS REALIZADAS: ${pruebasRealizadasText}`;
                 checked={checkboxes[groupKey]?.[label] || false}
                 onCheckedChange={(checked) => onCheckboxChange(groupKey, label, checked as boolean)}
               />
-              <Label htmlFor={`${groupKey}-${label}`} className="font-normal">
-                {label}
-              </Label>
+              <EditableCheckboxLabel group={groupKey} label={label} config={checkboxConfig} setConfig={setCheckboxConfig} />
             </div>
           ))}
         </div>
