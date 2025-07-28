@@ -24,6 +24,8 @@ interface MemosWfTabProps {
   setSelectedTemplate: (value: string) => void;
   formData: { [key: string]: any };
   setFormData: (value: { [key: string]: any }) => void;
+  onCopy: (text: string) => void;
+  onClear: () => void;
 }
 
 export default function MemosWfTab({ 
@@ -32,7 +34,9 @@ export default function MemosWfTab({
   selectedTemplate, 
   setSelectedTemplate, 
   formData, 
-  setFormData 
+  setFormData,
+  onCopy,
+  onClear,
 }: MemosWfTabProps) {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -44,11 +48,7 @@ export default function MemosWfTab({
     const initialData: { [key: string]: any } = {};
     if (template) {
         template.fields.forEach(field => {
-            if (field.defaultValue) {
-                initialData[field.id] = field.defaultValue;
-            } else {
-                initialData[field.id] = '';
-            }
+          initialData[field.id] = field.defaultValue || '';
         });
     }
     setFormData(initialData);
@@ -73,7 +73,8 @@ export default function MemosWfTab({
     toast({ title: 'Éxito', description: 'Plantilla añadida correctamente.' });
   }
 
-  const handleRemoveTemplate = (templateKey: string) => {
+  const handleRemoveTemplate = (e: React.MouseEvent, templateKey: string) => {
+    e.stopPropagation();
     const newTemplates = { ...templates };
     delete newTemplates[templateKey];
     setTemplates(newTemplates);
@@ -88,7 +89,7 @@ export default function MemosWfTab({
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
   
-  const handleCopy = () => {
+  const handleCopyClick = () => {
     if (!selectedTemplate) return;
 
     let templateText = `TIPO DE MEMO DE WF: ${selectedTemplate.toUpperCase()}\n\n`;
@@ -99,31 +100,9 @@ export default function MemosWfTab({
       templateText += `${field.label}: ${formData[field.id] || ''}\n`;
     });
 
-    navigator.clipboard.writeText(templateText);
-    toast({
-      title: "Memo WF Copiado",
-      description: "La plantilla del memo ha sido copiada al portapapeles.",
-    });
+    onCopy(templateText.trim());
   };
 
-  const handleClear = () => {
-    if (selectedTemplate) {
-        const template = templates[selectedTemplate];
-        const initialData: { [key: string]: any } = {};
-        if (template) {
-            template.fields.forEach(field => {
-                if (field.defaultValue) {
-                    initialData[field.id] = field.defaultValue;
-                } else {
-                    initialData[field.id] = '';
-                }
-            });
-        }
-        setFormData(initialData);
-    } else {
-        setFormData({});
-    }
-  };
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
@@ -162,19 +141,19 @@ export default function MemosWfTab({
                 </SelectTrigger>
                 <SelectContent>
                 {Object.keys(templates).map(key => (
-                     <SelectItem key={key} value={key} onSelect={(e) => e.preventDefault()}>
-                        <div className="flex items-center justify-between w-full">
+                     <div key={key} className="relative flex items-center">
+                        <SelectItem value={key} className="w-full pr-8">
                            <span className="capitalize">{key}</span>
-                           <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-6 w-6 ml-4 hover:bg-destructive/10" 
-                              onClick={(e) => { e.stopPropagation(); handleRemoveTemplate(key); }}
-                           >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                        </div>
-                    </SelectItem>
+                        </SelectItem>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-destructive/10" 
+                          onClick={(e) => handleRemoveTemplate(e, key)}
+                        >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    </div>
                 ))}
                 </SelectContent>
             </Select>
@@ -203,8 +182,8 @@ export default function MemosWfTab({
           <div className="space-y-4 pt-4 border-t">
             {renderDynamicFields()}
             <div className="flex gap-2">
-              <Button onClick={handleCopy}>Copiar Memo WF</Button>
-              <Button variant="outline" onClick={handleClear}>Limpiar</Button>
+              <Button onClick={handleCopyClick}>Copiar Memo WF</Button>
+              <Button variant="outline" onClick={onClear}>Limpiar</Button>
             </div>
           </div>
         )}

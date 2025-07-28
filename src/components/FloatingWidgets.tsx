@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { X, MessageSquare, Notebook, Users, Palette } from 'lucide-react';
+import { X, MessageSquare, Notebook, Users, Palette, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
@@ -35,10 +35,12 @@ const defaultThemeHex = {
 
 const colorPalettes = [
   { name: 'Omega', colors: { primary: '#1A237E', background: '#FFFFFF', accent: '#6A1B9A' } },
-  { name: 'Abismo', colors: { primary: '#e2e8f0', background: '#0f172a', accent: '#94a3b8' } },
-  { name: 'Bosque', colors: { primary: '#2f6241', background: '#f0f5f1', accent: '#dbece2' } },
-  { name: 'Amanecer', colors: { primary: '#c2410c', background: '#fff7ed', accent: '#ffedd5' } },
-  { name: 'Corporativo', colors: { primary: '#2563eb', background: '#ffffff', accent: '#f0f9ff' } },
+  { name: 'Abismo', colors: { primary: '#94a3b8', background: '#0f172a', accent: '#334155' } },
+  { name: 'Bosque', colors: { primary: '#166534', background: '#f0fdf4', accent: '#bbf7d0' } },
+  { name: 'Amanecer', colors: { primary: '#c2410c', background: '#fff7ed', accent: '#fed7aa' } },
+  { name: 'Medianoche', colors: { primary: '#3b82f6', background: '#1e293b', accent: '#0ea5e9' } },
+  { name: 'Esmeralda', colors: { primary: '#059669', background: '#ecfdf5', accent: '#6ee7b7' } },
+  { name: 'Rubí', colors: { primary: '#dc2626', background: '#fef2f2', accent: '#fca5a5' } },
 ];
 
 
@@ -55,6 +57,17 @@ export default function FloatingWidgets({
   const [backgroundColor, setBackgroundColor] = useState(defaultThemeHex.background);
   const [accentColor, setAccentColor] = useState(defaultThemeHex.accent);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }
+
 
   const applyTheme = (theme: {primary: string, background: string, accent: string}) => {
     const root = document.documentElement;
@@ -246,6 +259,19 @@ export default function FloatingWidgets({
   return (
     <>
       {/* Botones Flotantes */}
+      <div className="fixed bottom-4 left-4 z-50">
+        <Button
+            size="icon"
+            variant="outline"
+            className="rounded-full h-14 w-14 shadow-lg bg-background"
+            onClick={toggleTheme}
+            aria-label="Toggle dark mode"
+        >
+            <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+        </Button>
+      </div>
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
         {(['notes', 'users', 'theme'] as ActiveWidget[]).map(widget => (
           <Button

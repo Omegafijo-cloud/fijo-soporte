@@ -581,6 +581,54 @@ export default function DashboardPage() {
     })
   };
 
+  // ----- Manejadores de Plantillas Globales -----
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    const newBackupText = `${text}\n\n--------------------------------------\n\n${backupText}`;
+    setBackupText(newBackupText);
+    toast({
+      title: "Copiado y Respaldado",
+      description: "La plantilla ha sido copiada y guardada en la copia de respaldo.",
+    });
+  };
+
+  const handleClearGeneric = () => {
+    setPlantillasGenericasFormData(initialPlantillasGenericasFormData);
+    setPlantillasGenericasCheckboxes(initialPlantillasGenericasCheckboxes);
+    setPlantillasGenericasPruebas('');
+  };
+
+  const handleClearQuejas = () => {
+    setPlantillasQuejasSelectedTemplate('');
+    setPlantillasQuejasFormData({});
+    setPlantillasQuejasCheckboxValues({});
+    setPlantillasQuejasPruebasCheckboxes(initialPlantillasQuejasCheckboxes);
+    setPlantillasQuejasPruebas('');
+  };
+
+  const handleClearMemosWf = () => {
+      const template = memosWfTemplates[memosWfSelectedTemplate];
+      const initialData: { [key: string]: any } = {};
+      if (template) {
+          template.fields.forEach(field => {
+              initialData[field.id] = field.defaultValue || '';
+          });
+      }
+      setMemosWfFormData(initialData);
+  }
+  
+  const handleClearMemosOrden = () => {
+      const template = memosOrdenTemplates[memosOrdenSelectedTemplate];
+      const initialData: { [key: string]: any } = {};
+      if (template) {
+          template.fields.forEach(field => {
+              initialData[field.id] = field.defaultValue || '';
+          });
+      }
+      setMemosOrdenFormData(initialData);
+  }
+
   useEffect(() => {
     if (authLoading || !isDataLoaded) {
       const interval = setInterval(() => {
@@ -657,16 +705,14 @@ export default function DashboardPage() {
                     </TabsList>
                     <TabsContent value="genericas" className="p-6">
                         <PlantillasGenericasTab 
-                            backupText={backupText}
-                            setBackupText={setBackupText}
                             formData={plantillasGenericasFormData}
                             setFormData={setPlantillasGenericasFormData}
                             checkboxes={plantillasGenericasCheckboxes}
                             setCheckboxes={setPlantillasGenericasCheckboxes}
                             pruebasRealizadas={plantillasGenericasPruebas}
                             setPruebasRealizadas={setPlantillasGenericasPruebas}
-                            initialCheckboxes={initialPlantillasGenericasCheckboxes}
-                            initialFormData={initialPlantillasGenericasFormData}
+                            onCopy={handleCopyToClipboard}
+                            onClear={handleClearGeneric}
                         />
                     </TabsContent>
                     <TabsContent value="quejas" className="p-6">
@@ -681,27 +727,32 @@ export default function DashboardPage() {
                             setPruebasCheckboxes={setPlantillasQuejasPruebasCheckboxes}
                             pruebasRealizadas={plantillasQuejasPruebas}
                             setPruebasRealizadas={setPlantillasQuejasPruebas}
-                            initialPruebasCheckboxState={initialPlantillasQuejasCheckboxes}
+                            onCopy={handleCopyToClipboard}
+                            onClear={handleClearQuejas}
                         />
                     </TabsContent>
                     <TabsContent value="wf" className="p-6">
                         <MemosWfTab 
-                        templates={memosWfTemplates}
-                        setTemplates={setMemosWfTemplates}
-                        selectedTemplate={memosWfSelectedTemplate}
-                        setSelectedTemplate={setMemosWfSelectedTemplate}
-                        formData={memosWfFormData}
-                        setFormData={setMemosWfFormData}
+                            templates={memosWfTemplates}
+                            setTemplates={setMemosWfTemplates}
+                            selectedTemplate={memosWfSelectedTemplate}
+                            setSelectedTemplate={setMemosWfSelectedTemplate}
+                            formData={memosWfFormData}
+                            setFormData={setMemosWfFormData}
+                            onCopy={handleCopyToClipboard}
+                            onClear={handleClearMemosWf}
                         />
                     </TabsContent>
                     <TabsContent value="orden" className="p-6">
                         <MemosOrdenTab 
-                        templates={memosOrdenTemplates}
-                        setTemplates={setMemosOrdenTemplates}
-                        selectedTemplate={memosOrdenSelectedTemplate}
-                        setSelectedTemplate={setMemosOrdenSelectedTemplate}
-                        formData={memosOrdenFormData}
-                        setFormData={setMemosOrdenFormData}
+                            templates={memosOrdenTemplates}
+                            setTemplates={setMemosOrdenTemplates}
+                            selectedTemplate={memosOrdenSelectedTemplate}
+                            setSelectedTemplate={setMemosOrdenSelectedTemplate}
+                            formData={memosOrdenFormData}
+                            setFormData={setMemosOrdenFormData}
+                            onCopy={handleCopyToClipboard}
+                            onClear={handleClearMemosOrden}
                         />
                     </TabsContent>
                     </Tabs>

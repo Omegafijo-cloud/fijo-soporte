@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 
 type CheckboxState = {
   [group: string]: {
@@ -16,31 +15,26 @@ type CheckboxState = {
 };
 
 interface PlantillasGenericasTabProps {
-    backupText: string;
-    setBackupText: (text: string) => void;
     formData: any;
     setFormData: (data: any) => void;
     checkboxes: CheckboxState;
     setCheckboxes: (state: CheckboxState) => void;
     pruebasRealizadas: string;
     setPruebasRealizadas: (text: string) => void;
-    initialFormData: any;
-    initialCheckboxes: CheckboxState;
+    onCopy: (text: string) => void;
+    onClear: () => void;
 }
 
 export default function PlantillasGenericasTab({ 
-    backupText, 
-    setBackupText,
     formData,
     setFormData,
     checkboxes,
     setCheckboxes,
     pruebasRealizadas,
     setPruebasRealizadas,
-    initialFormData,
-    initialCheckboxes
+    onCopy,
+    onClear
 }: PlantillasGenericasTabProps) {
-  const { toast } = useToast();
 
   useEffect(() => {
     const generatePruebasText = () => {
@@ -55,12 +49,11 @@ export default function PlantillasGenericasTab({
       }
       return allCheckedItems.join(', ');
     };
-    // Solo actualiza si el campo no ha sido editado manualmente
-    // Para lograr esto, comparamos el estado actual con lo que se generaría.
-    // Si son diferentes, significa que el usuario editó manualmente.
+    
     const generatedText = generatePruebasText();
-    if (pruebasRealizadas === generatedText || pruebasRealizadas === '') {
-        setPruebasRealizadas(generatedText);
+    const isManuallyEdited = pruebasRealizadas !== generatedText && pruebasRealizadas !== '';
+    if (!isManuallyEdited) {
+      setPruebasRealizadas(generatedText);
     }
   }, [checkboxes, setPruebasRealizadas]);
 
@@ -79,7 +72,6 @@ export default function PlantillasGenericasTab({
     };
     setCheckboxes(newCheckboxes);
     
-    // Regenerar texto de pruebas al cambiar un checkbox
      const allCheckedItems: string[] = [];
       for (const G in newCheckboxes) {
         if (newCheckboxes[G]) {
@@ -93,13 +85,7 @@ export default function PlantillasGenericasTab({
 
   };
 
-  const handleClear = () => {
-    setFormData(initialFormData);
-    setCheckboxes(initialCheckboxes);
-    setPruebasRealizadas('');
-  }
-
-  const handleCopy = () => {
+  const handleCopyClick = () => {
     const template = `ID de llamada: ${formData.idLlamada}
 Nombre del contacto: ${formData.nombreContacto}
 N° Incidencia: ${formData.nIncidencia}
@@ -108,14 +94,7 @@ Inconveniente: ${formData.inconveniente}
 
 PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
-    const newBackupText = `${template}\n\n--------------------------------------\n\n${backupText}`;
-    setBackupText(newBackupText);
-
-    navigator.clipboard.writeText(template.trim());
-    toast({
-      title: "Copiado y Respaldado",
-      description: "La plantilla ha sido copiada y guardada en la copia de respaldo.",
-    })
+    onCopy(template.trim());
   }
 
   const renderCheckboxGroup = (title: string, groupKey: keyof CheckboxState) => (
@@ -184,8 +163,8 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleCopy}>Copiar Plantilla</Button>
-              <Button onClick={handleClear} variant="outline">Limpiar</Button>
+              <Button onClick={handleCopyClick}>Copiar Plantilla</Button>
+              <Button onClick={onClear} variant="outline">Limpiar</Button>
             </div>
           </CardContent>
         </Card>

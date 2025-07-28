@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 // Define la estructura de las plantillas de memos
@@ -164,7 +163,8 @@ interface PlantillasQuejasTabProps {
     setPruebasCheckboxes: (value: CheckboxState) => void;
     pruebasRealizadas: string;
     setPruebasRealizadas: (value: string) => void;
-    initialPruebasCheckboxState: CheckboxState;
+    onCopy: (text: string) => void;
+    onClear: () => void;
 }
 
 export default function PlantillasQuejasTab({
@@ -178,20 +178,14 @@ export default function PlantillasQuejasTab({
     setPruebasCheckboxes,
     pruebasRealizadas,
     setPruebasRealizadas,
-    initialPruebasCheckboxState,
+    onCopy,
+    onClear,
 }: PlantillasQuejasTabProps) {
-  const { toast } = useToast();
   const [radioValues, setRadioValues] = useState<RadioGroupState>({});
-
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    // Resetear el estado al cambiar de plantilla
-    setFormData({});
-    setCheckboxValues({});
-    setRadioValues({});
-    setPruebasCheckboxes(initialPruebasCheckboxState);
-    setPruebasRealizadas('');
+    onClear();
   };
   
   const handleInputChange = (id: string, value: string) => {
@@ -227,6 +221,7 @@ export default function PlantillasQuejasTab({
 
     const allCheckedItems: string[] = [];
     for (const G in newCheckboxes) {
+        if (!newCheckboxes[G]) continue;
         const checkedItems = Object.keys(newCheckboxes[G])
           .filter((l) => newCheckboxes[G][l]);
         allCheckedItems.push(...checkedItems);
@@ -247,18 +242,20 @@ export default function PlantillasQuejasTab({
       return allCheckedItems.join(', ');
     };
     const generatedText = generatePruebasText();
-    if (pruebasRealizadas === generatedText || pruebasRealizadas === '') {
+    const isManuallyEdited = pruebasRealizadas !== generatedText && pruebasRealizadas !== '';
+    if (!isManuallyEdited) {
         setPruebasRealizadas(generatedText);
     }
   }, [pruebasCheckboxes, setPruebasRealizadas]);
 
-  const handleCopy = () => {
+  const handleCopyClick = () => {
     if (!selectedTemplate) return;
 
     let template = `TIPO DE MEMO: ${selectedTemplate}\n\n`;
     
     // Checkboxes
     for (const group in checkboxValues) {
+      if(!checkboxValues[group]) continue;
       const checkedItems = Object.keys(checkboxValues[group]).filter(label => checkboxValues[group][label]);
       if (checkedItems.length > 0) {
         template += `${group}: ${checkedItems.join(', ')}\n`;
@@ -281,21 +278,9 @@ export default function PlantillasQuejasTab({
     
     template += `PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
 
-    navigator.clipboard.writeText(template.trim());
-    toast({
-      title: "Memo Copiado",
-      description: "La plantilla del memo ha sido copiada al portapapeles.",
-    });
+    onCopy(template.trim());
   }
 
-  const handleClear = () => {
-    setSelectedTemplate('');
-    setFormData({});
-    setCheckboxValues({});
-    setRadioValues({});
-    setPruebasCheckboxes(initialPruebasCheckboxState);
-    setPruebasRealizadas('');
-  }
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
@@ -413,8 +398,8 @@ export default function PlantillasQuejasTab({
                         />
                     </div>
                      <div className="flex gap-2">
-                        <Button onClick={handleCopy}>Copiar Memo</Button>
-                        <Button variant="outline" onClick={handleClear}>Limpiar Memo</Button>
+                        <Button onClick={handleCopyClick}>Copiar Memo</Button>
+                        <Button variant="outline" onClick={onClear}>Limpiar Memo</Button>
                     </div>
                 </div>
             )}
