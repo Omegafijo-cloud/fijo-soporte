@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save } from 'lucide-react';
+import { PlantillasTab } from '@/components/plantillas-tab';
 
 // Placeholder components for each tab content
-const PlantillasTab = () => <div id="plantillas" className="tab-content active">Contenido de Plantillas</div>;
 const HerramientasTab = () => <div id="herramientas" className="tab-content">Contenido de Herramientas</div>;
 const TransferenciasTab = () => <div id="transferencias" className="tab-content">Contenido de Transferencias</div>;
 const AvisosTab = () => <div id="avisos" className="tab-content">Contenido de Avisos</div>;
@@ -78,7 +78,7 @@ export default function OmegaPage() {
         {/* Contenido de la Pestaña Activa */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8">
             <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-0">
                     {renderTabContent()}
                 </CardContent>
             </Card>
