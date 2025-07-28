@@ -23,9 +23,9 @@ interface FloatingWidgetsProps {
 }
 
 const defaultTheme = {
-  primary: '237 73% 31%',
+  primary: '236 65% 33%',
   background: '0 0% 100%',
-  accent: '282 69% 54%',
+  accent: '282 69% 38%',
 };
 
 const defaultThemeHex = {
@@ -64,12 +64,13 @@ export default function FloatingWidgets({
   };
 
   const handleSetPalette = (palette: { primary: string, background: string, accent: string }) => {
+    const paletteName = colorPalettes.find(p => p.colors.primary === palette.primary)?.name || 'Personalizado';
     setPrimaryColor(palette.primary);
     setBackgroundColor(palette.background);
     setAccentColor(palette.accent);
     applyTheme(palette);
     toast({
-        title: `Tema ${colorPalettes.find(p => p.colors.primary === palette.primary)?.name} Aplicado`,
+        title: `Tema '${paletteName}' Aplicado`,
         description: 'La paleta de colores ha sido actualizada.',
     });
   }
@@ -173,13 +174,19 @@ export default function FloatingWidgets({
                 <CardHeader>
                     <CardTitle>Personalizar Tema</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     <div>
                         <Label className='text-sm font-medium'>Paletas Predefinidas</Label>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                            {colorPalettes.map(palette => (
                                 <Button key={palette.name} variant="outline" onClick={() => handleSetPalette(palette.colors)}>
-                                    {palette.name}
+                                    <div className="flex items-center gap-2">
+                                        {palette.name}
+                                        <div className="flex -space-x-1">
+                                            <div className="w-4 h-4 rounded-full border" style={{backgroundColor: palette.colors.primary}}></div>
+                                            <div className="w-4 h-4 rounded-full border" style={{backgroundColor: palette.colors.accent}}></div>
+                                        </div>
+                                    </div>
                                 </Button>
                            ))}
                         </div>
@@ -188,22 +195,24 @@ export default function FloatingWidgets({
                     <div>
                         <Label className='text-sm font-medium'>Colores Personalizados</Label>
                         <div className="space-y-3 mt-2">
-                            <div className="space-y-2">
+                            <div className="flex items-center justify-between">
                                 <Label>Color Primario</Label>
-                                <Input type="color" value={primaryColor} onChange={(e) => handleColorChange('primary', e.target.value)} className="p-1 h-10"/>
+                                <Input type="color" value={primaryColor} onChange={(e) => handleColorChange('primary', e.target.value)} className="p-1 h-10 w-24"/>
                             </div>
-                            <div className="space-y-2">
+                            <div className="flex items-center justify-between">
                                 <Label>Color de Fondo</Label>
-                                <Input type="color" value={backgroundColor} onChange={(e) => handleColorChange('background', e.target.value)} className="p-1 h-10"/>
+                                <Input type="color" value={backgroundColor} onChange={(e) => handleColorChange('background', e.target.value)} className="p-1 h-10 w-24"/>
                             </div>
-                             <div className="space-y-2">
+                             <div className="flex items-center justify-between">
                                 <Label>Color de Acento</Label>
-                                <Input type="color" value={accentColor} onChange={(e) => handleColorChange('accent', e.target.value)} className="p-1 h-10"/>
+                                <Input type="color" value={accentColor} onChange={(e) => handleColorChange('accent', e.target.value)} className="p-1 h-10 w-24"/>
                             </div>
                         </div>
                     </div>
                     <Separator />
-                    <Button onClick={handleRestoreDefaults}>Restaurar Predeterminados</Button>
+                    <Button onClick={handleRestoreDefaults} variant="outline" className="w-full">
+                        Restaurar Predeterminados
+                    </Button>
                 </CardContent>
             </Card>
         );
@@ -249,13 +258,13 @@ export default function FloatingWidgets({
             <PopoverTrigger asChild>
                 <Button
                     size="icon"
-                    className="rounded-full h-14 w-14 shadow-lg"
+                    className="rounded-full h-14 w-14 shadow-lg bg-accent text-accent-foreground hover:bg-accent/90"
                     aria-label="Abrir widget de OMEGA Copilot"
                 >
                     <MessageSquare className="h-6 w-6" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 h-[60vh] p-0 mr-4 border-primary shadow-2xl">
+            <PopoverContent align="end" className="w-96 h-[60vh] p-0 mr-4 border-primary shadow-2xl">
                  <iframe 
                       src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
                       className="w-full h-full border-0"
@@ -280,5 +289,3 @@ export default function FloatingWidgets({
     </>
   );
 }
-
-    
