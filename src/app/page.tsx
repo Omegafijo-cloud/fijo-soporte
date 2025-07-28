@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { signInWithPopup, OAuthProvider, signOut } from 'firebase/auth';
+import { signInWithRedirect, OAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +19,15 @@ export default function LoginPage() {
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // Check for error in redirect result
+    const errorParam = new URLSearchParams(window.location.search).get('error');
+    if (errorParam) {
+      const errorMessage = new URLSearchParams(window.location.search).get('errorMessage');
+      setError(errorMessage || 'Ocurrió un error durante el inicio de sesión.');
+    }
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && user) {
       router.push('/dashboard');
     }
@@ -29,40 +38,32 @@ export default function LoginPage() {
     setError(null);
     const provider = new OAuthProvider('microsoft.com');
     provider.setCustomParameters({
-        // Optional: prompt=select_account forces account selection
         prompt: 'select_account',
     });
 
     try {
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email;
-      if (!userEmail) {
-        throw new Error("No se pudo obtener el correo del usuario.");
-      }
-      
-      const domain = userEmail.split('@')[1];
-      if (!ALLOWED_DOMAINS.includes(domain)) {
-        await signOut(auth);
-        setError(`El dominio '${domain}' no está autorizado para acceder a esta aplicación.`);
-        setLoadingMicrosoft(false);
-        return;
-      }
-      
-      router.push('/dashboard');
-
+      await signInWithRedirect(auth, provider);
+      // After this, the page will redirect to Microsoft's sign-in page.
+      // The rest of the logic is handled by onAuthStateChanged in AuthContext.
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/account-exists-with-different-credential') {
         setError('Ya existe una cuenta con el mismo correo electrónico pero con un método de inicio de sesión diferente.');
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        setError('El proceso de inicio de sesión fue cancelado.');
       } else {
         setError('Ocurrió un error al intentar iniciar sesión con Microsoft.');
       }
-    } finally {
-        setLoadingMicrosoft(false);
+      setLoadingMicrosoft(false);
     }
   };
+  
+  // This effect will run on the redirect page from Microsoft. 
+  // We show a loading indicator while Firebase processes the sign-in.
+  useEffect(() => {
+    const isRedirect = window.location.href.includes('__%2Fauth%2Fhandler');
+    if (isRedirect) {
+        setLoadingMicrosoft(true);
+    }
+  }, []);
 
   if (authLoading || user) {
     return (
