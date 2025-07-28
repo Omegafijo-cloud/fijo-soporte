@@ -6,18 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement Firebase Authentication
-    console.log("Logging in with:", email, password);
-    // On successful login, redirect
-    router.push('/omega');
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/omega');
+    } catch (error: any) {
+      console.error("Error al iniciar sesión:", error);
+      toast({
+        title: "Error de autenticación",
+        description: "Las credenciales son incorrectas. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,6 +57,7 @@ export function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -52,12 +68,13 @@ export function LoginForm() {
               required 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
             />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full">
-            Iniciar Sesión
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Iniciando..." : "Iniciar Sesión"}
           </Button>
         </CardFooter>
       </form>

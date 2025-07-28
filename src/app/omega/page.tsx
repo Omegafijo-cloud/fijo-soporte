@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,9 @@ import { AvisosTab } from '@/components/avisos-tab';
 import { CopiaRespaldoTab } from '@/components/copia-respaldo-tab';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // -- Funciones para convertir HSL a Hex y viceversa --
 const hslStringToObj = (hslStr: string) => {
@@ -67,6 +71,10 @@ const defaultThemeColors = {
 
 
 export default function OmegaPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState('plantillas');
   const [activeWidget, setActiveWidget] = useState<string | null>(null);
   const [quickNotes, setQuickNotes] = useState('');
@@ -78,9 +86,22 @@ export default function OmegaPage() {
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-
   // State para los colores del tema
   const [themeColors, setThemeColors] = useState(defaultThemeColors);
+
+  // Efecto para verificar la autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        setLoading(false);
+      } else {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   // Efecto para el temporizador
   useEffect(() => {
@@ -94,7 +115,11 @@ export default function OmegaPage() {
         toast({ title: "¡Tiempo agotado!" });
     }
 
-    return () => clearInterval(timerRef.current!);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [isRunning, time, toast]);
 
   useEffect(() => {
@@ -103,6 +128,7 @@ export default function OmegaPage() {
         setIsRunning(false);
         toast({ title: "Temporizador reiniciado", description: "El temporizador se ha reiniciado con la nueva duración."});
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duration]);
 
   // Efecto para aplicar los colores al DOM
@@ -183,6 +209,20 @@ export default function OmegaPage() {
     }
   }
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar la sesión.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -200,6 +240,24 @@ export default function OmegaPage() {
         return <PlantillasTab />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="space-y-4 w-full max-w-4xl p-8">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-14 w-3/4 mx-auto" />
+          <div className="p-8">
+            <Card>
+              <CardContent className="p-6">
+                <Skeleton className="h-96 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -227,7 +285,7 @@ export default function OmegaPage() {
              <Button variant="ghost" size="icon" onClick={handleTimerStop} disabled={!isRunning}><Square className="h-5 w-5"/></Button>
              <Button variant="ghost" size="icon" onClick={handleTimerReset}><RotateCw className="h-5 w-5"/></Button>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Salir
           </Button>
