@@ -1,50 +1,108 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
-const initialCheckboxState = {
-  nivelCero: {
+type CheckboxState = {
+  [group: string]: {
+    [label: string]: boolean;
+  };
+};
+
+const initialCheckboxState: CheckboxState = {
+  'Nivel Cero': {
     'Contraseña de router': false,
     'Reiniciar router': false,
     'Validar luces del router': false,
   },
-  gponAdslHfc: {
+  'GPON - ADSL - HFC': {
     'Prueba de velocidad': false,
     'Verificar cableado': false,
     'Revisar configuración de red': false,
   },
-  tvHfcDthIptv: {
+  'TV HFC - DTH - IPTV': {
     'Reiniciar decodificador': false,
     'Verificar señal': false,
     'Sincronizar control remoto': false,
   },
-  otros: {
+  Otros: {
     'Consulta de facturación': false,
     'Actualización de datos': false,
   },
 };
 
-export default function PlantillasGenericasTab() {
-  const [formData, setFormData] = useState({
+const initialFormData = {
     idLlamada: '',
     nombreContacto: '',
     nIncidencia: '',
     inconveniente: '',
     tipoServicio: '',
-  });
+}
+
+export default function PlantillasGenericasTab() {
+  const [formData, setFormData] = useState(initialFormData);
   const [pruebasRealizadas, setPruebasRealizadas] = useState('');
-  const [checkboxes, setCheckboxes] = useState(initialCheckboxState);
+  const [checkboxes, setCheckboxes] = useState<CheckboxState>(initialCheckboxState);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const generatePruebasText = () => {
+      let text = '';
+      for (const group in checkboxes) {
+        const checkedItems = Object.keys(checkboxes[group]).filter(
+          (label) => checkboxes[group][label]
+        );
+        if (checkedItems.length > 0) {
+          text += `${group.toUpperCase()}:\n- ${checkedItems.join('\n- ')}\n\n`;
+        }
+      }
+      return text.trim();
+    };
+    setPruebasRealizadas(generatePruebasText());
+  }, [checkboxes]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
+
+  const handleCheckboxChange = (group: string, label: string, checked: boolean) => {
+    setCheckboxes((prev) => ({
+      ...prev,
+      [group]: {
+        ...prev[group],
+        [label]: checked,
+      },
+    }));
+  };
+
+  const handleClear = () => {
+    setFormData(initialFormData);
+    setCheckboxes(initialCheckboxState);
+  }
+
+  const handleCopy = () => {
+    const template = `ID de llamada: ${formData.idLlamada}
+Nombre del contacto: ${formData.nombreContacto}
+N° Incidencia: ${formData.nIncidencia}
+Tipo Servicio: ${formData.tipoServicio}
+Inconveniente: ${formData.inconveniente}
+
+PRUEBAS REALIZADAS:
+${pruebasRealizadas}`;
+
+    navigator.clipboard.writeText(template);
+    toast({
+      title: "Copiado",
+      description: "La plantilla ha sido copiada al portapapeles.",
+    })
+  }
 
   const renderCheckboxGroup = (title: string, groupKey: keyof typeof initialCheckboxState) => (
     <Card>
@@ -55,7 +113,11 @@ export default function PlantillasGenericasTab() {
         <div className="space-y-2">
           {Object.keys(checkboxes[groupKey]).map((label) => (
             <div key={label} className="flex items-center space-x-2">
-              <Checkbox id={`${groupKey}-${label}`} />
+              <Checkbox 
+                id={`${groupKey}-${label}`} 
+                checked={checkboxes[groupKey][label]}
+                onCheckedChange={(checked) => handleCheckboxChange(groupKey, label, checked as boolean)}
+              />
               <Label htmlFor={`${groupKey}-${label}`} className="font-normal">
                 {label}
               </Label>
@@ -100,11 +162,11 @@ export default function PlantillasGenericasTab() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="pruebasRealizadas">PRUEBAS REALIZADAS</Label>
-              <Textarea id="pruebasRealizadas" value={pruebasRealizadas} readOnly rows={8} className="bg-muted" />
+              <Textarea id="pruebasRealizadas" value={pruebasRealizadas} readOnly rows={10} className="bg-muted" />
             </div>
             <div className="flex gap-2">
-              <Button>Copiar Plantilla</Button>
-              <Button variant="outline">Limpiar</Button>
+              <Button onClick={handleCopy}>Copiar Plantilla</Button>
+              <Button onClick={handleClear} variant="outline">Limpiar</Button>
             </div>
           </CardContent>
         </Card>
@@ -112,10 +174,10 @@ export default function PlantillasGenericasTab() {
 
       {/* Columna Derecha: Checkboxes */}
       <div className="space-y-4">
-        {renderCheckboxGroup('Nivel Cero', 'nivelCero')}
-        {renderCheckboxGroup('GPON - ADSL - HFC', 'gponAdslHfc')}
-        {renderCheckboxGroup('TV HFC - DTH - IPTV', 'tvHfcDthIptv')}
-        {renderCheckboxGroup('Otros', 'otros')}
+        {renderCheckboxGroup('Nivel Cero', 'Nivel Cero')}
+        {renderCheckboxGroup('GPON - ADSL - HFC', 'GPON - ADSL - HFC')}
+        {renderCheckboxGroup('TV HFC - DTH - IPTV', 'TV HFC - DTH - IPTV')}
+        {renderCheckboxGroup('Otros', 'Otros')}
       </div>
     </div>
   );
