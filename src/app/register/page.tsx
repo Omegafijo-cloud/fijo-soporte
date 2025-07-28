@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const allowedDomain = '@omega.com';
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -30,6 +31,12 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!email.endsWith(allowedDomain)) {
+      setError(`Solo se permiten correos con el dominio ${allowedDomain}.`);
+      return;
+    }
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden.');
       return;
@@ -39,7 +46,6 @@ export default function RegisterPage() {
         return;
     }
     setLoading(true);
-    setError(null);
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -101,7 +107,7 @@ export default function RegisterPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="tu@correo.com"
+                        placeholder={`tu-usuario${allowedDomain}`}
                         required
                     />
                 </div>
