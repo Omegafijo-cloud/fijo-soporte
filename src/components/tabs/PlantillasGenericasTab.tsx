@@ -21,6 +21,8 @@ interface PlantillasGenericasTabProps {
     setCheckboxes: (state: CheckboxState) => void;
     pruebasRealizadas: string;
     setPruebasRealizadas: (text: string) => void;
+    orderedPruebas: string[];
+    setOrderedPruebas: (pruebas: string[]) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
 }
@@ -32,30 +34,15 @@ export default function PlantillasGenericasTab({
     setCheckboxes,
     pruebasRealizadas,
     setPruebasRealizadas,
+    orderedPruebas,
+    setOrderedPruebas,
     onCopy,
     onClear
 }: PlantillasGenericasTabProps) {
 
   useEffect(() => {
-    const generatePruebasText = () => {
-      const allCheckedItems: string[] = [];
-      for (const group in checkboxes) {
-        if (checkboxes[group]) {
-            const checkedItems = Object.keys(checkboxes[group]).filter(
-              (label) => checkboxes[group][label]
-            );
-            allCheckedItems.push(...checkedItems);
-        }
-      }
-      return allCheckedItems.join(', ');
-    };
-    
-    const generatedText = generatePruebasText();
-    const isManuallyEdited = pruebasRealizadas !== generatedText && pruebasRealizadas !== '';
-    if (!isManuallyEdited) {
-      setPruebasRealizadas(generatedText);
-    }
-  }, [checkboxes, setPruebasRealizadas]);
+    setPruebasRealizadas(orderedPruebas.join(', '));
+  }, [orderedPruebas, setPruebasRealizadas]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -63,6 +50,7 @@ export default function PlantillasGenericasTab({
   };
 
   const handleCheckboxChange = (group: string, label: string, checked: boolean) => {
+    // Update the visual state of the checkbox
     const newCheckboxes = {
       ...checkboxes,
       [group]: {
@@ -72,17 +60,16 @@ export default function PlantillasGenericasTab({
     };
     setCheckboxes(newCheckboxes);
     
-     const allCheckedItems: string[] = [];
-      for (const G in newCheckboxes) {
-        if (newCheckboxes[G]) {
-            const checkedItems = Object.keys(newCheckboxes[G]).filter(
-              (l) => newCheckboxes[G][l]
-            );
-            allCheckedItems.push(...checkedItems);
+    // Update the ordered list
+    setOrderedPruebas(prev => {
+        const a = new Set(prev);
+        if (checked) {
+            a.add(label);
+        } else {
+            a.delete(label);
         }
-      }
-    setPruebasRealizadas(allCheckedItems.join(', '));
-
+        return Array.from(a);
+    });
   };
 
   const handleCopyClick = () => {

@@ -67,12 +67,14 @@ type AppState = {
   plantillasGenericas_formData?: any;
   plantillasGenericas_checkboxes?: CheckboxState;
   plantillasGenericas_pruebasRealizadas?: string;
+  plantillasGenericas_orderedPruebas?: string[];
 
   plantillasQuejas_selectedTemplate?: string;
   plantillasQuejas_formData?: any;
   plantillasQuejas_checkboxValues?: CheckboxState;
   plantillasQuejas_pruebasCheckboxes?: CheckboxState;
   plantillasQuejas_pruebasRealizadas?: string;
+  plantillasQuejas_orderedPruebas?: string[];
 
   memosWf_templates?: MemoTemplate;
   memosWf_selectedTemplate?: string;
@@ -395,6 +397,7 @@ export default function DashboardPage() {
   const [plantillasGenericasFormData, setPlantillasGenericasFormData] = useState(initialPlantillasGenericasFormData);
   const [plantillasGenericasCheckboxes, setPlantillasGenericasCheckboxes] = useState<CheckboxState>(initialPlantillasGenericasCheckboxes);
   const [plantillasGenericasPruebas, setPlantillasGenericasPruebas] = useState('');
+  const [plantillasGenericasOrderedPruebas, setPlantillasGenericasOrderedPruebas] = useState<string[]>([]);
 
   // Estado para Plantillas de Quejas
   const [plantillasQuejasSelectedTemplate, setPlantillasQuejasSelectedTemplate] = useState('');
@@ -402,6 +405,7 @@ export default function DashboardPage() {
   const [plantillasQuejasCheckboxValues, setPlantillasQuejasCheckboxValues] = useState<CheckboxState>({});
   const [plantillasQuejasPruebasCheckboxes, setPlantillasQuejasPruebasCheckboxes] = useState<CheckboxState>(initialPlantillasQuejasCheckboxes);
   const [plantillasQuejasPruebas, setPlantillasQuejasPruebas] = useState('');
+  const [plantillasQuejasOrderedPruebas, setPlantillasQuejasOrderedPruebas] = useState<string[]>([]);
   
   // Estado para Memos WF
   const [memosWfTemplates, setMemosWfTemplates] = useState<MemoTemplate>(initialMemosWfTemplates);
@@ -430,11 +434,13 @@ export default function DashboardPage() {
       plantillasGenericas_formData: plantillasGenericasFormData,
       plantillasGenericas_checkboxes: plantillasGenericasCheckboxes,
       plantillasGenericas_pruebasRealizadas: plantillasGenericasPruebas,
+      plantillasGenericas_orderedPruebas: plantillasGenericasOrderedPruebas,
       plantillasQuejas_selectedTemplate: plantillasQuejasSelectedTemplate,
       plantillasQuejas_formData: plantillasQuejasFormData,
       plantillasQuejas_checkboxValues: plantillasQuejasCheckboxValues,
       plantillasQuejas_pruebasCheckboxes: plantillasQuejasPruebasCheckboxes,
       plantillasQuejas_pruebasRealizadas: plantillasQuejasPruebas,
+      plantillasQuejas_orderedPruebas: plantillasQuejasOrderedPruebas,
       memosWf_templates: memosWfTemplates,
       memosWf_selectedTemplate: memosWfSelectedTemplate,
       memosWf_formData: memosWfFormData,
@@ -448,9 +454,9 @@ export default function DashboardPage() {
     };
   }, [
       activeTab, activeSubTab, backupText, notesText, usersText, notices,
-      plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasPruebas,
+      plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasPruebas, plantillasGenericasOrderedPruebas,
       plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
-      plantillasQuejasPruebasCheckboxes, plantillasQuejasPruebas,
+      plantillasQuejasPruebasCheckboxes, plantillasQuejasPruebas, plantillasQuejasOrderedPruebas,
       memosWfTemplates, memosWfSelectedTemplate, memosWfFormData, 
       memosOrdenTemplates, memosOrdenSelectedTemplate, memosOrdenFormData,
       herramientasMinutos, transferenciasItems, transferenciasNewService, transferenciasNewValue
@@ -499,12 +505,14 @@ export default function DashboardPage() {
           if (data.plantillasGenericas_formData) setPlantillasGenericasFormData(data.plantillasGenericas_formData);
           if (data.plantillasGenericas_checkboxes) setPlantillasGenericasCheckboxes(data.plantillasGenericas_checkboxes);
           if (data.plantillasGenericas_pruebasRealizadas) setPlantillasGenericasPruebas(data.plantillasGenericas_pruebasRealizadas);
+          if (data.plantillasGenericas_orderedPruebas) setPlantillasGenericasOrderedPruebas(data.plantillasGenericas_orderedPruebas);
 
           if(data.plantillasQuejas_selectedTemplate) setPlantillasQuejasSelectedTemplate(data.plantillasQuejas_selectedTemplate);
           if(data.plantillasQuejas_formData) setPlantillasQuejasFormData(data.plantillasQuejas_formData);
           if(data.plantillasQuejas_checkboxValues) setPlantillasQuejasCheckboxValues(data.plantillasQuejas_checkboxValues);
           if(data.plantillasQuejas_pruebasCheckboxes) setPlantillasQuejasPruebasCheckboxes(data.plantillasQuejas_pruebasCheckboxes);
           if(data.plantillasQuejas_pruebasRealizadas) setPlantillasQuejasPruebas(data.plantillasQuejas_pruebasRealizadas);
+          if (data.plantillasQuejas_orderedPruebas) setPlantillasQuejasOrderedPruebas(data.plantillasQuejas_orderedPruebas);
           
           if(data.memosWf_templates) setMemosWfTemplates(data.memosWf_templates);
           if(data.memosWf_selectedTemplate) setMemosWfSelectedTemplate(data.memosWf_selectedTemplate);
@@ -597,6 +605,7 @@ export default function DashboardPage() {
     setPlantillasGenericasFormData(initialPlantillasGenericasFormData);
     setPlantillasGenericasCheckboxes(initialPlantillasGenericasCheckboxes);
     setPlantillasGenericasPruebas('');
+    setPlantillasGenericasOrderedPruebas([]);
   };
 
   const handleClearQuejas = () => {
@@ -605,6 +614,7 @@ export default function DashboardPage() {
     setPlantillasQuejasCheckboxValues({});
     setPlantillasQuejasPruebasCheckboxes(initialPlantillasQuejasCheckboxes);
     setPlantillasQuejasPruebas('');
+    setPlantillasQuejasOrderedPruebas([]);
   };
 
   const handleClearMemosWf = () => {
@@ -711,6 +721,8 @@ export default function DashboardPage() {
                             setCheckboxes={setPlantillasGenericasCheckboxes}
                             pruebasRealizadas={plantillasGenericasPruebas}
                             setPruebasRealizadas={setPlantillasGenericasPruebas}
+                            orderedPruebas={plantillasGenericasOrderedPruebas}
+                            setOrderedPruebas={setPlantillasGenericasOrderedPruebas}
                             onCopy={handleCopyToClipboard}
                             onClear={handleClearGeneric}
                         />
@@ -727,6 +739,8 @@ export default function DashboardPage() {
                             setPruebasCheckboxes={setPlantillasQuejasPruebasCheckboxes}
                             pruebasRealizadas={plantillasQuejasPruebas}
                             setPruebasRealizadas={setPlantillasQuejasPruebas}
+                            orderedPruebas={plantillasQuejasOrderedPruebas}
+                            setOrderedPruebas={setPlantillasQuejasOrderedPruebas}
                             onCopy={handleCopyToClipboard}
                             onClear={handleClearQuejas}
                         />

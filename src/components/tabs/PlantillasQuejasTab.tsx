@@ -163,6 +163,8 @@ interface PlantillasQuejasTabProps {
     setPruebasCheckboxes: (value: CheckboxState) => void;
     pruebasRealizadas: string;
     setPruebasRealizadas: (value: string) => void;
+    orderedPruebas: string[];
+    setOrderedPruebas: (pruebas: string[]) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
 }
@@ -178,6 +180,8 @@ export default function PlantillasQuejasTab({
     setPruebasCheckboxes,
     pruebasRealizadas,
     setPruebasRealizadas,
+    orderedPruebas,
+    setOrderedPruebas,
     onCopy,
     onClear,
 }: PlantillasQuejasTabProps) {
@@ -185,7 +189,8 @@ export default function PlantillasQuejasTab({
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    onClear();
+    onClear(); // This now also clears orderedPruebas in the parent
+    setRadioValues({});
   };
   
   const handleInputChange = (id: string, value: string) => {
@@ -219,34 +224,20 @@ export default function PlantillasQuejasTab({
     };
     setPruebasCheckboxes(newCheckboxes);
 
-    const allCheckedItems: string[] = [];
-    for (const G in newCheckboxes) {
-        if (!newCheckboxes[G]) continue;
-        const checkedItems = Object.keys(newCheckboxes[G])
-          .filter((l) => newCheckboxes[G][l]);
-        allCheckedItems.push(...checkedItems);
-    }
-    setPruebasRealizadas(allCheckedItems.join(', '));
+    setOrderedPruebas(prev => {
+        const a = new Set(prev);
+        if (checked) {
+            a.add(label);
+        } else {
+            a.delete(label);
+        }
+        return Array.from(a);
+    });
   };
 
   useEffect(() => {
-    const generatePruebasText = () => {
-       const allCheckedItems: string[] = [];
-      for (const group in pruebasCheckboxes) {
-        if (pruebasCheckboxes[group]) {
-          const checkedItems = Object.keys(pruebasCheckboxes[group])
-            .filter((label) => pruebasCheckboxes[group][label]);
-          allCheckedItems.push(...checkedItems);
-        }
-      }
-      return allCheckedItems.join(', ');
-    };
-    const generatedText = generatePruebasText();
-    const isManuallyEdited = pruebasRealizadas !== generatedText && pruebasRealizadas !== '';
-    if (!isManuallyEdited) {
-        setPruebasRealizadas(generatedText);
-    }
-  }, [pruebasCheckboxes, setPruebasRealizadas]);
+    setPruebasRealizadas(orderedPruebas.join(', '));
+  }, [orderedPruebas, setPruebasRealizadas]);
 
   const handleCopyClick = () => {
     if (!selectedTemplate) return;
