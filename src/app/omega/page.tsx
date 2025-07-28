@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users, MessageSquare, Palette, RotateCcw } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
@@ -12,6 +14,64 @@ import { CopiaRespaldoTab } from '@/components/copia-respaldo-tab';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
+// -- Funciones para convertir HSL a Hex y viceversa --
+// Estas son necesarias porque el input[type=color] trabaja con HEX,
+// pero el tema de ShadCN usa HSL.
+
+// Convierte un string "hsl(h, s%, l%)" a un objeto {h, s, l}
+const hslStringToObj = (hslStr: string) => {
+    const [h, s, l] = hslStr.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    return { h, s, l };
+};
+
+// Convierte un objeto {h, s, l} a un string "h s l" para las variables CSS
+const hslObjToCssVar = (hslObj: { h: number, s: number, l: number }) => {
+    return `${hslObj.h} ${hslObj.s}% ${hslObj.l}%`;
+};
+
+// Convierte HSL a HEX para el input de color
+const hslToHex = (h: number, s: number, l: number) => {
+    s /= 100;
+    l /= 100;
+    const k = (n: number) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) =>
+        l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    return `#${[8, 4, 0].map(n =>
+        Math.round(f(n) * 255).toString(16).padStart(2, '0')
+    ).join('')}`;
+};
+
+// Convierte HEX a HSL
+const hexToHsl = (hex: string) => {
+    let r = parseInt(hex.substring(1, 3), 16) / 255;
+    let g = parseInt(hex.substring(3, 5), 16) / 255;
+    let b = parseInt(hex.substring(5, 7), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+};
+
+const defaultThemeColors = {
+    background: { h: 240, s: 6, l: 10 },
+    foreground: { h: 220, s: 13, l: 95 },
+    primary: { h: 265, s: 70, l: 65 },
+    accent: { h: 180, s: 80, l: 55 },
+};
+
 
 export default function OmegaPage() {
   const [activeTab, setActiveTab] = useState('plantillas');
@@ -19,6 +79,19 @@ export default function OmegaPage() {
   const [quickNotes, setQuickNotes] = useState('');
   const [userList, setUserList] = useState('');
   const { toast } = useToast();
+
+  // State para los colores del tema
+  const [themeColors, setThemeColors] = useState(defaultThemeColors);
+
+  // Efecto para aplicar los colores al DOM
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--background', hslObjToCssVar(themeColors.background));
+    root.style.setProperty('--foreground', hslObjToCssVar(themeColors.foreground));
+    root.style.setProperty('--primary', hslObjToCssVar(themeColors.primary));
+    root.style.setProperty('--accent', hslObjToCssVar(themeColors.accent));
+  }, [themeColors]);
+  
 
   const handleWidgetToggle = (widgetName: string) => {
     setActiveWidget(prev => (prev === widgetName ? null : widgetName));
@@ -47,6 +120,21 @@ export default function OmegaPage() {
       description: 'El contenido ha sido borrado.',
     });
   };
+
+  const handleThemeColorChange = (colorName: keyof typeof themeColors, hexValue: string) => {
+    setThemeColors(prev => ({
+        ...prev,
+        [colorName]: hexToHsl(hexValue)
+    }));
+  };
+
+  const resetTheme = () => {
+    setThemeColors(defaultThemeColors);
+    toast({
+        title: "Tema Restaurado",
+        description: "Los colores han sido restaurados a sus valores por defecto.",
+    });
+  }
 
 
   const renderTabContent = () => {
@@ -120,7 +208,7 @@ export default function OmegaPage() {
       </main>
 
       {/* Widgets Inferiores Flotantes */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
          {/* Panel de Notas Rápidas */}
          {activeWidget === 'notas' && (
           <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
@@ -172,10 +260,40 @@ export default function OmegaPage() {
             <Card className="w-96 h-[60vh] shadow-lg animate-in slide-in-from-bottom-10 flex flex-col">
                 <CardContent className="p-2 flex-1">
                     <iframe
-                        src="" // TODO: Reemplaza con la URL de tu Copilot Studio Chatbot
+                        src="https://copilotstudio.microsoft.com/environments/Default-35058e0b-9a5c-4d1c-aa8e-08d02cd58b1a/bots/cr32d_marketingDigitalPro/webchat?__version__=2"
                         className="w-full h-full border-0"
                         title="Copilot Chat"
                     ></iframe>
+                </CardContent>
+            </Card>
+        )}
+
+        {/* Panel de Personalizar Tema */}
+        {activeWidget === 'theme' && (
+            <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
+                <CardContent className="p-4 space-y-4">
+                    <h4 className="font-semibold text-center">Personalizar Tema</h4>
+                    <div className="space-y-3">
+                        <div className="space-y-1">
+                            <Label>Fondo</Label>
+                            <Input type="color" value={hslToHex(themeColors.background.h, themeColors.background.s, themeColors.background.l)} onChange={(e) => handleThemeColorChange('background', e.target.value)} className="p-1 h-10" />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Texto</Label>
+                            <Input type="color" value={hslToHex(themeColors.foreground.h, themeColors.foreground.s, themeColors.foreground.l)} onChange={(e) => handleThemeColorChange('foreground', e.target.value)} className="p-1 h-10" />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Primario</Label>
+                            <Input type="color" value={hslToHex(themeColors.primary.h, themeColors.primary.s, themeColors.primary.l)} onChange={(e) => handleThemeColorChange('primary', e.target.value)} className="p-1 h-10" />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Acento</Label>
+                            <Input type="color" value={hslToHex(themeColors.accent.h, themeColors.accent.s, themeColors.accent.l)} onChange={(e) => handleThemeColorChange('accent', e.target.value)} className="p-1 h-10" />
+                        </div>
+                    </div>
+                    <Button onClick={resetTheme} variant="outline" className="w-full">
+                        <RotateCcw className="mr-2 h-4 w-4" /> Restaurar
+                    </Button>
                 </CardContent>
             </Card>
         )}
@@ -209,7 +327,15 @@ export default function OmegaPage() {
           >
             {activeWidget === 'copilot' ? <X /> : <MessageSquare />}
           </Button>
-          {/* Aquí irán los otros botones de widgets */}
+          <Button
+            size="icon"
+            className="rounded-full h-12 w-12 shadow-lg"
+            onClick={() => handleWidgetToggle('theme')}
+            variant={activeWidget === 'theme' ? 'default' : 'secondary'}
+            title="Personalizar Tema"
+          >
+            {activeWidget === 'theme' ? <X /> : <Palette />}
+          </Button>
         </div>
       </div>
 
