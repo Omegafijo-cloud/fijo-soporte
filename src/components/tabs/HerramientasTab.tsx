@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,17 +11,17 @@ export default function HerramientasTab() {
   const [minutos, setMinutos] = useState('');
   const [segundos, setSegundos] = useState<number | null>(null);
 
-  const handleConvert = () => {
+  useEffect(() => {
     const min = parseFloat(minutos);
-    if (!isNaN(min)) {
+    if (!isNaN(min) && minutos.trim() !== '') {
       setSegundos(min * 60);
     } else {
       setSegundos(null);
     }
-  };
+  }, [minutos]);
 
   const getResultColor = () => {
-    if (segundos === null) return '';
+    if (segundos === null) return 'text-muted-foreground';
     return segundos > TMO_META ? 'text-destructive' : 'text-green-600';
   };
 
@@ -43,15 +42,12 @@ export default function HerramientasTab() {
             placeholder="Ej: 6.2"
           />
         </div>
-        <Button onClick={handleConvert}>Convertir a Segundos</Button>
         <div className="pt-4 mt-4 border-t">
             <p className="text-lg font-semibold">Resultado:</p>
-            {segundos !== null ? (
-                 <p className={`text-2xl font-bold ${getResultColor()}`}>{segundos.toFixed(0)} segundos</p>
-            ) : (
-                <p className="text-muted-foreground">Ingrese un valor para convertir.</p>
-            )}
-             <p className="text-sm font-bold text-primary mt-2">META TMO {TMO_META} SEGUNDOS COMO MÁXIMO!</p>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${getResultColor()}`}>
+              {segundos !== null ? `${segundos.toFixed(0)} segundos` : 'Ingrese un valor...'}
+            </p>
+            <p className="text-sm font-bold text-primary mt-2">META TMO {TMO_META} SEGUNDOS COMO MÁXIMO!</p>
         </div>
       </CardContent>
     </Card>
