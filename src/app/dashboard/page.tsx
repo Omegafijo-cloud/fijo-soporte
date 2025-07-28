@@ -11,8 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { doc, setDoc, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
-import 'intro.js/introjs.css';
 import introJs from 'intro.js';
+import 'intro.js/introjs.css';
+
 
 import PlantillasGenericasTab from '@/components/tabs/PlantillasGenericasTab';
 import PlantillasQuejasTab from '@/components/tabs/PlantillasQuejasTab';
