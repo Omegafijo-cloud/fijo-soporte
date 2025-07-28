@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,104 +15,88 @@ type CheckboxState = {
   };
 };
 
-const initialCheckboxState: CheckboxState = {
-    'Nivel Cero': {
-        'Saldos OK': false,
-        'No hay Fallas': false,
-        'No presenta bloqueo': false,
-        'No hay OS abiertas': false,
-        'No hay quejas': false,
-    },
-    'GPON - ADSL - HFC': {
-        'Se verifica estado de las luces del router': false,
-        'Envio reset en UMP': false,
-        'Se Desconecta y Conecta Corriente': false,
-        'Se Desconecta y Conecta en otro tomacorriente': false,
-        'Se verifica Splitter': false,
-        'Cambio de baterías': false,
-        'Se verifica Coaxial bien apretado': false,
-        'Se verifica cortes o daños en la fibra': false,
-        'Se manda a realizar test de velocidad (00 Megas)': false,
-        'Se realiza Ping (0% perdido)': false,
-        'Estado de la ONT activo': false,
-        'Niveles SNR en Rojo': false,
-        'Luz LOS en ROJO': false,
-        'Se envia reboot en Axiros': false,
-    },
-    'TV HFC - DTH - IPTV': {
-        'Se verifica Conexiones HDMI': false,
-        'Se Verifica Conexiones RCA': false,
-        'Se verifica cable Coaxial': false,
-        'XX Stb afectados': false,
-        'Se valida Serial No. XXXX': false,
-        'Mensaje que muestra Tv: XXX': false,
-        'Se Envia Comando XXXX': false,
-        'Se Envia Reset Fisico': false,
-        'Se verifica en la GUI, AMCO en verde': false,
-    },
-    'Otros': {
-        'Se valida DPI ok, nombre completo ok, sin restricciones': false,
-        'Cliente no esta en Sitio': false,
-        'Cliente esta en Agencia': false,
-        'Cliente no quiere hacer pruebas': false,
-        'Se realiza cambio de contraseña con exito': false,
-        'Servicio funcionando de manera correcta': false,
-        'Se Genera Averia': false,
-        'Se envía reproceso': false,
-    },
-};
-
-const initialFormData = {
-    idLlamada: '',
-    nombreContacto: '',
-    nIncidencia: '',
-    inconveniente: '',
-    tipoServicio: '',
-}
-
 interface PlantillasGenericasTabProps {
     backupText: string;
     setBackupText: (text: string) => void;
+    formData: any;
+    setFormData: (data: any) => void;
+    checkboxes: CheckboxState;
+    setCheckboxes: (state: CheckboxState) => void;
+    pruebasRealizadas: string;
+    setPruebasRealizadas: (text: string) => void;
+    initialFormData: any;
+    initialCheckboxes: CheckboxState;
 }
 
-export default function PlantillasGenericasTab({ backupText, setBackupText }: PlantillasGenericasTabProps) {
-  const [formData, setFormData] = useState(initialFormData);
-  const [pruebasRealizadas, setPruebasRealizadas] = useState('');
-  const [checkboxes, setCheckboxes] = useState<CheckboxState>(initialCheckboxState);
+export default function PlantillasGenericasTab({ 
+    backupText, 
+    setBackupText,
+    formData,
+    setFormData,
+    checkboxes,
+    setCheckboxes,
+    pruebasRealizadas,
+    setPruebasRealizadas,
+    initialFormData,
+    initialCheckboxes
+}: PlantillasGenericasTabProps) {
   const { toast } = useToast();
 
   useEffect(() => {
     const generatePruebasText = () => {
       const allCheckedItems: string[] = [];
       for (const group in checkboxes) {
-        const checkedItems = Object.keys(checkboxes[group]).filter(
-          (label) => checkboxes[group][label]
-        );
-        allCheckedItems.push(...checkedItems);
+        if (checkboxes[group]) {
+            const checkedItems = Object.keys(checkboxes[group]).filter(
+              (label) => checkboxes[group][label]
+            );
+            allCheckedItems.push(...checkedItems);
+        }
       }
       return allCheckedItems.join(', ');
     };
-    setPruebasRealizadas(generatePruebasText());
-  }, [checkboxes]);
+    // Solo actualiza si el campo no ha sido editado manualmente
+    // Para lograr esto, comparamos el estado actual con lo que se generaría.
+    // Si son diferentes, significa que el usuario editó manualmente.
+    const generatedText = generatePruebasText();
+    if (pruebasRealizadas === generatedText || pruebasRealizadas === '') {
+        setPruebasRealizadas(generatedText);
+    }
+  }, [checkboxes, setPruebasRealizadas]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    setFormData((prev: any) => ({ ...prev, [id]: value }));
   };
 
   const handleCheckboxChange = (group: string, label: string, checked: boolean) => {
-    setCheckboxes((prev) => ({
-      ...prev,
+    const newCheckboxes = {
+      ...checkboxes,
       [group]: {
-        ...prev[group],
+        ...checkboxes[group],
         [label]: checked,
       },
-    }));
+    };
+    setCheckboxes(newCheckboxes);
+    
+    // Regenerar texto de pruebas al cambiar un checkbox
+     const allCheckedItems: string[] = [];
+      for (const G in newCheckboxes) {
+        if (newCheckboxes[G]) {
+            const checkedItems = Object.keys(newCheckboxes[G]).filter(
+              (l) => newCheckboxes[G][l]
+            );
+            allCheckedItems.push(...checkedItems);
+        }
+      }
+    setPruebasRealizadas(allCheckedItems.join(', '));
+
   };
 
   const handleClear = () => {
     setFormData(initialFormData);
-    setCheckboxes(initialCheckboxState);
+    setCheckboxes(initialCheckboxes);
+    setPruebasRealizadas('');
   }
 
   const handleCopy = () => {
@@ -134,18 +118,18 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
     })
   }
 
-  const renderCheckboxGroup = (title: string, groupKey: keyof typeof initialCheckboxState) => (
+  const renderCheckboxGroup = (title: string, groupKey: keyof CheckboxState) => (
     <Card>
       <CardHeader className="p-4">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <div className="space-y-2">
-          {Object.keys(checkboxes[groupKey]).map((label) => (
+          {checkboxes[groupKey] && Object.keys(checkboxes[groupKey]).map((label) => (
             <div key={label} className="flex items-center space-x-2">
               <Checkbox 
                 id={`${groupKey}-${label}`} 
-                checked={checkboxes[groupKey][label]}
+                checked={checkboxes[groupKey]?.[label] || false}
                 onCheckedChange={(checked) => handleCheckboxChange(groupKey, label, checked as boolean)}
               />
               <Label htmlFor={`${groupKey}-${label}`} className="font-normal">

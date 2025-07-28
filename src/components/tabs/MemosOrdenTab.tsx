@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,9 +25,19 @@ const predefinedOrdenMemos = {
   },
 };
 
-export default function MemosOrdenTab() {
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [formData, setFormData] = useState<{ [key: string]: any }>({});
+interface MemosOrdenTabProps {
+  selectedTemplate: string;
+  setSelectedTemplate: (value: string) => void;
+  formData: { [key: string]: any };
+  setFormData: (value: { [key: string]: any }) => void;
+}
+
+export default function MemosOrdenTab({
+  selectedTemplate,
+  setSelectedTemplate,
+  formData,
+  setFormData
+}: MemosOrdenTabProps) {
   const { toast } = useToast();
 
   const handleTemplateChange = (templateKey: string) => {

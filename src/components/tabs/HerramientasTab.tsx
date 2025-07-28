@@ -7,8 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 const TMO_META = 372;
 
-export default function HerramientasTab() {
-  const [minutos, setMinutos] = useState('');
+interface HerramientasTabProps {
+  minutos: string;
+  setMinutos: (value: string) => void;
+}
+
+export default function HerramientasTab({ minutos, setMinutos }: HerramientasTabProps) {
   const [segundos, setSegundos] = useState<number | null>(null);
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,10 +26,19 @@ const predefinedWfMemos = {
   },
 };
 
+interface MemosWfTabProps {
+  selectedTemplate: string;
+  setSelectedTemplate: (value: string) => void;
+  formData: { [key: string]: any };
+  setFormData: (value: { [key: string]: any }) => void;
+}
 
-export default function MemosWfTab() {
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [formData, setFormData] = useState<{ [key: string]: any }>({});
+export default function MemosWfTab({ 
+  selectedTemplate, 
+  setSelectedTemplate, 
+  formData, 
+  setFormData 
+}: MemosWfTabProps) {
   const { toast } = useToast();
 
   const handleTemplateChange = (templateKey: string) => {

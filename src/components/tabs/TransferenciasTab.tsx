@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -15,16 +13,23 @@ interface TransferItem {
   isCustom?: boolean;
 }
 
-const defaultTransferItems: TransferItem[] = [
-  { service: 'SERVICIO MOVIL', value: '123' },
-  { service: 'COMERCIAL', value: '101' },
-  { service: 'SOPORTE NIVEL 2', value: '103' },
-];
+interface TransferenciasTabProps {
+  transferItems: TransferItem[];
+  setTransferItems: (items: TransferItem[]) => void;
+  newService: string;
+  setNewService: (value: string) => void;
+  newValue: string;
+  setNewValue: (value: string) => void;
+}
 
-export default function TransferenciasTab() {
-  const [transferItems, setTransferItems] = useState<TransferItem[]>(defaultTransferItems);
-  const [newService, setNewService] = useState('');
-  const [newValue, setNewValue] = useState('');
+export default function TransferenciasTab({
+  transferItems,
+  setTransferItems,
+  newService,
+  setNewService,
+  newValue,
+  setNewValue,
+}: TransferenciasTabProps) {
 
   const handleAddTransfer = () => {
     if (newService.trim() && newValue.trim()) {

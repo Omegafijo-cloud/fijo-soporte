@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,60 +42,33 @@ type CheckboxState = {
   };
 };
 
-const initialPruebasCheckboxState: CheckboxState = {
-  'Nivel Cero': {
-    'Saldos OK': false,
-    'No hay Fallas': false,
-    'No presenta bloqueo': false,
-    'No hay OS abiertas': false,
-    'No hay quejas': false,
-  },
-  'GPON - ADSL - HFC': {
-    'Se verifica estado de las luces del router': false,
-    'Envio reset en UMP': false,
-    'Se Desconecta y Conecta Corriente': false,
-    'Se Desconecta y Conecta en otro tomacorriente': false,
-    'Se verifica Splitter': false,
-    'Cambio de baterías': false,
-    'Se verifica Coaxial bien apretado': false,
-    'Se verifica cortes o daños en la fibra': false,
-    'Se manda a realizar test de velocidad (00 Megas)': false,
-    'Se realiza Ping (0% perdido)': false,
-    'Estado de la ONT activo': false,
-    'Niveles SNR en Rojo': false,
-    'Luz LOS en ROJO': false,
-    'Se envia reboot en Axiros': false,
-  },
-  'TV HFC - DTH - IPTV': {
-    'Se verifica Conexiones HDMI': false,
-    'Se Verifica Conexiones RCA': false,
-    'Se verifica cable Coaxial': false,
-    'XX Stb afectados': false,
-    'Se valida Serial No. XXXX': false,
-    'Mensaje que muestra Tv: XXX': false,
-    'Se Envia Comando XXXX': false,
-    'Se Envia Reset Fisico': false,
-    'Se verifica en la GUI, AMCO en verde': false,
-  },
-  'Otros': {
-    'Se valida DPI ok, nombre completo ok, sin restricciones': false,
-    'Cliente no esta en Sitio': false,
-    'Cliente esta en Agencia': false,
-    'Cliente no quiere hacer pruebas': false,
-    'Se realiza cambio de contraseña con exito': false,
-    'Servicio funcionando de manera correcta': false,
-    'Se Genera Averia': false,
-    'Se envía reproceso': false,
-  },
-};
+interface PlantillasQuejasTabProps {
+    selectedTemplate: string;
+    setSelectedTemplate: (value: string) => void;
+    formData: { [key: string]: any };
+    setFormData: (value: { [key: string]: any }) => void;
+    checkboxValues: CheckboxState;
+    setCheckboxValues: (value: CheckboxState) => void;
+    pruebasCheckboxes: CheckboxState;
+    setPruebasCheckboxes: (value: CheckboxState) => void;
+    pruebasRealizadas: string;
+    setPruebasRealizadas: (value: string) => void;
+    initialPruebasCheckboxState: CheckboxState;
+}
 
-
-export default function PlantillasQuejasTab() {
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [formData, setFormData] = useState<{ [key: string]: any }>({});
-  const [checkboxValues, setCheckboxValues] = useState<CheckboxState>({});
-  const [pruebasRealizadas, setPruebasRealizadas] = useState('');
-  const [pruebasCheckboxes, setPruebasCheckboxes] = useState<CheckboxState>(initialPruebasCheckboxState);
+export default function PlantillasQuejasTab({
+    selectedTemplate,
+    setSelectedTemplate,
+    formData,
+    setFormData,
+    checkboxValues,
+    setCheckboxValues,
+    pruebasCheckboxes,
+    setPruebasCheckboxes,
+    pruebasRealizadas,
+    setPruebasRealizadas,
+    initialPruebasCheckboxState,
+}: PlantillasQuejasTabProps) {
   const { toast } = useToast();
 
   const handleTemplateChange = (templateKey: string) => {
@@ -104,6 +77,7 @@ export default function PlantillasQuejasTab() {
     setFormData({});
     setCheckboxValues({});
     setPruebasCheckboxes(initialPruebasCheckboxState);
+    setPruebasRealizadas('');
   };
   
   const handleInputChange = (id: string, value: string) => {
@@ -121,27 +95,42 @@ export default function PlantillasQuejasTab() {
   };
   
   const handlePruebasCheckboxChange = (group: string, label: string, checked: boolean) => {
-    setPruebasCheckboxes((prev) => ({
-      ...prev,
+    const newCheckboxes = {
+      ...pruebasCheckboxes,
       [group]: {
-        ...prev[group],
+        ...pruebasCheckboxes[group],
         [label]: checked,
       },
-    }));
+    };
+    setPruebasCheckboxes(newCheckboxes);
+
+    // Regenerar texto
+    const allCheckedItems: string[] = [];
+    for (const G in newCheckboxes) {
+        const checkedItems = Object.keys(newCheckboxes[G])
+          .filter((l) => newCheckboxes[G][l]);
+        allCheckedItems.push(...checkedItems);
+    }
+    setPruebasRealizadas(allCheckedItems.join(', '));
   };
 
   useEffect(() => {
     const generatePruebasText = () => {
        const allCheckedItems: string[] = [];
       for (const group in pruebasCheckboxes) {
-        const checkedItems = Object.keys(pruebasCheckboxes[group])
-          .filter((label) => pruebasCheckboxes[group][label]);
-        allCheckedItems.push(...checkedItems);
+        if (pruebasCheckboxes[group]) {
+          const checkedItems = Object.keys(pruebasCheckboxes[group])
+            .filter((label) => pruebasCheckboxes[group][label]);
+          allCheckedItems.push(...checkedItems);
+        }
       }
       return allCheckedItems.join(', ');
     };
-    setPruebasRealizadas(generatePruebasText());
-  }, [pruebasCheckboxes]);
+    const generatedText = generatePruebasText();
+    if (pruebasRealizadas === generatedText || pruebasRealizadas === '') {
+        setPruebasRealizadas(generatedText);
+    }
+  }, [pruebasCheckboxes, setPruebasRealizadas]);
 
   const handleCopy = () => {
     if (!selectedTemplate) return;
@@ -179,7 +168,7 @@ export default function PlantillasQuejasTab() {
     setFormData({});
     setCheckboxValues({});
     setPruebasCheckboxes(initialPruebasCheckboxState);
-    // El valor del select se controla externamente, así que al setear el state a '' se limpia.
+    setPruebasRealizadas('');
   }
 
   const renderDynamicFields = () => {
@@ -220,18 +209,18 @@ export default function PlantillasQuejasTab() {
     );
   };
   
-  const renderPruebasCheckboxGroup = (title: string, groupKey: keyof typeof initialPruebasCheckboxState) => (
+  const renderPruebasCheckboxGroup = (title: string, groupKey: keyof CheckboxState) => (
     <Card>
       <CardHeader className="p-4">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <div className="space-y-2">
-          {Object.keys(pruebasCheckboxes[groupKey]).map((label) => (
+          {pruebasCheckboxes[groupKey] && Object.keys(pruebasCheckboxes[groupKey]).map((label) => (
             <div key={label} className="flex items-center space-x-2">
               <Checkbox 
                 id={`pruebas-${groupKey}-${label}`} 
-                checked={pruebasCheckboxes[groupKey][label]}
+                checked={pruebasCheckboxes[groupKey][label] || false}
                 onCheckedChange={(checked) => handlePruebasCheckboxChange(groupKey, label, checked as boolean)}
               />
               <Label htmlFor={`pruebas-${groupKey}-${label}`} className="font-normal">

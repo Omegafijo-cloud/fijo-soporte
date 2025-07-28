@@ -24,34 +24,105 @@ import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import { Progress } from '@/components/ui/progress';
 import Timer from '@/components/Timer';
 
+// --- Tipos de Estado ---
+
 type Notice = {
   id: number;
   title: string;
   url: string;
 };
 
-// Tipos para el estado
+type CheckboxState = {
+  [group: string]: { [label: string]: boolean };
+};
+
+type TransferItem = {
+  service: string;
+  value: string;
+  isCustom?: boolean;
+};
+
+// Tipos para el estado global de la aplicación
 type AppState = {
-  backupText?: string;
   activeTab?: string;
   activeSubTab?: string;
+  
+  // Respaldo y Widgets
+  backupText?: string;
   notesText?: string;
   usersText?: string;
+
+  // Avisos
   notices?: Notice[];
+
+  // Estado de Pestañas
+  plantillasGenericas_formData?: any;
+  plantillasGenericas_checkboxes?: CheckboxState;
+  plantillasGenericas_pruebasRealizadas?: string;
+
+  plantillasQuejas_selectedTemplate?: string;
+  plantillasQuejas_formData?: any;
+  plantillasQuejas_checkboxValues?: CheckboxState;
+  plantillasQuejas_pruebasCheckboxes?: CheckboxState;
+  plantillasQuejas_pruebasRealizadas?: string;
+
+  memosWf_selectedTemplate?: string;
+  memosWf_formData?: any;
+
+  memosOrden_selectedTemplate?: string;
+  memosOrden_formData?: any;
+  
+  herramientas_minutos?: string;
+
+  transferencias_items?: TransferItem[];
+  transferencias_newService?: string;
+  transferencias_newValue?: string;
 };
+
+
+// --- Estados Iniciales ---
 
 const initialNotices: Notice[] = [
   { 
     id: 1, 
     title: 'PROCESOS DE MIGRACIÓN (WF)', 
-    url: 'https://docs.google.com/document/d/e/2PACX-1vT5n_Y_S_iW2j-8Gg3gB8P_B_aC9d_E_F_G_hI_jK_lM_nO_pQ_r_sT_uV_wX_yZ/pub?embedded=true' 
+    url: 'https://docs.google.com/document/d/1Zt3bV5z6X7C_.../edit' 
   },
   { 
     id: 2, 
     title: 'SEGUIMIENTO DE CASOS (DOC)', 
-    url: 'https://docs.google.com/document/d/e/2PACX-1vQ_R_S_tU_vW_xY_z_A_bC_dE_fG_hI_jK_lM_nO_pQ_rS_tU_vW_xY_z_A_bC/pub?embedded=true'
+    url: 'https://docs.google.com/document/d/1aB4c8D_.../edit'
   }
 ];
+
+const initialPlantillasGenericasFormData = {
+    idLlamada: '',
+    nombreContacto: '',
+    nIncidencia: '',
+    inconveniente: '',
+    tipoServicio: '',
+};
+
+const initialPlantillasGenericasCheckboxes: CheckboxState = {
+    'Nivel Cero': { 'Saldos OK': false, 'No hay Fallas': false, 'No presenta bloqueo': false, 'No hay OS abiertas': false, 'No hay quejas': false },
+    'GPON - ADSL - HFC': { 'Se verifica estado de las luces del router': false, 'Envio reset en UMP': false, 'Se Desconecta y Conecta Corriente': false, 'Se Desconecta y Conecta en otro tomacorriente': false, 'Se verifica Splitter': false, 'Cambio de baterías': false, 'Se verifica Coaxial bien apretado': false, 'Se verifica cortes o daños en la fibra': false, 'Se manda a realizar test de velocidad (00 Megas)': false, 'Se realiza Ping (0% perdido)': false, 'Estado de la ONT activo': false, 'Niveles SNR en Rojo': false, 'Luz LOS en ROJO': false, 'Se envia reboot en Axiros': false },
+    'TV HFC - DTH - IPTV': { 'Se verifica Conexiones HDMI': false, 'Se Verifica Conexiones RCA': false, 'Se verifica cable Coaxial': false, 'XX Stb afectados': false, 'Se valida Serial No. XXXX': false, 'Mensaje que muestra Tv: XXX': false, 'Se Envia Comando XXXX': false, 'Se Envia Reset Fisico': false, 'Se verifica en la GUI, AMCO en verde': false },
+    'Otros': { 'Se valida DPI ok, nombre completo ok, sin restricciones': false, 'Cliente no esta en Sitio': false, 'Cliente esta en Agencia': false, 'Cliente no quiere hacer pruebas': false, 'Se realiza cambio de contraseña con exito': false, 'Servicio funcionando de manera correcta': false, 'Se Genera Averia': false, 'Se envía reproceso': false },
+};
+
+const initialPlantillasQuejasCheckboxes: CheckboxState = {
+  'Nivel Cero': { 'Saldos OK': false, 'No hay Fallas': false, 'No presenta bloqueo': false, 'No hay OS abiertas': false, 'No hay quejas': false },
+  'GPON - ADSL - HFC': { 'Se verifica estado de las luces del router': false, 'Envio reset en UMP': false, 'Se Desconecta y Conecta Corriente': false, 'Se Desconecta y Conecta en otro tomacorriente': false, 'Se verifica Splitter': false, 'Cambio de baterías': false, 'Se verifica Coaxial bien apretado': false, 'Se verifica cortes o daños en la fibra': false, 'Se manda a realizar test de velocidad (00 Megas)': false, 'Se realiza Ping (0% perdido)': false, 'Estado de la ONT activo': false, 'Niveles SNR en Rojo': false, 'Luz LOS en ROJO': false, 'Se envia reboot en Axiros': false },
+  'TV HFC - DTH - IPTV': { 'Se verifica Conexiones HDMI': false, 'Se Verifica Conexiones RCA': false, 'Se verifica cable Coaxial': false, 'XX Stb afectados': false, 'Se valida Serial No. XXXX': false, 'Mensaje que muestra Tv: XXX': false, 'Se Envia Comando XXXX': false, 'Se Envia Reset Fisico': false, 'Se verifica en la GUI, AMCO en verde': false },
+  'Otros': { 'Se valida DPI ok, nombre completo ok, sin restricciones': false, 'Cliente no esta en Sitio': false, 'Cliente esta en Agencia': false, 'Cliente no quiere hacer pruebas': false, 'Se realiza cambio de contraseña con exito': false, 'Servicio funcionando de manera correcta': false, 'Se Genera Averia': false, 'Se envía reproceso': false },
+};
+
+const initialTransferItems: TransferItem[] = [
+  { service: 'SERVICIO MOVIL', value: '123' },
+  { service: 'COMERCIAL', value: '101' },
+  { service: 'SOPORTE NIVEL 2', value: '103' },
+];
+
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -59,28 +130,75 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const isInitialLoad = useRef(true);
 
-  // Estados Centralizados
-  const [backupText, setBackupText] = useState('');
+  // --- Estados Centralizados ---
   const [activeTab, setActiveTab] = useState('plantillas');
   const [activeSubTab, setActiveSubTab] = useState('genericas');
+  const [backupText, setBackupText] = useState('');
   const [notesText, setNotesText] = useState('');
   const [usersText, setUsersText] = useState('');
   const [notices, setNotices] = useState<Notice[]>(initialNotices);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // Estado para Plantillas Genéricas
+  const [plantillasGenericasFormData, setPlantillasGenericasFormData] = useState(initialPlantillasGenericasFormData);
+  const [plantillasGenericasCheckboxes, setPlantillasGenericasCheckboxes] = useState<CheckboxState>(initialPlantillasGenericasCheckboxes);
+  const [plantillasGenericasPruebas, setPlantillasGenericasPruebas] = useState('');
+
+  // Estado para Plantillas de Quejas
+  const [plantillasQuejasSelectedTemplate, setPlantillasQuejasSelectedTemplate] = useState('');
+  const [plantillasQuejasFormData, setPlantillasQuejasFormData] = useState({});
+  const [plantillasQuejasCheckboxValues, setPlantillasQuejasCheckboxValues] = useState<CheckboxState>({});
+  const [plantillasQuejasPruebasCheckboxes, setPlantillasQuejasPruebasCheckboxes] = useState<CheckboxState>(initialPlantillasQuejasCheckboxes);
+  const [plantillasQuejasPruebas, setPlantillasQuejasPruebas] = useState('');
+  
+  // Estado para Memos WF
+  const [memosWfSelectedTemplate, setMemosWfSelectedTemplate] = useState('');
+  const [memosWfFormData, setMemosWfFormData] = useState({});
+
+  // Estado para Memos Orden
+  const [memosOrdenSelectedTemplate, setMemosOrdenSelectedTemplate] = useState('');
+  const [memosOrdenFormData, setMemosOrdenFormData] = useState({});
+  
+  // Estado para Herramientas
+  const [herramientasMinutos, setHerramientasMinutos] = useState('');
+  
+  // Estado para Transferencias
+  const [transferenciasItems, setTransferenciasItems] = useState<TransferItem[]>(initialTransferItems);
+  const [transferenciasNewService, setTransferenciasNewService] = useState('');
+  const [transferenciasNewValue, setTransferenciasNewValue] = useState('');
+
 
   // ----- Lógica de persistencia de datos -----
 
   const getAppState = useCallback((): AppState => {
     return {
-      backupText,
-      activeTab,
-      activeSubTab,
-      notesText,
-      usersText,
-      notices,
+      activeTab, activeSubTab, backupText, notesText, usersText, notices,
+      plantillasGenericas_formData: plantillasGenericasFormData,
+      plantillasGenericas_checkboxes: plantillasGenericasCheckboxes,
+      plantillasGenericas_pruebasRealizadas: plantillasGenericasPruebas,
+      plantillasQuejas_selectedTemplate: plantillasQuejasSelectedTemplate,
+      plantillasQuejas_formData: plantillasQuejasFormData,
+      plantillasQuejas_checkboxValues: plantillasQuejasCheckboxValues,
+      plantillasQuejas_pruebasCheckboxes: plantillasQuejasPruebasCheckboxes,
+      plantillasQuejas_pruebasRealizadas: plantillasQuejasPruebas,
+      memosWf_selectedTemplate: memosWfSelectedTemplate,
+      memosWf_formData: memosWfFormData,
+      memosOrden_selectedTemplate: memosOrdenSelectedTemplate,
+      memosOrden_formData: memosOrdenFormData,
+      herramientas_minutos: herramientasMinutos,
+      transferencias_items: transferenciasItems,
+      transferencias_newService: transferenciasNewService,
+      transferencias_newValue: transferenciasNewValue,
     };
-  }, [backupText, activeTab, activeSubTab, notesText, usersText, notices]);
+  }, [
+      activeTab, activeSubTab, backupText, notesText, usersText, notices,
+      plantillasGenericasFormData, plantillasGenericasCheckboxes, plantillasGenericasPruebas,
+      plantillasQuejasSelectedTemplate, plantillasQuejasFormData, plantillasQuejasCheckboxValues,
+      plantillasQuejasPruebasCheckboxes, plantillasQuejasPruebas,
+      memosWfSelectedTemplate, memosWfFormData, memosOrdenSelectedTemplate, memosOrdenFormData,
+      herramientasMinutos, transferenciasItems, transferenciasNewService, transferenciasNewValue
+  ]);
 
   const saveStateToFirebase = useCallback(async () => {
     if (!user || !isDataLoaded) return;
@@ -102,9 +220,9 @@ export default function DashboardPage() {
     if (isInitialLoad.current || !isDataLoaded) return;
     const handler = setTimeout(() => {
       saveStateToFirebase();
-    }, 1500); // Guardar 1.5s después del último cambio
+    }, 1500);
     return () => clearTimeout(handler);
-  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab, notesText, usersText, notices]);
+  }, [saveStateToFirebase, isDataLoaded, getAppState]);
 
 
   // Cargar estado desde Firebase
@@ -113,12 +231,36 @@ export default function DashboardPage() {
       const unsub = onSnapshot(doc(db, 'users', user.uid, 'state', 'appState'), (docSnap) => {
         if (docSnap.exists() && isInitialLoad.current) {
           const data = docSnap.data() as AppState;
-          if (data.backupText) setBackupText(data.backupText);
+          // Cargar estado general
           if (data.activeTab) setActiveTab(data.activeTab);
           if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
+          if (data.backupText) setBackupText(data.backupText);
           if (data.notesText) setNotesText(data.notesText);
           if (data.usersText) setUsersText(data.usersText);
           if (data.notices) setNotices(data.notices);
+
+          // Cargar estado de pestañas
+          if (data.plantillasGenericas_formData) setPlantillasGenericasFormData(data.plantillasGenericas_formData);
+          if (data.plantillasGenericas_checkboxes) setPlantillasGenericasCheckboxes(data.plantillasGenericas_checkboxes);
+          if (data.plantillasGenericas_pruebasRealizadas) setPlantillasGenericasPruebas(data.plantillasGenericas_pruebasRealizadas);
+
+          if(data.plantillasQuejas_selectedTemplate) setPlantillasQuejasSelectedTemplate(data.plantillasQuejas_selectedTemplate);
+          if(data.plantillasQuejas_formData) setPlantillasQuejasFormData(data.plantillasQuejas_formData);
+          if(data.plantillasQuejas_checkboxValues) setPlantillasQuejasCheckboxValues(data.plantillasQuejas_checkboxValues);
+          if(data.plantillasQuejas_pruebasCheckboxes) setPlantillasQuejasPruebasCheckboxes(data.plantillasQuejas_pruebasCheckboxes);
+          if(data.plantillasQuejas_pruebasRealizadas) setPlantillasQuejasPruebas(data.plantillasQuejas_pruebasRealizadas);
+
+          if(data.memosWf_selectedTemplate) setMemosWfSelectedTemplate(data.memosWf_selectedTemplate);
+          if(data.memosWf_formData) setMemosWfFormData(data.memosWf_formData);
+          
+          if(data.memosOrden_selectedTemplate) setMemosOrdenSelectedTemplate(data.memosOrden_selectedTemplate);
+          if(data.memosOrden_formData) setMemosOrdenFormData(data.memosOrden_formData);
+
+          if(data.herramientas_minutos) setHerramientasMinutos(data.herramientas_minutos);
+
+          if(data.transferencias_items) setTransferenciasItems(data.transferencias_items);
+          if(data.transferencias_newService) setTransferenciasNewService(data.transferencias_newService);
+          if(data.transferencias_newValue) setTransferenciasNewValue(data.transferencias_newValue);
           
           isInitialLoad.current = false;
         } else if (!docSnap.exists()) {
@@ -128,7 +270,6 @@ export default function DashboardPage() {
       });
       return () => unsub();
     } else {
-        // Si no hay usuario, marcamos la carga como completa para que la redirección pueda ocurrir.
         if (!authLoading) {
             setIsDataLoaded(true);
         }
@@ -137,7 +278,7 @@ export default function DashboardPage() {
 
   // Redireccionar si el usuario no está autenticado después de la carga
   useEffect(() => {
-    if (authLoading || !isDataLoaded) return; // Espera a que la carga inicial termine
+    if (authLoading || !isDataLoaded) return;
     if (!user) {
       router.push('/');
     }
@@ -147,7 +288,7 @@ export default function DashboardPage() {
   // ----- Manejadores y otros -----
 
   const handleLogout = async () => {
-    await saveStateToFirebase(); // Guardar el estado final antes de salir
+    await saveStateToFirebase(); 
     await signOut(auth);
     router.push('/');
   };
@@ -205,7 +346,7 @@ export default function DashboardPage() {
     );
   }
   
-  if (!user) return null; // Previene el renderizado del dashboard si no hay usuario
+  if (!user) return null;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -244,18 +385,48 @@ export default function DashboardPage() {
                   </TabsList>
                   <TabsContent value="genericas" className="p-6">
                     <PlantillasGenericasTab 
-                        setBackupText={setBackupText} 
-                        backupText={backupText} 
+                        backupText={backupText}
+                        setBackupText={setBackupText}
+                        formData={plantillasGenericasFormData}
+                        setFormData={setPlantillasGenericasFormData}
+                        checkboxes={plantillasGenericasCheckboxes}
+                        setCheckboxes={setPlantillasGenericasCheckboxes}
+                        pruebasRealizadas={plantillasGenericasPruebas}
+                        setPruebasRealizadas={setPlantillasGenericasPruebas}
+                        initialCheckboxes={initialPlantillasGenericasCheckboxes}
+                        initialFormData={initialPlantillasGenericasFormData}
                     />
                   </TabsContent>
                   <TabsContent value="quejas" className="p-6">
-                    <PlantillasQuejasTab />
+                    <PlantillasQuejasTab 
+                        selectedTemplate={plantillasQuejasSelectedTemplate}
+                        setSelectedTemplate={setPlantillasQuejasSelectedTemplate}
+                        formData={plantillasQuejasFormData}
+                        setFormData={setPlantillasQuejasFormData}
+                        checkboxValues={plantillasQuejasCheckboxValues}
+                        setCheckboxValues={setPlantillasQuejasCheckboxValues}
+                        pruebasCheckboxes={plantillasQuejasPruebasCheckboxes}
+                        setPruebasCheckboxes={setPlantillasQuejasPruebasCheckboxes}
+                        pruebasRealizadas={plantillasQuejasPruebas}
+                        setPruebasRealizadas={setPlantillasQuejasPruebas}
+                        initialPruebasCheckboxState={initialPlantillasQuejasCheckboxes}
+                    />
                   </TabsContent>
                   <TabsContent value="wf" className="p-6">
-                    <MemosWfTab />
+                    <MemosWfTab 
+                      selectedTemplate={memosWfSelectedTemplate}
+                      setSelectedTemplate={setMemosWfSelectedTemplate}
+                      formData={memosWfFormData}
+                      setFormData={setMemosWfFormData}
+                    />
                   </TabsContent>
                   <TabsContent value="orden" className="p-6">
-                    <MemosOrdenTab />
+                    <MemosOrdenTab 
+                       selectedTemplate={memosOrdenSelectedTemplate}
+                       setSelectedTemplate={setMemosOrdenSelectedTemplate}
+                       formData={memosOrdenFormData}
+                       setFormData={setMemosOrdenFormData}
+                    />
                   </TabsContent>
                 </Tabs>
               </CardContent>
@@ -263,11 +434,21 @@ export default function DashboardPage() {
           </TabsContent>
           
           <TabsContent value="herramientas" className="mt-4">
-            <HerramientasTab />
+            <HerramientasTab 
+              minutos={herramientasMinutos}
+              setMinutos={setHerramientasMinutos}
+            />
           </TabsContent>
           
           <TabsContent value="transferencias" className="mt-4">
-            <TransferenciasTab />
+            <TransferenciasTab 
+               transferItems={transferenciasItems}
+               setTransferItems={setTransferenciasItems}
+               newService={transferenciasNewService}
+               setNewService={setTransferenciasNewService}
+               newValue={transferenciasNewValue}
+               setNewValue={setTransferenciasNewValue}
+            />
           </TabsContent>
 
           <TabsContent value="avisos" className="mt-4">
