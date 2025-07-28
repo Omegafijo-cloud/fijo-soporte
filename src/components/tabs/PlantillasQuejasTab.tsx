@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -160,11 +160,8 @@ interface PlantillasQuejasTabProps {
     checkboxValues: CheckboxState;
     setCheckboxValues: (value: CheckboxState) => void;
     pruebasCheckboxes: CheckboxState;
-    setPruebasCheckboxes: (value: CheckboxState) => void;
-    pruebasRealizadas: string;
-    setPruebasRealizadas: (value: string) => void;
     orderedPruebas: string[];
-    setOrderedPruebas: (pruebas: string[]) => void;
+    onPruebasCheckboxChange: (group: string, label: string, checked: boolean) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
 }
@@ -177,19 +174,19 @@ export default function PlantillasQuejasTab({
     checkboxValues,
     setCheckboxValues,
     pruebasCheckboxes,
-    setPruebasCheckboxes,
-    pruebasRealizadas,
-    setPruebasRealizadas,
     orderedPruebas,
-    setOrderedPruebas,
+    onPruebasCheckboxChange,
     onCopy,
     onClear,
 }: PlantillasQuejasTabProps) {
   const [radioValues, setRadioValues] = useState<RadioGroupState>({});
 
+  const pruebasRealizadasText = useMemo(() => orderedPruebas.join(', '), [orderedPruebas]);
+
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    onClear(); // This now also clears orderedPruebas in the parent
+    // Let parent handle clearing state
+    onClear(); 
     setRadioValues({});
   };
   
@@ -214,31 +211,6 @@ export default function PlantillasQuejasTab({
     }));
   };
   
-  const handlePruebasCheckboxChange = (group: string, label: string, checked: boolean) => {
-    const newCheckboxes = {
-      ...pruebasCheckboxes,
-      [group]: {
-        ...pruebasCheckboxes[group],
-        [label]: checked,
-      },
-    };
-    setPruebasCheckboxes(newCheckboxes);
-
-    setOrderedPruebas(prev => {
-        const a = new Set(prev);
-        if (checked) {
-            a.add(label);
-        } else {
-            a.delete(label);
-        }
-        return Array.from(a);
-    });
-  };
-
-  useEffect(() => {
-    setPruebasRealizadas(orderedPruebas.join(', '));
-  }, [orderedPruebas, setPruebasRealizadas]);
-
   const handleCopyClick = () => {
     if (!selectedTemplate) return;
 
@@ -267,7 +239,7 @@ export default function PlantillasQuejasTab({
     });
     template += '\n';
     
-    template += `PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
+    template += `PRUEBAS REALIZADAS: ${pruebasRealizadasText}`;
 
     onCopy(template.trim());
   }
@@ -340,7 +312,7 @@ export default function PlantillasQuejasTab({
               <Checkbox 
                 id={`pruebas-${groupKey}-${label}`} 
                 checked={pruebasCheckboxes[groupKey]?.[label] || false}
-                onCheckedChange={(checked) => handlePruebasCheckboxChange(groupKey, label, checked as boolean)}
+                onCheckedChange={(checked) => onPruebasCheckboxChange(groupKey, label, checked as boolean)}
               />
               <Label htmlFor={`pruebas-${groupKey}-${label}`} className="font-normal">
                 {label}
@@ -383,8 +355,8 @@ export default function PlantillasQuejasTab({
                         <Label htmlFor="pruebasRealizadasMemo">PRUEBAS REALIZADAS</Label>
                         <Textarea 
                             id="pruebasRealizadasMemo" 
-                            value={pruebasRealizadas} 
-                            onChange={(e) => setPruebasRealizadas(e.target.value)}
+                            value={pruebasRealizadasText}
+                            readOnly
                             rows={4}
                         />
                     </div>

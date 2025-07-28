@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,11 +18,8 @@ interface PlantillasGenericasTabProps {
     formData: any;
     setFormData: (data: any) => void;
     checkboxes: CheckboxState;
-    setCheckboxes: (state: CheckboxState) => void;
-    pruebasRealizadas: string;
-    setPruebasRealizadas: (text: string) => void;
     orderedPruebas: string[];
-    setOrderedPruebas: (pruebas: string[]) => void;
+    onCheckboxChange: (group: string, label: string, checked: boolean) => void;
     onCopy: (text: string) => void;
     onClear: () => void;
 }
@@ -31,45 +28,17 @@ export default function PlantillasGenericasTab({
     formData,
     setFormData,
     checkboxes,
-    setCheckboxes,
-    pruebasRealizadas,
-    setPruebasRealizadas,
     orderedPruebas,
-    setOrderedPruebas,
+    onCheckboxChange,
     onCopy,
     onClear
 }: PlantillasGenericasTabProps) {
 
-  useEffect(() => {
-    setPruebasRealizadas(orderedPruebas.join(', '));
-  }, [orderedPruebas, setPruebasRealizadas]);
+  const pruebasRealizadasText = useMemo(() => orderedPruebas.join(', '), [orderedPruebas]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev: any) => ({ ...prev, [id]: value }));
-  };
-
-  const handleCheckboxChange = (group: string, label: string, checked: boolean) => {
-    // Update the visual state of the checkbox
-    const newCheckboxes = {
-      ...checkboxes,
-      [group]: {
-        ...checkboxes[group],
-        [label]: checked,
-      },
-    };
-    setCheckboxes(newCheckboxes);
-    
-    // Update the ordered list
-    setOrderedPruebas(prev => {
-        const a = new Set(prev);
-        if (checked) {
-            a.add(label);
-        } else {
-            a.delete(label);
-        }
-        return Array.from(a);
-    });
   };
 
   const handleCopyClick = () => {
@@ -79,7 +48,7 @@ N° Incidencia: ${formData.nIncidencia}
 Tipo Servicio: ${formData.tipoServicio}
 Inconveniente: ${formData.inconveniente}
 
-PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
+PRUEBAS REALIZADAS: ${pruebasRealizadasText}`;
 
     onCopy(template.trim());
   }
@@ -96,7 +65,7 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
               <Checkbox 
                 id={`${groupKey}-${label}`} 
                 checked={checkboxes[groupKey]?.[label] || false}
-                onCheckedChange={(checked) => handleCheckboxChange(groupKey, label, checked as boolean)}
+                onCheckedChange={(checked) => onCheckboxChange(groupKey, label, checked as boolean)}
               />
               <Label htmlFor={`${groupKey}-${label}`} className="font-normal">
                 {label}
@@ -144,8 +113,8 @@ PRUEBAS REALIZADAS: ${pruebasRealizadas}`;
               <Label htmlFor="pruebasRealizadas">PRUEBAS REALIZADAS</Label>
               <Textarea 
                 id="pruebasRealizadas" 
-                value={pruebasRealizadas} 
-                onChange={(e) => setPruebasRealizadas(e.target.value)}
+                value={pruebasRealizadasText}
+                readOnly
                 rows={4} 
               />
             </div>
