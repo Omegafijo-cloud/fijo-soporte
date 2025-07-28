@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X } from 'lucide-react';
+import { Timer, LogOut, FileText, Wrench, ArrowRightLeft, Megaphone, Save, StickyNote, Copy, Trash2, X, Users } from 'lucide-react';
 import { PlantillasTab } from '@/components/plantillas-tab';
 import { HerramientasTab } from '@/components/herramientas-tab';
 import { TransferenciasTab } from '@/components/transferencias-tab';
@@ -17,6 +17,7 @@ export default function OmegaPage() {
   const [activeTab, setActiveTab] = useState('plantillas');
   const [activeWidget, setActiveWidget] = useState<string | null>(null);
   const [quickNotes, setQuickNotes] = useState('');
+  const [userList, setUserList] = useState('');
   const { toast } = useToast();
 
   const handleWidgetToggle = (widgetName: string) => {
@@ -142,6 +143,29 @@ export default function OmegaPage() {
             </CardContent>
           </Card>
         )}
+        
+        {/* Panel de Lista de Usuarios */}
+        {activeWidget === 'usuarios' && (
+          <Card className="w-80 shadow-lg animate-in slide-in-from-bottom-10">
+            <CardContent className="p-4 space-y-3">
+              <h4 className="font-semibold text-center">Lista de Usuarios</h4>
+              <Textarea 
+                placeholder="Mantén tu lista de usuarios aquí..." 
+                rows={8}
+                value={userList}
+                onChange={(e) => setUserList(e.target.value)}
+              />
+              <div className="flex justify-between gap-2">
+                <Button size="sm" onClick={() => handleCopyFromWidget(userList, 'Lista de Usuarios')} className="flex-1">
+                  <Copy className="mr-2 h-4 w-4" /> Copiar
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleClearWidget(setUserList, 'Lista de Usuarios')} className="flex-1">
+                  <Trash2 className="mr-2 h-4 w-4" /> Limpiar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Botones de Toggle para Widgets */}
         <div className="flex justify-end gap-3">
@@ -149,8 +173,17 @@ export default function OmegaPage() {
             size="icon"
             className="rounded-full h-12 w-12 shadow-lg"
             onClick={() => handleWidgetToggle('notas')}
+            variant={activeWidget === 'notas' ? 'default' : 'secondary'}
           >
             {activeWidget === 'notas' ? <X /> : <StickyNote />}
+          </Button>
+          <Button
+            size="icon"
+            className="rounded-full h-12 w-12 shadow-lg"
+            onClick={() => handleWidgetToggle('usuarios')}
+            variant={activeWidget === 'usuarios' ? 'default' : 'secondary'}
+          >
+            {activeWidget === 'usuarios' ? <X /> : <Users />}
           </Button>
           {/* Aquí irán los otros botones de widgets */}
         </div>
