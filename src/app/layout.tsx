@@ -15,11 +15,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className={inter.className}>
-        <AppStateProvider>
-          <FirebaseProvider>
+        <FirebaseProvider>
+          <AppStateProvider>
             {children}
-          </FirebaseProvider>
-        </AppStateProvider>
+          </AppStateProvider>
+        </FirebaseProvider>
       </body>
     </html>
   );

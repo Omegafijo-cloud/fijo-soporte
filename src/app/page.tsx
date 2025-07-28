@@ -14,8 +14,8 @@ export default function HomePage() {
   const appStateContext = useContext(AppStateContext);
 
   // Since FirebaseProvider is now a child, it might not be ready on first render.
-  const { user, isAuthReady, handleLogin } = firebaseContext || {};
-  const { appData, alert, setAlert, confirm, setConfirm, noticeModalOpen, setNoticeModalOpen } = appStateContext || {};
+  const { user, isAuthReady, handleLogin, setupFirestoreListener } = firebaseContext || {};
+  const { appData, setAppData, alert, setAlert, confirm, setConfirm, noticeModalOpen, setNoticeModalOpen, defaultAppData } = appStateContext || {};
 
   // Set CSS variables for theme on initial load and when themeSettings change
   useEffect(() => {
@@ -25,6 +25,21 @@ export default function HomePage() {
       });
     }
   }, [appData?.themeSettings]);
+  
+  // Effect to link Firebase user state with App state
+  useEffect(() => {
+      if (isAuthReady) {
+          if (user) {
+              setNoticeModalOpen(true);
+              // Pass the state setters to the listener
+              setupFirestoreListener(user.uid, setAppData, defaultAppData, setAlert);
+          } else {
+              // Reset app data if user logs out
+              setAppData(defaultAppData);
+          }
+      }
+  }, [user, isAuthReady, setupFirestoreListener, setAppData, defaultAppData, setAlert, setNoticeModalOpen]);
+
 
   if (!isAuthReady || !appStateContext) {
     return (
