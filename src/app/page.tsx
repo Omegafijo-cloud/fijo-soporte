@@ -1,21 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { user, loading } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de inicio de sesión aquí
-    console.log('Email:', email, 'Password:', password);
-    alert('Inicio de sesión no implementado. Revisa la consola para ver los datos.');
+    setError(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Credenciales inválidas. Por favor, revise su correo y contraseña.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('El formato del correo electrónico no es válido.');
+      } else {
+        setError('Ocurrió un error al intentar iniciar sesión.');
+      }
+    }
   };
+
+  if (loading || user) {
+    return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
+            <p>Cargando...</p>
+        </div>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-gray-100 dark:bg-gray-900">
@@ -66,6 +98,7 @@ export default function LoginPage() {
                 className="h-12 text-lg"
               />
             </div>
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <Button type="submit" className="w-full h-12 text-lg font-bold">
               Acceder
             </Button>
