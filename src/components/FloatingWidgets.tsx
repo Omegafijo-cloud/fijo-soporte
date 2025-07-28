@@ -10,6 +10,7 @@ import { X, MessageSquare, Notebook, Users, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 type ActiveWidget = 'notes' | 'users' | 'chat' | 'theme' | null;
 
@@ -30,7 +31,16 @@ const defaultThemeHex = {
     primary: '#1c3d5a',
     background: '#ffffff',
     accent: '#f0f2f5',
-}
+};
+
+const colorPalettes = [
+  { name: 'Omega', colors: { primary: '#1c3d5a', background: '#ffffff', accent: '#f0f2f5' } },
+  { name: 'Abismo', colors: { primary: '#e2e8f0', background: '#0f172a', accent: '#1e293b' } },
+  { name: 'Bosque', colors: { primary: '#2f6241', background: '#f0f5f1', accent: '#dbece2' } },
+  { name: 'Amanecer', colors: { primary: '#c2410c', background: '#fff7ed', accent: '#ffedd5' } },
+  { name: 'Corporativo', colors: { primary: '#2563eb', background: '#ffffff', accent: '#f0f9ff' } },
+];
+
 
 export default function FloatingWidgets({
     notesText,
@@ -51,6 +61,17 @@ export default function FloatingWidgets({
     root.style.setProperty('--background', hexToHsl(theme.background));
     root.style.setProperty('--accent', hexToHsl(theme.accent));
   };
+
+  const handleSetPalette = (palette: { primary: string, background: string, accent: string }) => {
+    setPrimaryColor(palette.primary);
+    setBackgroundColor(palette.background);
+    setAccentColor(palette.accent);
+    applyTheme(palette);
+    toast({
+        title: `Tema ${colorPalettes.find(p => p.colors.primary === palette.primary)?.name} Aplicado`,
+        description: 'La paleta de colores ha sido actualizada.',
+    });
+  }
 
   const handleColorChange = (colorType: 'primary' | 'background' | 'accent', value: string) => {
     let newTheme = { primary: primaryColor, background: backgroundColor, accent: accentColor };
@@ -158,23 +179,40 @@ export default function FloatingWidgets({
         );
       case 'theme':
         return (
-            <Card className="h-full">
+            <Card className="h-full overflow-y-auto">
                 <CardHeader>
                     <CardTitle>Personalizar Tema</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label>Color Primario</Label>
-                        <Input type="color" value={primaryColor} onChange={(e) => handleColorChange('primary', e.target.value)} className="p-1 h-10"/>
+                    <div>
+                        <Label className='text-sm font-medium'>Paletas Predefinidas</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                           {colorPalettes.map(palette => (
+                                <Button key={palette.name} variant="outline" onClick={() => handleSetPalette(palette.colors)}>
+                                    {palette.name}
+                                </Button>
+                           ))}
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label>Color de Fondo</Label>
-                        <Input type="color" value={backgroundColor} onChange={(e) => handleColorChange('background', e.target.value)} className="p-1 h-10"/>
+                    <Separator />
+                    <div>
+                        <Label className='text-sm font-medium'>Colores Personalizados</Label>
+                        <div className="space-y-3 mt-2">
+                            <div className="space-y-2">
+                                <Label>Color Primario</Label>
+                                <Input type="color" value={primaryColor} onChange={(e) => handleColorChange('primary', e.target.value)} className="p-1 h-10"/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Color de Fondo</Label>
+                                <Input type="color" value={backgroundColor} onChange={(e) => handleColorChange('background', e.target.value)} className="p-1 h-10"/>
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Color de Acento</Label>
+                                <Input type="color" value={accentColor} onChange={(e) => handleColorChange('accent', e.target.value)} className="p-1 h-10"/>
+                            </div>
+                        </div>
                     </div>
-                     <div className="space-y-2">
-                        <Label>Color de Acento</Label>
-                        <Input type="color" value={accentColor} onChange={(e) => handleColorChange('accent', e.target.value)} className="p-1 h-10"/>
-                    </div>
+                    <Separator />
                     <Button onClick={handleRestoreDefaults}>Restaurar Predeterminados</Button>
                 </CardContent>
             </Card>
@@ -227,10 +265,12 @@ export default function FloatingWidgets({
           activeWidget ? "translate-y-0" : "translate-y-[150%]"
         )}
       >
-        <div className="p-4 pt-0 h-[50vh] sm:h-auto max-h-[50vh]">
+        <div className="p-4 pt-0 h-[50vh] sm:h-auto max-h-[50vh] sm:max-h-[70vh]">
           {renderWidgetContent()}
         </div>
       </div>
     </>
   );
 }
+
+    
