@@ -52,6 +52,8 @@ export default function DashboardPage() {
   }
 
   if (!user) {
+    // Redirige al login si no hay usuario y no está cargando
+    router.push('/');
     return null;
   }
 
@@ -139,6 +141,7 @@ export default function DashboardPage() {
                     <iframe 
                       src="https://docs.google.com/document/d/12345/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
                       className="w-full h-96 border rounded-md"
+                      title="Procesos de Migración"
                     ></iframe>
                   </CardContent>
                 </Card>
@@ -150,6 +153,7 @@ export default function DashboardPage() {
                     <iframe 
                       src="https://docs.google.com/document/d/67890/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
                       className="w-full h-96 border rounded-md"
+                      title="Seguimiento de Casos"
                     ></iframe>
                   </CardContent>
                 </Card>
