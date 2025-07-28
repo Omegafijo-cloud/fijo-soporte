@@ -109,7 +109,7 @@ export default function PlantillasQuejasTab() {
           (label) => pruebasCheckboxes[group][label]
         );
         if (checkedItems.length > 0) {
-          text += `${group.toUpperCase()}:\n- ${checkedItems.join('\n- ')}\n\n`;
+          text += `${group.replace(' (Memos)', '').toUpperCase()}:\n- ${checkedItems.map(l => l.replace(' (Memo)', '')).join('\n- ')}\n\n`;
         }
       }
       return text.trim();
@@ -117,6 +117,44 @@ export default function PlantillasQuejasTab() {
     setPruebasRealizadas(generatePruebasText());
   }, [pruebasCheckboxes]);
 
+  const handleCopy = () => {
+    if (!selectedTemplate) return;
+
+    let template = `TIPO DE MEMO: ${selectedTemplate}\n\n`;
+
+    // Añadir valores de los checkboxes de "quien genera"
+    for (const group in checkboxValues) {
+      const checkedItems = Object.keys(checkboxValues[group]).filter(label => checkboxValues[group][label]);
+      if (checkedItems.length > 0) {
+        template += `${group}: ${checkedItems.join(', ')}\n`;
+      }
+    }
+    template += '\n';
+
+    // Añadir valores de los campos de texto y textarea
+    const templateFields = memoTemplates[selectedTemplate as keyof typeof memoTemplates].fields;
+    templateFields.forEach(field => {
+      template += `${field.label}: ${formData[field.id] || ''}\n`;
+    });
+    template += '\n';
+    
+    // Añadir pruebas realizadas
+    template += `PRUEBAS REALIZADAS:\n${pruebasRealizadas}`;
+
+    navigator.clipboard.writeText(template);
+    toast({
+      title: "Memo Copiado",
+      description: "La plantilla del memo ha sido copiada al portapapeles.",
+    });
+  }
+
+  const handleClear = () => {
+    setSelectedTemplate('');
+    setFormData({});
+    setCheckboxValues({});
+    setPruebasCheckboxes(initialPruebasCheckboxState);
+    // El valor del select se controla externamente, así que al setear el state a '' se limpia.
+  }
 
   const renderDynamicFields = () => {
     if (!selectedTemplate) return null;
@@ -212,8 +250,8 @@ export default function PlantillasQuejasTab() {
                         <Textarea id="pruebasRealizadasMemo" value={pruebasRealizadas} readOnly rows={8} className="bg-muted" />
                     </div>
                      <div className="flex gap-2">
-                        <Button>Copiar Memo</Button>
-                        <Button variant="outline" onClick={() => handleTemplateChange('')}>Limpiar Memo</Button>
+                        <Button onClick={handleCopy}>Copiar Memo</Button>
+                        <Button variant="outline" onClick={handleClear}>Limpiar Memo</Button>
                     </div>
                 </div>
             )}
