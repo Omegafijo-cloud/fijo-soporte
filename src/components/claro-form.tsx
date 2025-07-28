@@ -77,7 +77,7 @@ export function ClaroForm() {
   };
 
   return (
-    <Card className="w-full max-w-2xl shadow-2xl border-2 border-border/60">
+    <Card className="w-full max-w-2xl mx-auto mt-4 shadow-2xl border-2 border-border/60">
       <CardHeader className="text-center">
         <div className="flex justify-center items-center gap-3">
           <Signal className="h-10 w-10 text-primary"/>
