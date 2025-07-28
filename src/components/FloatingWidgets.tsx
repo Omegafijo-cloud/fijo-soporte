@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 import { hexToHsl } from '@/lib/utils';
 
 type ActiveWidget = 'notes' | 'users' | 'chat' | 'theme' | null;
+
+interface FloatingWidgetsProps {
+    notesText: string;
+    setNotesText: (text: string) => void;
+    usersText: string;
+    setUsersText: (text: string) => void;
+}
 
 const defaultTheme = {
   primary: '222.2 47.4% 11.2%',
@@ -25,10 +32,13 @@ const defaultThemeHex = {
     accent: '#f0f2f5',
 }
 
-export default function FloatingWidgets() {
+export default function FloatingWidgets({
+    notesText,
+    setNotesText,
+    usersText,
+    setUsersText,
+}: FloatingWidgetsProps) {
   const [activeWidget, setActiveWidget] = useState<ActiveWidget>(null);
-  const [notesText, setNotesText] = useState('');
-  const [usersText, setUsersText] = useState('');
   const { toast } = useToast();
   
   const [primaryColor, setPrimaryColor] = useState(defaultThemeHex.primary);

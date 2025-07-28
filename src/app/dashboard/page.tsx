@@ -25,7 +25,8 @@ type AppState = {
   backupText?: string;
   activeTab?: string;
   activeSubTab?: string;
-  // Añadiremos más estados aquí
+  notesText?: string;
+  usersText?: string;
 };
 
 export default function DashboardPage() {
@@ -38,6 +39,8 @@ export default function DashboardPage() {
   const [backupText, setBackupText] = useState('');
   const [activeTab, setActiveTab] = useState('plantillas');
   const [activeSubTab, setActiveSubTab] = useState('genericas');
+  const [notesText, setNotesText] = useState('');
+  const [usersText, setUsersText] = useState('');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   // ----- Lógica de persistencia de datos -----
@@ -47,8 +50,10 @@ export default function DashboardPage() {
       backupText,
       activeTab,
       activeSubTab,
+      notesText,
+      usersText,
     };
-  }, [backupText, activeTab, activeSubTab]);
+  }, [backupText, activeTab, activeSubTab, notesText, usersText]);
 
   const saveStateToFirebase = useCallback(async () => {
     if (!user || !isDataLoaded) return;
@@ -72,7 +77,7 @@ export default function DashboardPage() {
       saveStateToFirebase();
     }, 1500); // Guardar 1.5s después del último cambio
     return () => clearTimeout(handler);
-  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab]);
+  }, [saveStateToFirebase, isDataLoaded, backupText, activeTab, activeSubTab, notesText, usersText]);
 
 
   // Cargar estado desde Firebase
@@ -85,6 +90,8 @@ export default function DashboardPage() {
           if (data.backupText) setBackupText(data.backupText);
           if (data.activeTab) setActiveTab(data.activeTab);
           if (data.activeSubTab) setActiveSubTab(data.activeSubTab);
+          if (data.notesText) setNotesText(data.notesText);
+          if (data.usersText) setUsersText(data.usersText);
           
           isInitialLoad.current = false;
         } else if (!doc.exists()) {
@@ -255,7 +262,12 @@ export default function DashboardPage() {
         </Tabs>
       </main>
 
-      <FloatingWidgets />
+      <FloatingWidgets 
+        notesText={notesText}
+        setNotesText={setNotesText}
+        usersText={usersText}
+        setUsersText={setUsersText}
+      />
 
       <footer className="p-4 text-center text-xs text-muted-foreground">
         Desarrollado por: Keiner Valera
@@ -263,5 +275,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
