@@ -5,7 +5,6 @@ import React, { useState, useEffect, useCallback, useContext, useRef } from 'rea
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { FirebaseContext } from '../../context/FirebaseContext';
 import { AppStateContext } from '../../context/AppStateContext';
 
 // Import tab components
@@ -24,9 +23,8 @@ import UsersWidget from '../widgets/UsersWidget';
 import CopilotWidget from '../widgets/CopilotWidget';
 import ThemeWidget from '../widgets/ThemeWidget';
 
-export default function MainLayout() {
+export default function MainLayout({ handleLogout }) {
     const { appData, switchTab, setConfirm } = useContext(AppStateContext);
-    const { handleLogout } = useContext(FirebaseContext);
     const [openWidgetPanel, setOpenWidgetPanel] = useState(null);
 
     const onLogoutClick = () => {

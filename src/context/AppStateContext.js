@@ -3,7 +3,6 @@
 
 import React, { createContext, useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
-import { FirebaseContext } from './FirebaseContext'; // Import FirebaseContext
 
 // --- CONSTANTES GLOBALES Y CONFIGURACIÓN ---
 export const defaultThemeSettings = {
@@ -30,10 +29,6 @@ export const defaultAppData = {
 const AppStateContext = createContext(null);
 
 export const AppStateProvider = ({ children }) => {
-  const firebaseContext = useContext(FirebaseContext);
-  const db = firebaseContext?.db;
-  const userId = firebaseContext?.user?.uid;
-  
   const [appData, setAppData] = useState(defaultAppData);
   const [isSaving, setIsSaving] = useState(false);
   const saveDataTimeoutRef = useRef(null);
@@ -43,30 +38,26 @@ export const AppStateProvider = ({ children }) => {
   const [alert, setAlert] = useState({ isOpen: false, message: '' });
   const [confirm, setConfirm] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [noticeModalOpen, setNoticeModalOpen] = useState(false);
-
-  // Helper to get data for save (reads from appData state)
-  const getUIDataForSave = useCallback(() => {
-    return {
-      themeSettings: appData.themeSettings,
-      notesContent: appData.notesContent,
-      usersContent: appData.usersContent,
-      genericFormData: appData.genericFormData,
-      memoQuejasData: appData.memoQuejasData,
-      wfMemosData: appData.wfMemosData,
-      ordenMemosData: appData.ordenMemosData,
-      activeTabs: appData.activeTabs,
-      // backupTemplatesContent and customTransferItems are explicitly NOT saved as per request
-    };
-  }, [appData]);
-
-  // Auto-save trigger
-  const triggerSave = useCallback(() => {
-    if (isSaving || !userId || !db) return; // Ensure user and db are available
+  
+  // This function will be triggered from HomePage to save data
+  const triggerSave = useCallback((db, userId) => {
+    if (isInitialLoadRef.current) return;
+    if (isSaving || !userId || !db) return;
+    
     clearTimeout(saveDataTimeoutRef.current);
     saveDataTimeoutRef.current = setTimeout(async () => {
       setIsSaving(true);
-      const dataToSave = getUIDataForSave();
-      const appId = 'claro-template-generator'; // Replace with a dynamic app ID if needed
+      const dataToSave = {
+        themeSettings: appData.themeSettings,
+        notesContent: appData.notesContent,
+        usersContent: appData.usersContent,
+        genericFormData: appData.genericFormData,
+        memoQuejasData: appData.memoQuejasData,
+        wfMemosData: appData.wfMemosData,
+        ordenMemosData: appData.ordenMemosData,
+        activeTabs: appData.activeTabs,
+      };
+      const appId = 'claro-template-generator';
       const userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'appState');
       try {
         await setDoc(userDocRef, dataToSave, { merge: true });
@@ -77,15 +68,7 @@ export const AppStateProvider = ({ children }) => {
         setIsSaving(false);
       }
     }, 500);
-  }, [isSaving, userId, db, getUIDataForSave, setAlert]);
-
-  // Effect to trigger save on appData changes (debounced)
-  useEffect(() => {
-    // Only trigger save if not the initial load from Firebase
-    if (!isInitialLoadRef.current) {
-      triggerSave();
-    }
-  }, [appData, triggerSave]);
+  }, [isSaving, appData]);
 
 
   // UI State Updaters (passed down via context)
@@ -137,7 +120,7 @@ export const AppStateProvider = ({ children }) => {
 
   const contextValue = {
     appData,
-    setAppData, // Exposed for FirebaseProvider to update directly from snapshot
+    setAppData,
     updateAppData,
     updateGenericFormData,
     updateMemoQuejasData,
@@ -151,8 +134,9 @@ export const AppStateProvider = ({ children }) => {
     setConfirm,
     noticeModalOpen,
     setNoticeModalOpen,
-    defaultAppData, // Also expose defaultAppData for resets
-    isInitialLoadRef, // pass ref to be set by Firebase context on load
+    defaultAppData,
+    isInitialLoadRef,
+    triggerSave, // Expose triggerSave to be called from HomePage
   };
 
   return (

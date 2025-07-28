@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
-export default function LoginPage({ handleLogin, setAlert }) {
+export default function LoginPage({ handleLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
