@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -13,9 +13,10 @@ import Link from 'next/link';
 import NeuralNetworkAnimation from '@/components/NeuralNetworkAnimation';
 import OmegaLogo from '@/components/OmegaLogo';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,28 +28,36 @@ export default function LoginPage() {
     }
   }, [user, authLoading, router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden.');
+      return;
+    }
+    if (password.length < 6) {
+        setError('La contraseña debe tener al menos 6 caracteres.');
+        return;
+    }
     setLoading(true);
     setError(null);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
       switch (err.code) {
-        case 'auth/user-not-found':
-          setError('No existe un usuario con este correo electrónico.');
-          break;
-        case 'auth/wrong-password':
-          setError('La contraseña es incorrecta.');
+        case 'auth/email-already-in-use':
+          setError('Este correo electrónico ya está en uso.');
           break;
         case 'auth/invalid-email':
-           setError('El formato del correo electrónico no es válido.');
-           break;
+          setError('El formato del correo electrónico no es válido.');
+          break;
+        case 'auth/weak-password':
+          setError('La contraseña es demasiado débil.');
+          break;
         default:
-          setError('Ocurrió un error al intentar iniciar sesión.');
+          setError('Ocurrió un error al intentar registrar la cuenta.');
       }
       setLoading(false);
     }
@@ -77,14 +86,14 @@ export default function LoginPage() {
           <CardHeader>
              <div className="flex items-center justify-center gap-4">
                <OmegaLogo className="h-10 w-10" />
-               <CardTitle className="text-3xl font-bold">Omega iniciar sesión</CardTitle>
+               <CardTitle className="text-3xl font-bold">Crear una cuenta</CardTitle>
             </div>
             <CardDescription className="text-center text-lg pt-2">
-              Accede con tu cuenta
+              Únete a Omega para empezar a trabajar.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleRegister} className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="email">Correo Electrónico</Label>
                     <Input 
@@ -107,20 +116,31 @@ export default function LoginPage() {
                         required
                     />
                 </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                    <Input 
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="********"
+                        required
+                    />
+                </div>
 
                 <Button 
                     type="submit"
                     className="w-full h-12 text-lg font-bold"
                     disabled={loading}
                 >
-                  {loading ? 'Iniciando...' : 'Iniciar sesión'}
+                  {loading ? 'Creando cuenta...' : 'Registrarse'}
                 </Button>
                 {error && <p className="text-sm font-medium text-destructive text-center">{error}</p>}
             </form>
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              ¿No tienes una cuenta?{' '}
-              <Link href="/register" className="font-semibold text-primary hover:underline">
-                Regístrate
+              ¿Ya tienes una cuenta?{' '}
+              <Link href="/" className="font-semibold text-primary hover:underline">
+                Inicia sesión
               </Link>
             </p>
           </CardContent>
