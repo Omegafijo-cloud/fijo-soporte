@@ -210,7 +210,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <iframe 
-                      src="https://docs.google.com/document/d/12345/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
+                      src="https://docs.google.com/document/d/e/2PACX-1vR-y_zq_xO0qA1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1/pub?embedded=true" 
                       className="w-full h-96 border rounded-md"
                       title="Procesos de Migración"
                     ></iframe>
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <iframe 
-                      src="https://docs.google.com/document/d/67890/edit?usp=sharing&ouid=107146598717882699775&rtpof=true&sd=true" 
+                      src="https://docs.google.com/document/d/e/2PACX-1vR-y_zq_xO0qA1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_1Z0Z_2/pub?embedded=true"
                       className="w-full h-96 border rounded-md"
                       title="Seguimiento de Casos"
                     ></iframe>
@@ -263,3 +263,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
