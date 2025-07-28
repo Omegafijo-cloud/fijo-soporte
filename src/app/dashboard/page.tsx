@@ -1030,7 +1030,7 @@ export default function DashboardPage() {
                 newService={transferenciasNewService}
                 setNewService={setTransferenciasNewService}
                 newValue={transferenciasNewValue}
-                setNewValue={setNewValue}
+                setNewValue={setTransferenciasNewValue}
                 />
             </TabsContent>
             
